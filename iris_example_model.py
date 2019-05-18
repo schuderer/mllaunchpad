@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 # python clitool.py -c iris_example_cfg.yml -t
 #
 # Start REST API:
-# python clitool.py -c iris_example_cfg.yml -t
+# python clitool.py -c iris_example_cfg.yml -a
 #
 # Example API call:
 # http://127.0.0.1:5000/guessiris?x=3&sepal.length=4.9&sepal.width=2.4&petal.length=3.3&petal.width=1
