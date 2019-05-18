@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 # python clitool.py -c addition_example_cfg.yml -t
 #
 # Start REST API:
-# python clitool.py -c addition_example_cfg.yml -t
+# python clitool.py -c addition_example_cfg.yml -a
 #
 # Example API call:
 # http://127.0.0.1:5000/add?x1=3&x2=2
