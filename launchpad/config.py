@@ -8,7 +8,7 @@ CONFIG_DEFAULT = "./config_EXAMPLE.yml"
 
 def get_validated_config(filename=CONFIG_DEFAULT):
     if filename == CONFIG_DEFAULT:
-        logger.warn("Config filename not set, using default: '%s'", CONFIG_DEFAULT)
+        logger.warning("Config filename not set, using default: '%s'", CONFIG_DEFAULT)
     logger.info("Loading configuration file %s...", filename)
 
     with open(filename) as f:

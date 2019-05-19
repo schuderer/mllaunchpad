@@ -22,7 +22,7 @@ def init_logging(filename=LOG_CONF_FILENAME_DEFAULT):
     logging.config.dictConfig(logging_config)
     logger = logging.getLogger(__name__)
     if filename == LOG_CONF_FILENAME_DEFAULT:
-        logger.warn("Logging filename not set, using default: '%s'", LOG_CONF_FILENAME_DEFAULT)
+        logger.warning("Logging filename not set, using default: '%s'", LOG_CONF_FILENAME_DEFAULT)
 
     return logger
 
