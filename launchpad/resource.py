@@ -17,10 +17,19 @@ DATE_FORMAT_FILES = "%Y-%m-%d_%H-%M-%S"
 
 
 class ModelStore():
-    """
+    """Deals with persisting, loading, updating metrics metadata of models.
+    Abstracts away how and where the model is kept.
+
+    TODO: Smarter querying like "get me the model with the currently (next)
+    best metrics which serves a particular API resource."
     """
 
     def __init__(self, config):
+        """Get a model store based on the config settings
+
+        Params:
+            config: configuration dict
+        """
         self.location = config['model_store']['location']
         if not os.path.exists(self.location):
             os.makedirs(self.location)
@@ -114,6 +123,8 @@ class ModelStore():
 
 
     def update_model_metrics(self, model_conf, metrics):
+        """Update the test metrics for a previously stored model
+        """
         base_name = self._get_model_base_name(model_conf)
         meta = self._load_metadata(base_name)
         meta['metrics'] = metrics
@@ -123,6 +134,17 @@ class ModelStore():
 
 
 def create_data_sources(config, tag=None):
+    """Creates the data sources as defined in the configuration dict.
+    Filters them by tag.
+
+    Params:
+        config: configuration dictionary
+        tag:    optionally filter for only matching datasources
+
+    Returns:
+        dict with keys=datasource names, values=instantiated DataSource objects
+    """
+
     ds_objects = {}
 
     if 'datasources' not in config or type(config['datasources']) is not dict:

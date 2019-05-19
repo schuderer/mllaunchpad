@@ -46,6 +46,9 @@ def train_model(complete_conf):
     model_conf = complete_conf['model']
     model, metrics = user_mm.createTrainedModel(model_conf, ds)
 
+    if not isinstance(model, modelinterface.ModelInterface):
+        logger.warning("Model's class is not a subclass of ModelInterface: %s", model)
+
     model_store = resource.ModelStore(complete_conf)
     model_store.dump_trained_model(model_conf, model, metrics)
 
