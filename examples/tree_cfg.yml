@@ -23,5 +23,5 @@ model:
   predict_options: {}
 
 api:
-  version: 0.0.1  # use semantic versioning (breaking.adding.fix)
-  resource_name: iris  # what comes in the URL after the /
+  resource_name: iris  # name of the service api, also what comes in the URL after the first /
+  version: 0.0.1  # use semantic versioning (breaking.adding.fix), first segment will be used in url as .../vX

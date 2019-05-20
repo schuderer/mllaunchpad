@@ -5,7 +5,7 @@ import launchpad as lp
 import logging
 import logging.config
 
-LOG_CONF_FILENAME_DEFAULT = "./logging_cfg.yml"  # TODO get from command line, environment variable...
+LOG_CONF_FILENAME_DEFAULT = "./logging_cfg.yml"  # TODO get from environment variable...
 HELP_STRING = """
 Parameters:
 -h        / --help               : Print this help

@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 # python clitool.py -c examples/tree_cfg.yml -a
 #
 # Example API call:
-# http://127.0.0.1:5000/iris?sepal.length=4.9&sepal.width=2.4&petal.length=3.3&petal.width=1
+# http://127.0.0.1:5000/iris/v0?sepal.length=4.9&sepal.width=2.4&petal.length=3.3&petal.width=1
 
 class MyExampleModelMaker(ModelMakerInterface):
     """Creates a model

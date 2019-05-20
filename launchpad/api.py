@@ -1,5 +1,6 @@
 from flask import Flask, request  # import gunicorn  # usable for prod, maybe use with nginx
 from flask_restful import Resource, Api # TODO: install watchdog for flask to use (no polling = fewer cpu cycles)
+import re
 from . import resource
 import logging
 
@@ -17,14 +18,16 @@ class FlaskPredictionResource(Resource):
         return self.modelApi.predict_using_model(args)
 
 
-class ModelApi():
+class ModelApi:
     """Class to plug a Data-Scientist-created model into.
 
-    This class handles the heavy lifting of APIs, config, etc for the model.
+    This class handles the heavy lifting of APIs for the model.
 
     The model is a delegate which inherits from (=implements) ModelInterface.
     It needs to provide certain functionality:
        - a predict function
+
+    For details, see the doc-comments in the module modelinterface
     """
 
     def __init__(self, conf):
@@ -40,6 +43,8 @@ class ModelApi():
         self.datasources = self.init_datasources()
 
         self.model = self.load_model()
+
+        self.app = Flask(__name__)
 
 
     def init_datasources(self):
@@ -67,13 +72,25 @@ class ModelApi():
         logger.debug("Prediction output %s", output)
         return output
 
+    def _get_major_version(self):
+        match = re.match(r'\d+', self.config['api']['version'])
+        if match is None:
+            raise ValueError("API version in configuration is malformed.")
+        return 'v{}'.format(match.group(0))
 
     def run(self):
         logger.info("Starting Flask server")
-        self.app = Flask(__name__)
+
         api = Api(self.app)
+
+        api_name = self.config['api']['resource_name']
+        api_version = self._get_major_version()
+        api_url = '/{}/{}'.format(api_name, api_version)
+
         api.add_resource(FlaskPredictionResource,
-                         '/'+self.config['api']['resource_name'],
+                         api_url,
                          resource_class_kwargs={'modelApiObj': self})
+
         self.app.run(debug=True)
+
         logger.info("Flask server stopped")

@@ -50,7 +50,7 @@ def train_model(complete_conf):
         logger.warning("Model's class is not a subclass of ModelInterface: %s", model)
 
     model_store = resource.ModelStore(complete_conf)
-    model_store.dump_trained_model(model_conf, model, metrics)
+    model_store.dump_trained_model(complete_conf, model, metrics)
 
     logger.info("Created and stored trained model %s, version %s, metrics %s", model_conf['name'], model_conf['version'], metrics)
 

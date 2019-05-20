@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 # python clitool.py -c examples/addition_cfg.yml -a
 #
 # Example API call:
-# http://127.0.0.1:5000/add?x1=3&x2=2
+# http://127.0.0.1:5000/add/v0?x1=3&x2=2
 
 
 class MyAdditionExampleModelMaker(ModelMakerInterface):

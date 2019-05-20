@@ -66,7 +66,7 @@ class ModelStore():
             shutil.copy(file, os.path.join(backup_dir, new_file_name))
 
 
-    def dump_trained_model(self, model_conf, model, metrics={}):
+    def dump_trained_model(self, complete_conf, model, metrics):
         """Save a model object in the model store. Some metadata will also
         be saved along the model, including the metrics which is the second parameter.
 
@@ -78,6 +78,7 @@ class ModelStore():
         Returns:
             Nothing
         """
+        model_conf = complete_conf['model']
         base_name = self._get_model_base_name(model_conf)
 
         # Check if exists and backup if it does
@@ -89,9 +90,12 @@ class ModelStore():
             pickle.dump(model, f)
 
         # Save metadata
+        api_conf = complete_conf['api']
         meta = {
             'name': model_conf['name'],
             'version': model_conf['version'],
+            'api_name': api_conf['resource_name'],
+            'api_version': api_conf['version'],
             'created': datetime.now().strftime(DATE_FORMAT),
             'created_by': getpass.getuser(),
             'metrics': metrics,
