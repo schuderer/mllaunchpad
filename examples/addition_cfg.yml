@@ -64,7 +64,7 @@ model_store:
 model:
   name: "LameModel"
   version: 0.0.1  # use semantic versioning (<breaking>.<adding>.<fix>)
-  module: addition_example_model  # same as file name without .py
+  module: examples.addition_model  # same as file name without .py
   train_options: {}
   predict_options: {}
 
