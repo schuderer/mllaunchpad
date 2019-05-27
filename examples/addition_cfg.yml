@@ -62,15 +62,15 @@ model_store:
   location: ./model_store  # TODO: maybe support sftp or other remote locations...
 
 model:
-  name: "LameModel"
-  version: 0.0.1  # use semantic versioning (<breaking>.<adding>.<fix>)
+  name: LameModel
+  version: '0.0.1'  # use semantic versioning (<breaking>.<adding>.<fix>)
   module: examples.addition_model  # same as file name without .py
   train_options: {}
   predict_options: {}
 
 api:
   resource_name: add  # name of the service api, also what comes in the URL after the first /
-  version: 0.0.1  # use semantic versioning (breaking.adding.fix), first segment will be used in url as .../vX
+  version: '0.0.1'  # use semantic versioning (breaking.adding.fix), first segment will be used in url as .../vX
   users:  # this is TODO
     - name: muleuser
       password: soetnuh3g  # hashed, salted

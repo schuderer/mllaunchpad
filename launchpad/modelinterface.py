@@ -9,15 +9,15 @@ class ModelInterface(abc.ABC):
     Please inherit from this class when creating your model to make
     it usable for ModelApi.
 
-    When initializing your derived model, you can pass an object to the constructor
+    When initializing your derived model, pass it an object
     which contains what is needed for prediction (usually your trained regressor
     or classifier, but can be anything). It is stored in self.obj.
     """
 
     def __init__(self, content=None):
-        """If you overwrite the constructor, please call super().__init__(...)
+        """If you overwrite __init__, please call super().__init__(...)
         at the beginning. Otherwise, you need to assign self.content to the
-        content parameter manually in your constructor.
+        content parameter manually in __init__.
 
         Params:
             content:  any object that is needed for prediction (usually a trained
@@ -27,7 +27,7 @@ class ModelInterface(abc.ABC):
 
 
     @abc.abstractmethod
-    def predict(self, model_conf={}, data_sources={}, argsDict={}):
+    def predict(self, model_conf, data_sources, argsDict):
         """Implement this method, including data prep/feature creation based on argsDict.
         argsDict can also contain an id which the model can use to fetch data
         from any data_sources.

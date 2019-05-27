@@ -16,7 +16,7 @@ DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 DATE_FORMAT_FILES = "%Y-%m-%d_%H-%M-%S"
 
 
-class ModelStore():
+class ModelStore:
     """Deals with persisting, loading, updating metrics metadata of models.
     Abstracts away how and where the model is kept.
 
@@ -146,7 +146,7 @@ def create_data_sources(config, tag=None):
         tag:    optionally filter for only matching datasources
 
     Returns:
-        dict with keys=datasource names, values=instantiated DataSource objects
+        dict with keys=datasource names, values=initialized DataSource objects
     """
 
     ds_objects = {}
@@ -185,8 +185,8 @@ def create_data_sources(config, tag=None):
     return ds_objects
 
 
-# TODO: will possibly also need DataSinks...
-class DataSource():
+# TODO: We will probably also need DataSinks (e.g. for batch prediction)...
+class DataSource:
     """Interface, used by the Data Scientist's model to get its data from.
     Concrete DataSources (for files, data bases, etc.) need to inherit from this class.
     """
@@ -196,19 +196,19 @@ class DataSource():
         """
         self.id = identifier
         self.config = datasource_config
-        self.options = self.config['options'] if 'options' in self.config else {}
+        self.options = self.config.get('options', {})
 
-        self.expires = self.config['expires'] if 'expires' in self.config else 0
+        self.expires = self.config.get('expires', 0)
 
         self._cached_df = None
         self._cached_df_time = 0
         self._cached_raw = None
         self._cached_raw_time = 0
 
-    def get_dataframe(self, argDict={}, buffer=False):
+    def get_dataframe(self, argDict=None, buffer=False):
         ...
 
-    def get_raw(self, argDict={}, buffer=False):
+    def get_raw(self, argDict=None, buffer=False):
         ...
 
     def try_get_cached_df(self):
@@ -258,7 +258,7 @@ class DbmsDataSource(DataSource):
 
 
 class OracleDataSource(DbmsDataSource):
-    """DataSource for database connections
+    """DataSource for Oracle database connections
     """
 
     def __init__(self, identifier, datasource_config, dbms_config):
@@ -277,11 +277,20 @@ class OracleDataSource(DbmsDataSource):
         )
         logger.debug("Oracle connection string: {}".format(dsn_tns))
 
-        kwOptions = self.dbms_config['options'] if 'options' in self.dbms_config else {}
+        kwOptions = self.dbms_config.get('options', {})
         self.connection = cx_Oracle.connect(user, pw, dsn_tns, **kwOptions)
 
 
-    def get_dataframe(self, argDict={}, buffer=False):
+    def get_dataframe(self, argDict=None, buffer=False):
+        """Get the FileDataSource's data as dataframe.
+
+        Params:
+            argsDict: optional, parameters for SQL stored procedure
+            buffer: optional, currently not implemented
+
+        Returns:
+            DataFrame object, possibly cached according to expires-config
+        """
         if buffer:
             raise NotImplementedError("Buffered reading not supported yet")
 
@@ -291,7 +300,7 @@ class OracleDataSource(DbmsDataSource):
 
         # TODO: maybe want to open/close connection on every method call (shouldn't happen often)
         query = self.config['query']
-        params = argDict
+        params = argDict or {}
         kwOptions = self.options
 
         logger.debug("Fetching query {} with params {} and options {}...".format(query, params, kwOptions))
@@ -302,8 +311,9 @@ class OracleDataSource(DbmsDataSource):
         return df
 
 
-    def get_raw(self, argDict={}, buffer=False):
-        raise TypeError("Oracle Databases are not available in raw format")
+    def get_raw(self, argDict=None, buffer=False):
+        """Not implemented"""
+        raise TypeError("OracleDataSource currently doesn not support Raw format/blobs")
 
 
     def __del__(self):
@@ -327,7 +337,16 @@ class FileDataSource(DataSource):
         self.path = datasource_config['path']
 
 
-    def get_dataframe(self, argDict={}, buffer=False):
+    def get_dataframe(self, argDict=None, buffer=False):
+        """Get the FileDataSource's data as dataframe.
+
+        Params:
+            argsDict: optional, currently not implemented
+            buffer: optional, currently not implemented
+
+        Returns:
+            DataFrame object, possibly cached according to expires-config
+        """
         if buffer:
             raise NotImplementedError("Buffered reading not supported yet")
 
@@ -350,7 +369,16 @@ class FileDataSource(DataSource):
         return df
 
 
-    def get_raw(self, argDict={}, buffer=False):
+    def get_raw(self, argDict=None, buffer=False):
+        """Get the FileDataSource's data as raw binary data.
+
+        Params:
+            argsDict: optional, currently not implemented
+            buffer: optional, currently not implemented
+
+        Returns:
+            The file's bytes, possibly cached according to expires-config
+        """
         if buffer:
             raise NotImplementedError("Buffered reading not supported yet")
 
