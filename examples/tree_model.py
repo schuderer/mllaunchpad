@@ -31,9 +31,7 @@ class MyExampleModelMaker(ModelMakerInterface):
 
         finished_model = MyExampleModel(content=my_tree)
 
-        metrics = self.test_trained_model(model_conf, data_sources, finished_model)
-
-        return finished_model, metrics
+        return finished_model
 
     def test_trained_model(self, model_conf, data_sources, model):
         df = data_sources['petals_test'].get_dataframe()

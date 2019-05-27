@@ -1,4 +1,4 @@
-from flask import Flask, request  # import gunicorn  # usable for prod, maybe use with nginx
+from flask import Flask, request  # import gunicorn  # WSGI - usable for prod, maybe use with nginx
 from flask_restful import Resource, Api  # TODO: install watchdog for flask to use (no polling = fewer cpu cycles)
 import re
 from . import resource
@@ -51,7 +51,7 @@ class ModelApi:
 
     def init_datasources(self):
         logger.info('Initializing datasources...')
-        ds = resource.create_data_sources(self.config, tag='predict')
+        ds = resource.create_data_sources(self.config, tags='predict')
         logger.info('%s datasource(s) initialized: %s', len(ds), list(ds.keys()))
 
         return ds

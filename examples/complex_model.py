@@ -26,6 +26,11 @@ class MyModelMaker(ModelMakerInterface):
     """
 
     def create_trained_model(self, model_conf, data_sources, old_model=None):
+        # demo: get the database data source
+        limit = model_conf['train_options']['num_ora_rows']
+        dbdf = data_sources['panel'].get_dataframe(arg_dict={'limit': limit})
+        print(dbdf)
+
         # just for lolz
         number_to_add = model_conf['train_options']['magic_number']
         my_lame_predictor = lambda x: x + number_to_add
@@ -42,9 +47,7 @@ class MyModelMaker(ModelMakerInterface):
         model_contents = {'lame_pred': my_lame_predictor, 'petal_pred': my_tree}
         finished_model = MyModel(content=model_contents)
 
-        metrics = self.test_trained_model(model_conf, data_sources, finished_model)
-
-        return finished_model, metrics
+        return finished_model
 
     def test_trained_model(self, model_conf, data_sources, model):
         df = data_sources['petals_test'].get_dataframe()

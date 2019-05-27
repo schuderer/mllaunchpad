@@ -43,13 +43,16 @@ def train_model(complete_conf):
     logger.debug('Creating trained model...')
     user_mm = _get_model_maker(complete_conf)
 
-    ds = resource.create_data_sources(complete_conf, tag='train')
+    ds = resource.create_data_sources(complete_conf, tags=['train', 'test'])
 
     model_conf = complete_conf['model']
-    model, metrics = user_mm.create_trained_model(model_conf, ds)
+    model = user_mm.create_trained_model(model_conf, ds)
 
     if not isinstance(model, modelinterface.ModelInterface):
         logger.warning('Model\'s class is not a subclass of ModelInterface: %s', model)
+
+    logger.debug('Testing trained model...')
+    metrics = user_mm.test_trained_model(model_conf, ds, model)
 
     model_store = resource.ModelStore(complete_conf)
     model_store.dump_trained_model(complete_conf, model, metrics)
@@ -64,17 +67,17 @@ def retest_model(complete_conf):
     logger.debug('Retesting existing trained model...')
     user_mm = _get_model_maker(complete_conf)
 
-    ds = resource.create_data_sources(complete_conf, tag='test')
+    ds = resource.create_data_sources(complete_conf, tags='test')
 
     model_conf = complete_conf['model']
     model_store = resource.ModelStore(complete_conf)
     model, metadata = model_store.load_trained_model(model_conf)
 
-    metrics_test = user_mm.test_trained_model(model_conf, ds, model)
+    test_metrics = user_mm.test_trained_model(model_conf, ds, model)
 
-    model_store.update_model_metrics(model_conf, metrics_test)
+    model_store.update_model_metrics(model_conf, test_metrics)
 
     logger.info('Retested existing model %s, version %s, new metrics %s',
-                model_conf['name'], model_conf['version'], metrics_test)
+                model_conf['name'], model_conf['version'], test_metrics)
 
-    return metrics_test
+    return test_metrics

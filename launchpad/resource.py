@@ -131,17 +131,22 @@ class ModelStore:
         self._dump_metadata(base_name, meta)
 
 
-def create_data_sources(config, tag=None):
+def create_data_sources(config, tags=None):
     """Creates the data sources as defined in the configuration dict.
     Filters them by tag.
 
     Params:
         config: configuration dictionary
-        tag:    optionally filter for only matching datasources
+        tags:   optionally filter for only matching datasources
+                no value(s) = match all datasources
 
     Returns:
         dict with keys=datasource names, values=initialized DataSource objects
     """
+
+    tags = tags or []
+    if type(tags) is str:
+        tags = [tags]
 
     ds_objects = {}
 
@@ -152,11 +157,15 @@ def create_data_sources(config, tag=None):
     datasources = config['datasources']
     for ds_id in datasources:
         ds_config = datasources[ds_id]
-        if tag is not None and \
-            ('tags' not in ds_config
-             or tag != ds_config['tags']
-                and tag not in ds_config['tags']):
+
+        ds_config_tags = ds_config.get('tags') or []
+        if type(ds_config_tags) is str:
+            ds_config_tags = [ds_config_tags]
+
+        if tags and not set(tags) & set(ds_config_tags):
+            # User requires tag(s) but no overlap (intersection between tag sets is empty)
             continue
+
         ds_type = ds_config['type']
 
         logger.debug('Initializing datasource %s of type %s...', ds_id, ds_type)
@@ -262,8 +271,8 @@ class OracleDataSource(DbmsDataSource):
 
         logger.info('Establishing Oracle database connection for datasource {}...'.format(self.id))
 
-        user = self.dbms_config['username']
-        pw = self.dbms_config['password']
+        user = os.environ.get(self.dbms_config['user_var'])
+        pw = os.environ.get(self.dbms_config['password_var'])
         dsn_tns = cx_Oracle.makedsn(
             self.dbms_config['host'],
             self.dbms_config['port'],

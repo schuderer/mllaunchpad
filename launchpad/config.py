@@ -1,9 +1,10 @@
+import os
 import yaml  # https://camel.readthedocs.io/en/latest/yamlref.html
 import logging
 
 logger = logging.getLogger(__name__)
 
-CONFIG_DEFAULT = './config_EXAMPLE.yml'
+CONFIG_DEFAULT = os.environ.get('LAUNCHPAD_CFG', './config_EXAMPLE.yml')
 
 
 def get_validated_config(filename=CONFIG_DEFAULT):

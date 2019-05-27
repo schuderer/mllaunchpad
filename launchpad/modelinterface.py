@@ -70,6 +70,8 @@ class ModelMakerInterface(abc.ABC):
     @abc.abstractmethod
     def create_trained_model(self, model_conf, data_sources, old_model=None):
         """Implement this method, including data prep/feature creation.
+        No need to test your model here. Put testing code in test_trained_model, which
+        will be called automatically after training.
         (Feel free to put common code for preparing data into another function,
         class, library, ...)
 
@@ -82,11 +84,8 @@ class ModelMakerInterface(abc.ABC):
                           for incremental training. default: None
 
         Return:
-            Tuple of modelForRunning and metrics
-            where "modelForRunning" is an instance of your ModelInterface-derived
-            class (which you passed your trained classifier/... as constructor parameter),
-            and "metrics" is a dict of metrics (like 'accuracy', 'f1', 'confusion_matrix',
-            etc.), as it is produced by the method "test_trained_model".
+            Model for running, i.e. an instance of your ModelInterface-derived
+            class (which you passed your trained classifier/... as constructor parameter)
         """
         ...
 
@@ -94,8 +93,7 @@ class ModelMakerInterface(abc.ABC):
     def test_trained_model(self, model_conf, data_sources, model):
         """Implement this method, including data prep/feature creation.
         This method will be called to re-test a model, e.g. to check whether
-        it has to be re-trained. You should also use this method for your
-        own testing after training.
+        it has to be re-trained.
         (Feel free to put common code for preparing data into another function,
         class, library, ...)
 
