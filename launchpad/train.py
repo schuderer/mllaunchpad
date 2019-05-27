@@ -20,50 +20,51 @@ def _get_model_maker(complete_conf):
     Returns:
         instance of data scientist's ModelMaker model factory object
     """
-    logger.debug("Locating and instantiating ModelMaker...")
+    logger.debug('Locating and instantiating ModelMaker...')
 
     __import__(complete_conf['model']['module'])
 
     classes = modelinterface.ModelMakerInterface.__subclasses__()
     if len(classes) != 1:
-        raise ValueError("The configured model module (.py file) must contain " +
-                         "one ModelMakerInterface-inheriting class definition, but contains {}.".format(len(classes)))
+        raise ValueError('The configured model module (.py file) must contain ' +
+                         'one ModelMakerInterface-inheriting class definition, but contains {}.'
+                         .format(len(classes)))
 
     mm_cls = classes[0]
-    logger.debug("Found ModelMaker class named %s", mm_cls)
+    logger.debug('Found ModelMaker class named %s', mm_cls)
 
     mm = mm_cls()
-    logger.debug("Instantiated ModelMaker object %s", mm)
+    logger.debug('Instantiated ModelMaker object %s', mm)
 
     return mm
 
 
 def train_model(complete_conf):
-    logger.debug("Creating trained model...")
+    logger.debug('Creating trained model...')
     user_mm = _get_model_maker(complete_conf)
 
-    ds = resource.create_data_sources(complete_conf, tag="train")
+    ds = resource.create_data_sources(complete_conf, tag='train')
 
     model_conf = complete_conf['model']
     model, metrics = user_mm.create_trained_model(model_conf, ds)
 
     if not isinstance(model, modelinterface.ModelInterface):
-        logger.warning("Model's class is not a subclass of ModelInterface: %s", model)
+        logger.warning('Model\'s class is not a subclass of ModelInterface: %s', model)
 
     model_store = resource.ModelStore(complete_conf)
     model_store.dump_trained_model(complete_conf, model, metrics)
 
-    logger.info("Created and stored trained model %s, version %s, metrics %s",
+    logger.info('Created and stored trained model %s, version %s, metrics %s',
                 model_conf['name'], model_conf['version'], metrics)
 
     return model, metrics
 
 
 def retest_model(complete_conf):
-    logger.debug("Retesting existing trained model...")
+    logger.debug('Retesting existing trained model...')
     user_mm = _get_model_maker(complete_conf)
 
-    ds = resource.create_data_sources(complete_conf, tag="test")
+    ds = resource.create_data_sources(complete_conf, tag='test')
 
     model_conf = complete_conf['model']
     model_store = resource.ModelStore(complete_conf)
@@ -73,7 +74,7 @@ def retest_model(complete_conf):
 
     model_store.update_model_metrics(model_conf, metrics_test)
 
-    logger.info("Retested existing model %s, version %s, new metrics %s",
+    logger.info('Retested existing model %s, version %s, new metrics %s',
                 model_conf['name'], model_conf['version'], metrics_test)
 
     return metrics_test

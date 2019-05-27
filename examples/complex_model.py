@@ -67,7 +67,7 @@ class MyModel(ModelInterface):
     """
 
     def predict(self, model_conf, data_sources, args_dict):
-        logger.info("Hey, look at me -- I'm carrying out a prediction")
+        logger.info('Hey, look at me -- I\'m carrying out a prediction')
 
         # Do some lame prediction (= addition)
         x_raw = int(args_dict['x'])  # todo sanitize
@@ -85,11 +85,11 @@ class MyModel(ModelInterface):
         # to test: 127.0.0.1:5000/mypredict?x=3&sepal.length=4.9&sepal.width=2.4&petal.length=3.3&petal.width=1
         petal_predictor = self.content['petal_pred']
         X2 = pd.DataFrame({
-            "sepal.length": [float(args_dict['sepal.length'])],
-            "sepal.width": [float(args_dict['sepal.width'])],
-            "petal.length": [float(args_dict['petal.length'])],
-            "petal.width": [float(args_dict['petal.width'])]
+            'sepal.length': [float(args_dict['sepal.length'])],
+            'sepal.width': [float(args_dict['sepal.width'])],
+            'petal.length': [float(args_dict['petal.length'])],
+            'petal.width': [float(args_dict['petal.width'])]
             })
         y2 = petal_predictor.predict(X2)[0]
 
-        return {"the_result_yo": y, "random_name": random_name, "iris_variety": y2}
+        return {'the_result_yo': y, 'random_name': random_name, 'iris_variety': y2}

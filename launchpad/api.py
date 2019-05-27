@@ -10,12 +10,12 @@ logger = logging.getLogger(__name__)
 class FlaskPredictionResource(Resource):
     # Adapted from https://flask-restful.readthedocs.io/en/latest/quickstart.html
     def __init__(self, model_api_obj):
-        self.modelApi = model_api_obj
+        self.model_api = model_api_obj
 
     def get(self):  # todo: optional resource identifier like kltid?
         args = request.args
-        logger.debug("Received GET request with arguments: %s", args)
-        return self.modelApi.predict_using_model(args)
+        logger.debug('Received GET request with arguments: %s', args)
+        return self.model_api.predict_using_model(args)
 
 
 class ModelApi:
@@ -50,34 +50,34 @@ class ModelApi:
         self.app = Flask(__name__)
 
     def init_datasources(self):
-        logger.info("Initializing datasources...")
-        ds = resource.create_data_sources(self.config, tag="predict")
-        logger.info("%s datasource(s) initialized: %s", len(ds), list(ds.keys()))
+        logger.info('Initializing datasources...')
+        ds = resource.create_data_sources(self.config, tag='predict')
+        logger.info('%s datasource(s) initialized: %s', len(ds), list(ds.keys()))
 
         return ds
 
     def load_model(self):
-        logger.info("Loading model...")
+        logger.info('Loading model...')
         model, meta = self.model_store.load_trained_model(self.model_config)
-        logger.info("Model loaded: {}, version: {}, created {}".format(meta['name'], meta['version'], meta['created']))
+        logger.info('Model loaded: {}, version: {}, created {}'.format(meta['name'], meta['version'], meta['created']))
 
         return model
 
     def predict_using_model(self, args_dict):
-        logger.debug("Prediction input %s", dict(args_dict))
-        logger.info("Starting prediction")
+        logger.debug('Prediction input %s', dict(args_dict))
+        logger.info('Starting prediction')
         output = self.model.predict(self.model_config, self.datasources, args_dict)
-        logger.debug("Prediction output %s", output)
+        logger.debug('Prediction output %s', output)
         return output
 
     def _get_major_version(self):
         match = re.match(r'\d+', self.config['api']['version'])
         if match is None:
-            raise ValueError("API version in configuration is malformed.")
+            raise ValueError('API version in configuration is malformed.')
         return 'v{}'.format(match.group(0))
 
     def run(self):
-        logger.info("Starting Flask server")
+        logger.info('Starting Flask server')
 
         api = Api(self.app)
 
@@ -87,8 +87,8 @@ class ModelApi:
 
         api.add_resource(FlaskPredictionResource,
                          api_url,
-                         resource_class_kwargs={'modelApiObj': self})
+                         resource_class_kwargs={'model_api_obj': self})
 
         self.app.run(debug=True)
 
-        logger.info("Flask server stopped")
+        logger.info('Flask server stopped')

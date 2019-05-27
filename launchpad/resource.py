@@ -12,16 +12,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 SUPPORTED_FILE_TYPES = ['csv', 'euro_csv', 'rawfile']
-DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
-DATE_FORMAT_FILES = "%Y-%m-%d_%H-%M-%S"
+DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+DATE_FORMAT_FILES = '%Y-%m-%d_%H-%M-%S'
 
 
 class ModelStore:
     """Deals with persisting, loading, updating metrics metadata of models.
     Abstracts away how and where the model is kept.
 
-    TODO: Smarter querying like "get me the model with the currently (next)
-    best metrics which serves a particular API resource."
+    TODO: Smarter querying like 'get me the model with the currently (next)
+    best metrics which serves a particular API resource.'
     """
 
     def __init__(self, config):
@@ -35,11 +35,11 @@ class ModelStore:
             os.makedirs(self.location)
 
     def _get_model_base_name(self, model_conf):
-        return os.path.join(self.location, "{}_{}".format(model_conf['name'], model_conf['version']))
+        return os.path.join(self.location, '{}_{}'.format(model_conf['name'], model_conf['version']))
 
     @staticmethod
     def _load_metadata(base_name):
-        metadata_name = base_name + ".json"
+        metadata_name = base_name + '.json'
         with open(metadata_name, 'r') as f:
             meta = json.load(f)
 
@@ -47,20 +47,20 @@ class ModelStore:
 
     @staticmethod
     def _dump_metadata(base_name, metadata):
-        metadata_name = base_name + ".json"
+        metadata_name = base_name + '.json'
         with open(metadata_name, 'w') as f:
             json.dump(metadata, f)
 
     def _backup_old_model(self, base_name):
-        backup_dir = os.path.join(self.location, "previous")
+        backup_dir = os.path.join(self.location, 'previous')
         if not os.path.exists(backup_dir):
             os.makedirs(backup_dir)
         infix = datetime.now().strftime(DATE_FORMAT_FILES)
-        for file in glob.glob(base_name + "*"):
+        for file in glob.glob(base_name + '*'):
             fn_ext = os.path.basename(file)
             fn, ext = os.path.splitext(fn_ext)
-            new_file_name = "{}_{}{}".format(fn, infix, ext)
-            logger.debug("Backing up previous model file {} as {}".format(fn_ext, new_file_name))
+            new_file_name = '{}_{}{}'.format(fn, infix, ext)
+            logger.debug('Backing up previous model file {} as {}'.format(fn_ext, new_file_name))
             shutil.copy(file, os.path.join(backup_dir, new_file_name))
 
     def dump_trained_model(self, complete_conf, model, metrics):
@@ -82,7 +82,7 @@ class ModelStore:
         self._backup_old_model(base_name)
 
         # Save model itself
-        pkl_name = base_name + ".pkl"
+        pkl_name = base_name + '.pkl'
         with open(pkl_name, 'wb') as f:
             pickle.dump(model, f)
 
@@ -113,7 +113,7 @@ class ModelStore:
         """
         base_name = self._get_model_base_name(model_conf)
 
-        pkl_name = base_name + ".pkl"
+        pkl_name = base_name + '.pkl'
         with open(pkl_name, 'rb') as f:
             model = pickle.load(f)
 
@@ -146,7 +146,7 @@ def create_data_sources(config, tag=None):
     ds_objects = {}
 
     if 'datasources' not in config or type(config['datasources']) is not dict:
-        logger.info("No datasources defined in configuration")
+        logger.info('No datasources defined in configuration')
         return ds_objects
 
     datasources = config['datasources']
@@ -159,7 +159,7 @@ def create_data_sources(config, tag=None):
             continue
         ds_type = ds_config['type']
 
-        logger.debug("Initializing datasource %s of type %s...", ds_id, ds_type)
+        logger.debug('Initializing datasource %s of type %s...', ds_id, ds_type)
         if ds_type in SUPPORTED_FILE_TYPES:
             ds_objects[ds_id] = FileDataSource(ds_id, ds_config)
         elif ds_type == 'dbms':
@@ -169,12 +169,12 @@ def create_data_sources(config, tag=None):
             if dbms_type == 'oracle':
                 ds_objects[ds_id] = OracleDataSource(ds_id, ds_config, dbms)
             elif dbms_type == 'hive':
-                raise NotImplementedError("Sorry, still have to implement this one.")
+                raise NotImplementedError('Sorry, still have to implement this one.')
             else:
-                raise ValueError("Unsupported dbms type: {}".format(dbms_type))
+                raise ValueError('Unsupported dbms type: {}'.format(dbms_type))
         else:
-            raise ValueError("Unsupported datasource type: {}".format(ds_type))
-        logger.debug("Datasource %s initialized", ds_id)
+            raise ValueError('Unsupported datasource type: {}'.format(ds_type))
+        logger.debug('Datasource %s initialized', ds_id)
 
     return ds_objects
 
@@ -210,7 +210,7 @@ class DataSource:
            and (self.expires == -1  # cache indefinitely
                 or (self.expires > 0
                     and time() <= self._cached_df_time + self.expires)):
-            logger.debug("Returning cached dataframe")
+            logger.debug('Returning cached dataframe')
             return self._cached_df
         else:  # either immediately expires (0) or has expired in meantime (>0)
             return None
@@ -220,7 +220,7 @@ class DataSource:
            and (self.expires == -1  # cache indefinitely
                 or (self.expires > 0
                     and time() <= self._cached_raw_time + self.expires)):
-            logger.debug("Returning cached raw data")
+            logger.debug('Returning cached raw data')
             return self._cached_raw
         else:  # either immediately expires (0) or has expired in meantime (>0)
             return None
@@ -260,7 +260,7 @@ class OracleDataSource(DbmsDataSource):
 
         import cx_Oracle  # TODO: check whether importing here actually saves space/time
 
-        logger.info("Establishing Oracle database connection for datasource {}...".format(self.id))
+        logger.info('Establishing Oracle database connection for datasource {}...'.format(self.id))
 
         user = self.dbms_config['username']
         pw = self.dbms_config['password']
@@ -269,7 +269,7 @@ class OracleDataSource(DbmsDataSource):
             self.dbms_config['port'],
             service_name=self.dbms_config['service_name']
         )
-        logger.debug("Oracle connection string: {}".format(dsn_tns))
+        logger.debug('Oracle connection string: {}'.format(dsn_tns))
 
         kw_options = self.dbms_config.get('options', {})
         self.connection = cx_Oracle.connect(user, pw, dsn_tns, **kw_options)
@@ -285,7 +285,7 @@ class OracleDataSource(DbmsDataSource):
             DataFrame object, possibly cached according to expires-config
         """
         if buffer:
-            raise NotImplementedError("Buffered reading not supported yet")
+            raise NotImplementedError('Buffered reading not supported yet')
 
         cached = self.try_get_cached_df()
         if cached is not None:
@@ -296,7 +296,7 @@ class OracleDataSource(DbmsDataSource):
         params = arg_dict or {}
         kw_options = self.options
 
-        logger.debug("Fetching query {} with params {} and options {}...".format(query, params, kw_options))
+        logger.debug('Fetching query {} with params {} and options {}...'.format(query, params, kw_options))
         df = pd.read_sql(query, con=self.connection, params=params, **kw_options)
 
         self.cache_df_if_required(df)
@@ -305,7 +305,7 @@ class OracleDataSource(DbmsDataSource):
 
     def get_raw(self, arg_dict=None, buffer=False):
         """Not implemented"""
-        raise TypeError("OracleDataSource currently does not not support Raw format/blobs")
+        raise TypeError('OracleDataSource currently does not not support Raw format/blobs')
 
     def __del__(self):
         if hasattr(self, 'connection'):
@@ -320,8 +320,9 @@ class FileDataSource(DataSource):
         super().__init__(identifier, datasource_config)
 
         ds_type = datasource_config['type']
-        if type not in SUPPORTED_FILE_TYPES:
-            raise ValueError("'{}' is not a datasource file type (in datasource '{}').".format(ds_type, identifier))
+        if ds_type not in SUPPORTED_FILE_TYPES:
+            raise ValueError('{} is not a datasource file type (in datasource {}).'
+                             .format(repr(ds_type), repr(identifier)))
 
         self.type = ds_type
         self.path = datasource_config['path']
@@ -337,7 +338,7 @@ class FileDataSource(DataSource):
             DataFrame object, possibly cached according to expires-config
         """
         if buffer:
-            raise NotImplementedError("Buffered reading not supported yet")
+            raise NotImplementedError('Buffered reading not supported yet')
 
         cached = self.try_get_cached_df()
         if cached is not None:
@@ -345,13 +346,13 @@ class FileDataSource(DataSource):
 
         kw_options = self.options
 
-        logger.debug("Loading type {} file {} with options {}...".format(self.type, self.path, kw_options))
+        logger.debug('Loading type {} file {} with options {}...'.format(self.type, self.path, kw_options))
         if self.type == 'csv':
             df = pd.read_csv(self.path, **kw_options)
         elif self.type == 'euro_csv':
-            df = pd.read_csv(self.path, sep=";", decimal=",", **kw_options)
+            df = pd.read_csv(self.path, sep=';', decimal=',', **kw_options)
         else:
-            raise ValueError("Cannot read raw file as a data frame. Use method 'get_raw' instead")
+            raise ValueError('Cannot read raw file as a data frame. Use method "get_raw" instead')
 
         self.cache_df_if_required(df)
 
@@ -368,7 +369,7 @@ class FileDataSource(DataSource):
             The file's bytes, possibly cached according to expires-config
         """
         if buffer:
-            raise NotImplementedError("Buffered reading not supported yet")
+            raise NotImplementedError('Buffered reading not supported yet')
 
         cached = self.try_get_cached_raw()
         if cached is not None:
@@ -376,7 +377,7 @@ class FileDataSource(DataSource):
 
         kw_options = self.options
 
-        logger.debug("Loading raw binary file {} with options {}...".format(self.type, self.path, kw_options))
+        logger.debug('Loading raw binary file {} with options {}...'.format(self.type, self.path, kw_options))
         with open(self.path, 'rb') as bin_file:
             raw = bin_file.read(**kw_options)
 

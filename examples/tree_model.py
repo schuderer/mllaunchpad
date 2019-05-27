@@ -25,7 +25,7 @@ class MyExampleModelMaker(ModelMakerInterface):
         df = data_sources['petals'].get_dataframe()
         X = df.drop('variety', axis=1)
         y = df['variety']
-
+        
         my_tree = tree.DecisionTreeClassifier()
         my_tree.fit(X, y)
 
@@ -39,9 +39,9 @@ class MyExampleModelMaker(ModelMakerInterface):
         df = data_sources['petals_test'].get_dataframe()
         X_test = df.drop('variety', axis=1)
         y_test = df['variety']
-
+        
         my_tree = model.content
-
+        
         y_predict = my_tree.predict(X_test)
 
         acc = accuracy_score(y_test, y_predict)
@@ -59,13 +59,13 @@ class MyExampleModel(ModelInterface):
     def predict(self, model_conf, data_sources, args_dict):
 
         X = pd.DataFrame({
-            "sepal.length": [float(args_dict['sepal.length'])],
-            "sepal.width": [float(args_dict['sepal.width'])],
-            "petal.length": [float(args_dict['petal.length'])],
-            "petal.width": [float(args_dict['petal.width'])]
+            'sepal.length': [float(args_dict['sepal.length'])],
+            'sepal.width': [float(args_dict['sepal.width'])],
+            'petal.length': [float(args_dict['petal.length'])],
+            'petal.width': [float(args_dict['petal.width'])]
             })
-
+            
         my_tree = self.content
         y = my_tree.predict(X)[0]
 
-        return {"iris_soort": y}
+        return {'iris_soort': y}
