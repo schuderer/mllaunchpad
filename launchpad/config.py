@@ -17,7 +17,7 @@ def get_validated_config(filename=CONFIG_DEFAULT):
     req_props = ['model', 'api']
 
     for prop in req_props:
-        if (prop not in y):
+        if prop not in y:
             raise ValueError("Configuration file {} does not contain {} property.".format(filename, prop))
 
     # TODO: should completely validate config structure when stable

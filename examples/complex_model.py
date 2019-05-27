@@ -21,12 +21,11 @@ def data_prep(X):
     return X
 
 
-
 class MyModelMaker(ModelMakerInterface):
     """
     """
 
-    def createTrainedModel(self, model_conf, data_sources, old_model=None):
+    def create_trained_model(self, model_conf, data_sources, old_model=None):
         # just for lolz
         number_to_add = model_conf['train_options']['magic_number']
         my_lame_predictor = lambda x: x + number_to_add
@@ -40,15 +39,14 @@ class MyModelMaker(ModelMakerInterface):
         my_tree = tree.DecisionTreeClassifier()
         my_tree.fit(X_train, y_train)
 
-        modelContents = {'lame_pred': my_lame_predictor, 'petal_pred': my_tree}
-        finishedModel = MyModel(content=modelContents)
+        model_contents = {'lame_pred': my_lame_predictor, 'petal_pred': my_tree}
+        finished_model = MyModel(content=model_contents)
 
-        metrics = self.testTrainedModel(model_conf, data_sources, finishedModel)
+        metrics = self.test_trained_model(model_conf, data_sources, finished_model)
 
-        return finishedModel, metrics
+        return finished_model, metrics
 
-
-    def testTrainedModel(self, model_conf, data_sources, model):
+    def test_trained_model(self, model_conf, data_sources, model):
         df = data_sources['petals_test'].get_dataframe()
         X_test = df.drop('variety', axis=1)
         y_test = df['variety']
@@ -68,11 +66,11 @@ class MyModel(ModelInterface):
     """Does some simple prediction
     """
 
-    def predict(self, model_conf, data_sources, argsDict):
+    def predict(self, model_conf, data_sources, args_dict):
         logger.info("Hey, look at me -- I'm carrying out a prediction")
 
         # Do some lame prediction (= addition)
-        x_raw = int(argsDict['x'])  # todo sanitize
+        x_raw = int(args_dict['x'])  # todo sanitize
 
         # optional data prep/feature creation for x here...
         x = data_prep(x_raw)
@@ -87,10 +85,10 @@ class MyModel(ModelInterface):
         # to test: 127.0.0.1:5000/mypredict?x=3&sepal.length=4.9&sepal.width=2.4&petal.length=3.3&petal.width=1
         petal_predictor = self.content['petal_pred']
         X2 = pd.DataFrame({
-            "sepal.length": [float(argsDict['sepal.length'])],
-            "sepal.width": [float(argsDict['sepal.width'])],
-            "petal.length": [float(argsDict['petal.length'])],
-            "petal.width": [float(argsDict['petal.width'])]
+            "sepal.length": [float(args_dict['sepal.length'])],
+            "sepal.width": [float(args_dict['sepal.width'])],
+            "petal.length": [float(args_dict['petal.length'])],
+            "petal.width": [float(args_dict['petal.width'])]
             })
         y2 = petal_predictor.predict(X2)[0]
 

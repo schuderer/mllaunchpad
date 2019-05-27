@@ -16,12 +16,12 @@ model_store:
   location: ./model_store  # TODO: maybe support sftp or other remote locations...
 
 model:
-  name: "IrisModel"
-  version: 0.0.1  # use semantic versioning (<breaking>.<adding>.<fix>)
+  name: IrisModel
+  version: '0.0.1'  # use semantic versioning (<breaking>.<adding>.<fix>)
   module: examples.tree_model  # same as file name without .py
   train_options: {}
   predict_options: {}
 
 api:
   resource_name: iris  # name of the service api, also what comes in the URL after the first /
-  version: 0.0.1  # use semantic versioning (breaking.adding.fix), first segment will be used in url as .../vX
+  version: '0.0.1'  # use semantic versioning (breaking.adding.fix), first segment will be used in url as .../vX

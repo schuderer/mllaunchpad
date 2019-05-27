@@ -9,15 +9,15 @@ class ModelInterface(abc.ABC):
     Please inherit from this class when creating your model to make
     it usable for ModelApi.
 
-    When initializing your derived model, you can pass an object to the constructor
+    When initializing your derived model, pass it an object
     which contains what is needed for prediction (usually your trained regressor
     or classifier, but can be anything). It is stored in self.obj.
     """
 
     def __init__(self, content=None):
-        """If you overwrite the constructor, please call super().__init__(...)
+        """If you overwrite __init__, please call super().__init__(...)
         at the beginning. Otherwise, you need to assign self.content to the
-        content parameter manually in your constructor.
+        content parameter manually in __init__.
 
         Params:
             content:  any object that is needed for prediction (usually a trained
@@ -25,9 +25,8 @@ class ModelInterface(abc.ABC):
         """
         self.content = content
 
-
     @abc.abstractmethod
-    def predict(self, model_conf={}, data_sources={}, argsDict={}):
+    def predict(self, model_conf, data_sources, args_dict):
         """Implement this method, including data prep/feature creation based on argsDict.
         argsDict can also contain an id which the model can use to fetch data
         from any data_sources.
@@ -46,7 +45,6 @@ class ModelInterface(abc.ABC):
         """
         ...
 
-
     def __del__(self):
         """Clean up any resources (temporary files, sockets, etc.).
         If you overtwrite this method, please call super().__del__() at the beginning.
@@ -57,12 +55,12 @@ class ModelInterface(abc.ABC):
 class ModelMakerInterface(abc.ABC):
     """Abstract model factory interface for Data-Scientist-created models.
     Please inherit from this class and put your training code into the
-    method "createTrainedModel". This method will be called by the framework when
+    method "create_trained_model". This method will be called by the framework when
     your model needs to be (re)trained.
 
     Why not simply use static methods?
-        We want to make it possible for createTrainedModel to pass extra info
-        testTrainedModel without extending the latter with optional keyword
+        We want to make it possible for create_trained_model to pass extra info
+        test_trained_model without extending the latter with optional keyword
         arguments that might be confusing for the 90% of cases where they are
         not needed. So we rely on the smarts of the person inheriting from this
         class to find a solution/shortcuts if they e.g. want to do the train/test
@@ -70,7 +68,7 @@ class ModelMakerInterface(abc.ABC):
     """
 
     @abc.abstractmethod
-    def createTrainedModel(self, model_conf, data_sources, old_model=None):
+    def create_trained_model(self, model_conf, data_sources, old_model=None):
         """Implement this method, including data prep/feature creation.
         (Feel free to put common code for preparing data into another function,
         class, library, ...)
@@ -88,12 +86,12 @@ class ModelMakerInterface(abc.ABC):
             where "modelForRunning" is an instance of your ModelInterface-derived
             class (which you passed your trained classifier/... as constructor parameter),
             and "metrics" is a dict of metrics (like 'accuracy', 'f1', 'confusion_matrix',
-            etc.), as it is produced by the method "testTrainedModel".
+            etc.), as it is produced by the method "test_trained_model".
         """
         ...
 
     @abc.abstractmethod
-    def testTrainedModel(self, model_conf, data_sources, model):
+    def test_trained_model(self, model_conf, data_sources, model):
         """Implement this method, including data prep/feature creation.
         This method will be called to re-test a model, e.g. to check whether
         it has to be re-trained. You should also use this method for your

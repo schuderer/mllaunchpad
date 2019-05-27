@@ -1,12 +1,13 @@
 import getopt
 import sys
+import os
 import yaml
 import launchpad as lp
 import logging
 import logging.config
 
-LOG_CONF_FILENAME_DEFAULT = "./logging_cfg.yml"  # TODO get from environment variable...
-HELP_STRING = """
+LOG_CONF_FILENAME_DEFAULT = os.environ.get('LAUNCHPAD_LOG', './logging_cfg.yml')
+HELP_STRING = '''
 Parameters:
 -h        / --help               : Print this help
 -t        / --train              : Run training, store model and metrics
@@ -14,24 +15,24 @@ Parameters:
 -a        / --api                : Run API Server (Debug Mode!)
 -c <file> / --config=<file>      : Config file to use
 -l <file> / --logconfig=<file>   : Log config file to use
-"""
+'''
 
 
 def init_logging(filename=LOG_CONF_FILENAME_DEFAULT):
     logging_config = yaml.safe_load(open(filename))
     logging.config.dictConfig(logging_config)
-    logger = logging.getLogger(__name__)
+    new_logger = logging.getLogger(__name__)
     if filename == LOG_CONF_FILENAME_DEFAULT:
-        logger.warning("Logging filename not set, using default: '%s'", LOG_CONF_FILENAME_DEFAULT)
+        new_logger.warning('Logging filename not set, using default: %s', repr(LOG_CONF_FILENAME_DEFAULT))
 
-    return logger
+    return new_logger
 
 
 if __name__ == '__main__':
     fullCmdArguments = sys.argv
     argumentList = fullCmdArguments[1:]
-    unixOptions = "htrac:l:"
-    gnuOptions = ["help", "train", "retest", "api", "config=", "logconfig="]
+    unixOptions = 'htrac:l:'
+    gnuOptions = ['help', 'train', 'retest', 'api', 'config=', 'logconfig=']
     try:
         arguments, values = getopt.getopt(argumentList, unixOptions, gnuOptions)
     except getopt.error as err:
@@ -43,22 +44,22 @@ if __name__ == '__main__':
     conf = None
     logger = None
     for currentArgument, currentValue in arguments:
-        if currentArgument in ("-c", "--config"):
+        if currentArgument in ('-c', '--config'):
             conf = lp.get_validated_config(currentValue)
-        elif currentArgument in ("-l", "--logconfig"):
+        elif currentArgument in ('-l', '--logconfig'):
             logger = init_logging(currentValue)
-        elif currentArgument in ("-t", "--train"):
+        elif currentArgument in ('-t', '--train'):
             cmd = 'train'
-        elif currentArgument in ("-r", "--retest"):
+        elif currentArgument in ('-r', '--retest'):
             cmd = 'retest'
-        elif currentArgument in ("-a", "--api"):
+        elif currentArgument in ('-a', '--api'):
             cmd = 'api'
-        elif currentArgument in ("-h", "--help"):
+        elif currentArgument in ('-h', '--help'):
             print(HELP_STRING)
             exit(0)
 
     if cmd is None:
-        print("\nNo command given.")
+        print('\nNo command given.')
         print(HELP_STRING)
         exit(1)
 

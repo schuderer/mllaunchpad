@@ -17,7 +17,7 @@ class MyAdditionExampleModelMaker(ModelMakerInterface):
     """Creates a model which adds (this can't really be called training)
     """
 
-    def createTrainedModel(self, model_conf, data_sources, old_model=None):
+    def create_trained_model(self, model_conf, data_sources, old_model=None):
 
         # We can get info from the model's config dictionary if necessary
         my_name = model_conf['name']
@@ -41,13 +41,12 @@ class MyAdditionExampleModelMaker(ModelMakerInterface):
         finishedModel = MyAdditionExampleModel(content=modelContents)
 
         # We make sure that our model also comes with some test metrics
-        metrics = self.testTrainedModel(model_conf, data_sources, finishedModel)
+        metrics = self.test_trained_model(model_conf, data_sources, finishedModel)
 
         # First return value: model instance, second value: metrics dict
         return finishedModel, metrics
 
-
-    def testTrainedModel(self, model_conf, data_sources, model):
+    def test_trained_model(self, model_conf, data_sources, model):
 
         # Okay, this is a stupid stand-in for preparing test data (usually you
         # have a specific data source for that)
@@ -77,15 +76,15 @@ class MyAdditionExampleModel(ModelInterface):
     """Simplest possible "Data Science Model" example, without using data sources.
     """
 
-    def predict(self, model_conf, data_sources, argsDict):
+    def predict(self, model_conf, data_sources, args_dict):
 
         # We can optionally get info from the model's config dictionary
         my_name = model_conf['name']
         logger.info("Hey, look at me, %s -- I'm adding two numbers!", my_name)
 
         # Get the parameters/arguments from the API call
-        x1 = int(argsDict['x1'])
-        x2 = int(argsDict['x2'])
+        x1 = int(args_dict['x1'])
+        x2 = int(args_dict['x2'])
 
         # Get the predictor from the dict that we stuffed into this model when training
         my_lame_predictor = self.content['lame_pred']

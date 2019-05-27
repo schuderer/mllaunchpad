@@ -1,5 +1,5 @@
 from flask import Flask, request  # import gunicorn  # usable for prod, maybe use with nginx
-from flask_restful import Resource, Api # TODO: install watchdog for flask to use (no polling = fewer cpu cycles)
+from flask_restful import Resource, Api  # TODO: install watchdog for flask to use (no polling = fewer cpu cycles)
 import re
 from . import resource
 import logging
@@ -9,8 +9,8 @@ logger = logging.getLogger(__name__)
 
 class FlaskPredictionResource(Resource):
     # Adapted from https://flask-restful.readthedocs.io/en/latest/quickstart.html
-    def __init__(self, modelApiObj):
-        self.modelApi = modelApiObj
+    def __init__(self, model_api_obj):
+        self.modelApi = model_api_obj
 
     def get(self):  # todo: optional resource identifier like kltid?
         args = request.args
@@ -39,13 +39,15 @@ class ModelApi:
             conf:   configuration dictionary to use
         """
         self.config = conf
+        self.model_config = self.config['model']
+
+        self.model_store = resource.ModelStore(self.config)
 
         self.datasources = self.init_datasources()
 
         self.model = self.load_model()
 
         self.app = Flask(__name__)
-
 
     def init_datasources(self):
         logger.info("Initializing datasources...")
@@ -54,21 +56,17 @@ class ModelApi:
 
         return ds
 
-
     def load_model(self):
         logger.info("Loading model...")
-        self.model_store = resource.ModelStore(self.config)
-        self.model_config = self.config['model']
         model, meta = self.model_store.load_trained_model(self.model_config)
         logger.info("Model loaded: {}, version: {}, created {}".format(meta['name'], meta['version'], meta['created']))
 
         return model
 
-
-    def predict_using_model(self, argsDict):
-        logger.debug("Prediction input %s", dict(argsDict))
+    def predict_using_model(self, args_dict):
+        logger.debug("Prediction input %s", dict(args_dict))
         logger.info("Starting prediction")
-        output = self.model.predict(self.model_config, self.datasources, argsDict)
+        output = self.model.predict(self.model_config, self.datasources, args_dict)
         logger.debug("Prediction output %s", output)
         return output
 

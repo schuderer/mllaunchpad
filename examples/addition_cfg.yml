@@ -19,7 +19,7 @@
 
 # datasources:
   # l3.3:
-  #   type: dbms  # type can also be: csv, csv2 (european formatting), rawfile
+  #   type: dbms  # type can also be: csv, euro_csv (european formatting), rawfile
   #   dbms: bda
   #   query: SELECT * FROM MYDB.MYTABLE WHERE BLA = :someparam AND BLU = :foobar # https://legacy.python.org/dev/peps/pep-0249/#paramstyle
   #   expires: 60*60*1  # -1: never, 0: immediately, >0: time in seconds. Choose 0 to disable caching.
@@ -32,7 +32,7 @@
   #   expires: 60*60*24  # -1: never, 0: immediately, >0: time in seconds. Choose 0 to disable caching.
   #   options: {}
   # first_names:
-  #   type: csv2  # uses ; as separators and , as decimal point
+  #   type: euro_csv  # uses ; as separators and , as decimal point
   #   path: ./file.csv  # The string can also be a URL. Valid URL schemes include http, ftp, s3, and file.
   #   expires: -1  # -1: never (=cached forever), 0: immediately (=no caching), >0: time in seconds.
   #   options: {}
@@ -62,15 +62,15 @@ model_store:
   location: ./model_store  # TODO: maybe support sftp or other remote locations...
 
 model:
-  name: "LameModel"
-  version: 0.0.1  # use semantic versioning (<breaking>.<adding>.<fix>)
+  name: LameModel
+  version: '0.0.1'  # use semantic versioning (<breaking>.<adding>.<fix>)
   module: examples.addition_model  # same as file name without .py
   train_options: {}
   predict_options: {}
 
 api:
   resource_name: add  # name of the service api, also what comes in the URL after the first /
-  version: 0.0.1  # use semantic versioning (breaking.adding.fix), first segment will be used in url as .../vX
+  version: '0.0.1'  # use semantic versioning (breaking.adding.fix), first segment will be used in url as .../vX
   users:  # this is TODO
     - name: muleuser
       password: soetnuh3g  # hashed, salted
