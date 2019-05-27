@@ -305,7 +305,7 @@ class OracleDataSource(DbmsDataSource):
 
     def get_raw(self, arg_dict=None, buffer=False):
         """Not implemented"""
-        raise TypeError('OracleDataSource currently does not not support Raw format/blobs')
+        raise TypeError('OracleDataSource currently does not not support raw format/blobs')
 
     def __del__(self):
         if hasattr(self, 'connection'):
