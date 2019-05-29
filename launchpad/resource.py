@@ -35,7 +35,8 @@ class ModelStore:
             os.makedirs(self.location)
 
     def _get_model_base_name(self, model_conf):
-        return os.path.join(self.location, '{}_{}'.format(model_conf['name'], model_conf['version']))
+        return os.path.join(self.location, '{}_{}'
+                .format(model_conf['name'], model_conf['version']))
 
     @staticmethod
     def _load_metadata(base_name):
@@ -97,8 +98,7 @@ class ModelStore:
             'created_by': getpass.getuser(),
             'metrics': metrics,
             'metrics_history': {datetime.now().strftime(DATE_FORMAT): metrics},
-            'config_snapshot': model_conf
-        }
+            'config_snapshot': model_conf}
         self._dump_metadata(base_name, meta)
 
     def load_trained_model(self, model_conf):
@@ -276,8 +276,7 @@ class OracleDataSource(DbmsDataSource):
         dsn_tns = cx_Oracle.makedsn(
             self.dbms_config['host'],
             self.dbms_config['port'],
-            service_name=self.dbms_config['service_name']
-        )
+            service_name=self.dbms_config['service_name'])
         logger.debug('Oracle connection string: {}'.format(dsn_tns))
 
         kw_options = self.dbms_config.get('options', {})
@@ -305,7 +304,8 @@ class OracleDataSource(DbmsDataSource):
         params = arg_dict or {}
         kw_options = self.options
 
-        logger.debug('Fetching query {} with params {} and options {}...'.format(query, params, kw_options))
+        logger.debug('Fetching query {} with params {} and options {}...'
+                     .format(query, params, kw_options))
         df = pd.read_sql(query, con=self.connection, params=params, **kw_options)
 
         self.cache_df_if_required(df)
@@ -355,7 +355,8 @@ class FileDataSource(DataSource):
 
         kw_options = self.options
 
-        logger.debug('Loading type {} file {} with options {}...'.format(self.type, self.path, kw_options))
+        logger.debug('Loading type {} file {} with options {}...'
+                     .format(self.type, self.path, kw_options))
         if self.type == 'csv':
             df = pd.read_csv(self.path, **kw_options)
         elif self.type == 'euro_csv':
@@ -386,7 +387,8 @@ class FileDataSource(DataSource):
 
         kw_options = self.options
 
-        logger.debug('Loading raw binary file {} with options {}...'.format(self.type, self.path, kw_options))
+        logger.debug('Loading raw binary file {} with options {}...'
+                     .format(self.type, self.path, kw_options))
         with open(self.path, 'rb') as bin_file:
             raw = bin_file.read(**kw_options)
 

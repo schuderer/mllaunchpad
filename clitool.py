@@ -1,12 +1,9 @@
 import getopt
 import sys
-import os
-import yaml
+from flask import Flask
 import launchpad as lp
-import logging
-import logging.config
+from launchpad import logutil
 
-LOG_CONF_FILENAME_DEFAULT = os.environ.get('LAUNCHPAD_LOG', './logging_cfg.yml')
 HELP_STRING = '''
 Parameters:
 -h        / --help               : Print this help
@@ -16,16 +13,6 @@ Parameters:
 -c <file> / --config=<file>      : Config file to use
 -l <file> / --logconfig=<file>   : Log config file to use
 '''
-
-
-def init_logging(filename=LOG_CONF_FILENAME_DEFAULT):
-    logging_config = yaml.safe_load(open(filename))
-    logging.config.dictConfig(logging_config)
-    new_logger = logging.getLogger(__name__)
-    if filename == LOG_CONF_FILENAME_DEFAULT:
-        new_logger.warning('Logging filename not set, using default: %s', repr(LOG_CONF_FILENAME_DEFAULT))
-
-    return new_logger
 
 
 if __name__ == '__main__':
@@ -47,7 +34,7 @@ if __name__ == '__main__':
         if currentArgument in ('-c', '--config'):
             conf = lp.get_validated_config(currentValue)
         elif currentArgument in ('-l', '--logconfig'):
-            logger = init_logging(currentValue)
+            logger = logutil.init_logging(currentValue)
         elif currentArgument in ('-t', '--train'):
             cmd = 'train'
         elif currentArgument in ('-r', '--retest'):
@@ -63,12 +50,15 @@ if __name__ == '__main__':
         print(HELP_STRING)
         exit(1)
 
-    logger = logger or init_logging()
+    logger = logger or logutil.init_logging()
     conf = conf or lp.get_validated_config()
     if cmd == 'train':
         model, metrics = lp.train_model(conf)
     elif cmd == 'retest':
         metrics = lp.retest_model(conf)
     elif cmd == 'api':
-        sol = lp.ModelApi(conf)
-        sol.run()
+        logger.warning("Starting Flask debug server. In production, please use a WSGI server, "
+                       + "e.g. 'gunicorn -w 4 -b 127.0.0.1:5000 launchpad.entrypoint:app'")
+        app = Flask(__name__)
+        lp.ModelApi(conf, app)
+        app.run(debug=True)

@@ -1,5 +1,6 @@
-from flask import Flask, request  # import gunicorn  # WSGI - usable for prod, maybe use with nginx
-from flask_restful import Resource, Api  # TODO: install watchdog for flask to use (no polling = fewer cpu cycles)
+# from flask import Flask
+from flask import request
+from flask_restful import Resource, Api
 import re
 from . import resource
 import logging
@@ -30,38 +31,30 @@ class ModelApi:
     For details, see the doc-comments in the module modelinterface
     """
 
-    def __init__(self, conf):
+    def __init__(self, config, application):
         """When initializing ModelApi, your model will be automatically
         retrieved from the model store based on the currently active
         configuration.
 
         Params:
-            conf:   configuration dictionary to use
+            config:       configuration dictionary to use
+            application:  flask application to use
         """
-        self.config = conf
-        self.model_config = self.config['model']
+        self.model_config = config['model']
+        model_store = resource.ModelStore(config)
+        self.model = self._load_model(model_store, self.model_config)
+        self.datasources = self._init_datasources(config)
 
-        self.model_store = resource.ModelStore(self.config)
+        logger.debug('Initializing RESTful API')
+        api = Api(application)
 
-        self.datasources = self.init_datasources()
+        api_name = config['api']['resource_name']
+        api_version = self._get_major_version(config)
+        api_url = '/{}/{}'.format(api_name, api_version)
 
-        self.model = self.load_model()
-
-        self.app = Flask(__name__)
-
-    def init_datasources(self):
-        logger.info('Initializing datasources...')
-        ds = resource.create_data_sources(self.config, tags='predict')
-        logger.info('%s datasource(s) initialized: %s', len(ds), list(ds.keys()))
-
-        return ds
-
-    def load_model(self):
-        logger.info('Loading model...')
-        model, meta = self.model_store.load_trained_model(self.model_config)
-        logger.info('Model loaded: {}, version: {}, created {}'.format(meta['name'], meta['version'], meta['created']))
-
-        return model
+        api.add_resource(FlaskPredictionResource,
+                         api_url,
+                         resource_class_kwargs={'model_api_obj': self})
 
     def predict_using_model(self, args_dict):
         logger.debug('Prediction input %s', dict(args_dict))
@@ -70,25 +63,26 @@ class ModelApi:
         logger.debug('Prediction output %s', output)
         return output
 
-    def _get_major_version(self):
-        match = re.match(r'\d+', self.config['api']['version'])
+    @staticmethod
+    def _init_datasources(config):
+        logger.info('Initializing datasources...')
+        ds = resource.create_data_sources(config, tags='predict')
+        logger.info('%s datasource(s) initialized: %s', len(ds), list(ds.keys()))
+
+        return ds
+
+    @staticmethod
+    def _load_model(model_store, model_config):
+        logger.info('Loading model...')
+        model, meta = model_store.load_trained_model(model_config)
+        logger.info('Model loaded: {}, version: {}, created {}'
+                    .format(meta['name'], meta['version'], meta['created']))
+
+        return model
+
+    @staticmethod
+    def _get_major_version(config):
+        match = re.match(r'\d+', config['api']['version'])
         if match is None:
             raise ValueError('API version in configuration is malformed.')
         return 'v{}'.format(match.group(0))
-
-    def run(self):
-        logger.info('Starting Flask server')
-
-        api = Api(self.app)
-
-        api_name = self.config['api']['resource_name']
-        api_version = self._get_major_version()
-        api_url = '/{}/{}'.format(api_name, api_version)
-
-        api.add_resource(FlaskPredictionResource,
-                         api_url,
-                         resource_class_kwargs={'model_api_obj': self})
-
-        self.app.run(debug=True)
-
-        logger.info('Flask server stopped')

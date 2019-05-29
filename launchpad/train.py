@@ -26,8 +26,8 @@ def _get_model_maker(complete_conf):
 
     classes = modelinterface.ModelMakerInterface.__subclasses__()
     if len(classes) != 1:
-        raise ValueError('The configured model module (.py file) must contain ' +
-                         'one ModelMakerInterface-inheriting class definition, but contains {}.'
+        raise ValueError('The configured model module (.py file) must contain '
+                         + 'one ModelMakerInterface-inheriting class definition, but contains {}.'
                          .format(len(classes)))
 
     mm_cls = classes[0]

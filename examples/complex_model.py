@@ -85,7 +85,6 @@ class MyModel(ModelInterface):
         y = lame_predictor(x)
 
         # Also try iris petal-based prediction:
-        # to test: 127.0.0.1:5000/mypredict?x=3&sepal.length=4.9&sepal.width=2.4&petal.length=3.3&petal.width=1
         petal_predictor = self.content['petal_pred']
         X2 = pd.DataFrame({
             'sepal.length': [float(args_dict['sepal.length'])],

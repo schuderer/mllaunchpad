@@ -5,4 +5,6 @@ REM  2. Install Oracle Instant Client 64 bit 18.5 base package:      https://www
 
 @echo off
 SET PATH=C:\Oracle\instantclient_18_5;%PATH%
+SET LAUNCHPAD_CFG=.\examples\tree_cfg.yml
+echo Don't forget to set env vars like XOB10_USER, XOB10_PW...
 %*

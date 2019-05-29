@@ -4,10 +4,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-CONFIG_DEFAULT = os.environ.get('LAUNCHPAD_CFG', './config_EXAMPLE.yml')
+CONFIG_DEFAULT = './config_EXAMPLE.yml'
+CONFIG_ENV = os.environ.get('LAUNCHPAD_CFG', CONFIG_DEFAULT)
 
 
-def get_validated_config(filename=CONFIG_DEFAULT):
+def get_validated_config(filename=CONFIG_ENV):
     if filename == CONFIG_DEFAULT:
         logger.warning('Config filename not set, using default: %s', repr(CONFIG_DEFAULT))
     logger.info('Loading configuration file %s...', filename)
@@ -19,7 +20,8 @@ def get_validated_config(filename=CONFIG_DEFAULT):
 
     for prop in req_props:
         if prop not in y:
-            raise ValueError('Configuration file {} does not contain {} property.'.format(filename, prop))
+            raise ValueError('Configuration file {} does not contain {} property.'
+                             .format(filename, prop))
 
     # TODO: should completely validate config structure when stable
 
