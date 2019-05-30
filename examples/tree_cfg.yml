@@ -23,5 +23,6 @@ model:
   predict_options: {}
 
 api:
-  resource_name: iris  # name of the service api, also what comes in the URL after the first /
+  resource_name: varieties  # name of the service api, also what comes in the URL after the first /
   version: '0.0.1'  # use semantic versioning (breaking.adding.fix), first segment will be used in url as .../vX
+  raml: examples/tree.raml
