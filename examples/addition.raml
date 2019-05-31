@@ -1,0 +1,82 @@
+#%RAML 0.8
+---
+title: Super Fancy Addition API
+baseUri: https://{host}/add/{version}  # TODO: auto-insert (or fetch) config api name?
+version: v0  # increment only for API-breaking updates (TODO: way to auto insert (or fetch) config's version?)
+documentation:
+    - title: An API for predicting sums
+      content: |
+        I do hope you can guess what this does...
+
+# RESTful basics:
+# URL paths are resource names (in plural form):
+# /books  -- all books
+# /books/aBookId  -- one specific book
+#
+# No verbs in URL. Verbs are the standard HTTP actions:
+#  get:    get resource item(s), with e.g. query parameters: search (one or many)
+#  post:   create new resource item
+#  put:    update an existing resource item
+#  delete: delete an existing resource item
+#
+# These actions can be used on collections (like /books), or items
+# (like /books/aBookId) and might have different meanings depending on that.
+
+
+# Not sure whether basicauth is in scope at all for the RAML definition
+# as it has no influence on the parameters (I think), except if you count
+# the 'Authorization: Basic <base64 encoded name:pw>' header
+securitySchemes:
+ - basic:
+      description: For testing purposes. We might need more elaborate auth eventually.
+      type: Basic Authentication
+      settings:  # Not needed for basic authentication, but parser requires it
+        requestTokenUri:
+        authorizationUri:
+        tokenCredentialsUri:
+
+
+/sum:
+  get:
+    description: Sum of x1 and x2
+    queryParameters:
+      x1:
+        displayName: First number
+        type: number
+        description: The first number to add
+        example: 7.7
+        required: false
+        default: 0.0
+      x2:
+        displayName: Second number
+        type: number
+        description: The second number to add
+        example: 7.7
+        required: false
+        default: 0.0
+        #minimum: -39  # for numbers or integers
+        #maximum: 100  # for numbers or integers
+        #minLength: 3  # for strings
+        #maxLength: 100  # for strings
+        #default: 0
+    responses:
+      200:  # OK
+        body:
+          application/json:
+            schema: | #prediction_result  # or type: ...?
+              {
+                "type": "object",
+                "$schema": "http://json-schema.org/draft-03/schema",
+                "id": "http://jsonschema.net",
+                "required": true,
+                "properties": {
+                  "sum": {
+                    "type": "number",
+                    "required": true
+                  }
+                }
+              }
+            example: |
+              {
+                "sum": 42.24
+              }

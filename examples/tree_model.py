@@ -13,7 +13,10 @@ logger = logging.getLogger(__name__)
 # python clitool.py -c examples/tree_cfg.yml -a
 #
 # Example API call:
-# http://127.0.0.1:5000/varieties/v0?sepal.length=4.9&sepal.width=2.4&petal.length=3.3&petal.width=1
+# http://127.0.0.1:5000/iris/v0/varieties?sepal.length=4.9&sepal.width=2.4&petal.length=3.3&petal.width=1
+#
+# Example with URI Param (Resource ID):
+# http://127.0.0.1:5000/iris/v0/varieties/aaoeu?hallo=metric
 
 
 class MyExampleModelMaker(ModelMakerInterface):
@@ -55,6 +58,11 @@ class MyExampleModel(ModelInterface):
     """
 
     def predict(self, model_conf, data_sources, args_dict):
+
+        if 'test_key' in args_dict:
+            logger.info('Got the uri parameter (ID) %s. Would use it to e.g. look up data...',
+                        args_dict['test_key'])
+            return {'iris_variety': 'Setiosa'}
 
         X = pd.DataFrame({
             'sepal.length': [args_dict['sepal.length']],

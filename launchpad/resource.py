@@ -92,7 +92,7 @@ class ModelStore:
         meta = {
             'name': model_conf['name'],
             'version': model_conf['version'],
-            'api_name': api_conf['resource_name'],
+            'api_name': api_conf['name'],
             'api_version': api_conf['version'],
             'created': datetime.now().strftime(DATE_FORMAT),
             'created_by': getpass.getuser(),

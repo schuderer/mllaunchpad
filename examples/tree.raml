@@ -1,7 +1,7 @@
 #%RAML 0.8
 ---
 title: Iris Variety Prediction API
-baseUri: https://example.com/iris/{version}
+baseUri: https://{host}/iris/{version}
 version: v0  # increment only for API-breaking updates (TODO: way to auto insert config's version?)
 documentation:
     - title: An API for predicting Iris Varieties
@@ -127,7 +127,15 @@ securitySchemes:
       #    application/json:
       #      example: |
       #        { "message": "Iris not found" }
-
+  /{test_key}: # just to test
+    get:
+      queryParameters:
+        hallo:
+          description: some demo query parameter in addition to the uri param
+          type: string
+          required: true
+          enum: ['metric', 'imperial']
+          #default: 42
 
 # Accepting files example (e.g. for image recognition)
 #...resource...

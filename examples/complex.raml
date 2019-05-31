@@ -1,0 +1,111 @@
+#%RAML 0.8
+---
+title: Some more complex's model API
+baseUri: https://{host}/add/{version}  # TODO: auto-insert (or fetch) config api name?
+version: v0  # increment only for API-breaking updates (TODO: way to auto insert (or fetch) config's version?)
+documentation:
+    - title: Example title
+      content: |
+        Example description
+
+# RESTful basics:
+# URL paths are resource names (in plural form):
+# /books  -- all books
+# /books/aBookId  -- one specific book
+#
+# No verbs in URL. Verbs are the standard HTTP actions:
+#  get:    get resource item(s), with e.g. query parameters: search (one or many)
+#  post:   create new resource item
+#  put:    update an existing resource item
+#  delete: delete an existing resource item
+#
+# These actions can be used on collections (like /books), or items
+# (like /books/aBookId) and might have different meanings depending on that.
+
+
+# Not sure whether basicauth is in scope at all for the RAML definition
+# as it has no influence on the parameters (I think), except if you count
+# the 'Authorization: Basic <base64 encoded name:pw>' header
+securitySchemes:
+ - basic:
+      description: For testing purposes. We might need more elaborate auth eventually.
+      type: Basic Authentication
+      settings:  # Not needed for basic authentication, but parser requires it
+        requestTokenUri:
+        authorizationUri:
+        tokenCredentialsUri:
+
+
+/somethings:
+  get:
+    description: Some example
+    queryParameters:
+      x:
+        displayName: A number to add a magic number to
+        type: number
+        example: 7.7
+        required: true
+      sepal.length:
+        displayName: Sepal Length
+        type: number
+        description: Measured length of iris flower sepals (flower leaves)
+        example: 3.14
+        required: true
+        minimum: 0
+      sepal.width:
+        displayName: Sepal Width
+        type: number
+        description: Measured width of iris flower sepals (flower leaves)
+        example: 3.14
+        required: true
+        minimum: 0
+      petal.length:
+        displayName: Petal Length
+        type: number
+        description: Measured length of iris flower petals
+        example: 3.14
+        required: true
+        minimum: 0
+      petal.width:
+        displayName: Petal Width
+        type: number
+        description: Measured width of iris flower petals
+        example: 3.14
+        required: true
+        minimum: 0
+        #minimum: -39  # for numbers or integers
+        #maximum: 100  # for numbers or integers
+        #minLength: 3  # for strings
+        #maxLength: 100  # for strings
+        #default: 0
+    responses:
+      200:  # OK
+        body:
+          application/json:
+            schema: | #prediction_result  # or type: ...?
+              {
+                "type": "object",
+                "$schema": "http://json-schema.org/draft-03/schema",
+                "id": "http://jsonschema.net",
+                "required": true,
+                "properties": {
+                  "the_result_yo": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "random_name": {
+                    "type": "string",
+                    "required": false
+                  },
+                  "iris_variety": {
+                    "type": "string",
+                    "required": true,
+                    "enum": ["Virginica", "Versicolor", "Setosa"]
+                  }
+                }
+              }
+            example: |
+              {
+                'the_result_yo': 27,
+                'random_name': 'Siglinde',
+                'iris_variety': 'Setosa'}

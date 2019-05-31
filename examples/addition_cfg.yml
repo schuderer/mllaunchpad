@@ -69,10 +69,6 @@ model:
   predict_options: {}
 
 api:
-  resource_name: add  # name of the service api, also what comes in the URL after the first /
+  name: add  # name of the service api, also what comes in the URL after the first /
   version: '0.0.1'  # use semantic versioning (breaking.adding.fix), first segment will be used in url as .../vX
-  users:  # this is TODO
-    - name: muleuser
-      password: soetnuh3g  # hashed, salted
-    - name: testuser1
-      password: 239pgupts
+  raml: examples/addition.raml

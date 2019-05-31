@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 # python clitool.py -c examples/addition_cfg.yml -a
 #
 # Example API call:
-# http://127.0.0.1:5000/add/v0?x1=3&x2=2
+# http://127.0.0.1:5000/add/v0/sum?x1=3&x2=2
 
 
 class MyAdditionExampleModelMaker(ModelMakerInterface):
@@ -40,11 +40,8 @@ class MyAdditionExampleModelMaker(ModelMakerInterface):
         # at prediction time using the self.content property.
         finished_model = MyAdditionExampleModel(content=model_contents)
 
-        # We make sure that our model also comes with some test metrics
-        metrics = self.test_trained_model(model_conf, data_sources, finished_model)
-
         # First return value: model instance, second value: metrics dict
-        return finished_model, metrics
+        return finished_model
 
     def test_trained_model(self, model_conf, data_sources, model):
 
@@ -83,8 +80,8 @@ class MyAdditionExampleModel(ModelInterface):
         logger.info('Hey, look at me, %s -- I\'m adding two numbers!', my_name)
 
         # Get the parameters/arguments from the API call
-        x1 = int(args_dict['x1'])
-        x2 = int(args_dict['x2'])
+        x1 = args_dict['x1']
+        x2 = args_dict['x2']
 
         # Get the predictor from the dict that we stuffed into this model when training
         my_lame_predictor = self.content['lame_pred']

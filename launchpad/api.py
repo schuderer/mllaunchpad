@@ -11,7 +11,8 @@ logger = logging.getLogger(__name__)
 def _get_major_api_version(config):
     match = re.match(r'\d+', config['api']['version'])
     if match is None:
-        raise ValueError('API version in configuration is malformed.')
+        raise ValueError('API version in configuration is malformed. Expected x.y.z, got {}'
+                         .format(config['api']['version']))
     return 'v{}'.format(match.group(0))
 
 
@@ -32,48 +33,62 @@ def _load_raml(config):
 _type_lookup = {
     'number': float,
     'integer': int,
-    'string': str,
-    'enum': str  # TODO: enum and other types...
+    'string': str # TODO: other types...
     }
 
 
-def _request_parser_from_raml(config):
+def _create_request_parser(resource):
     """We only use query_params and form_params for now (no custom headers, body, etc.).
-    Note that they are used interchangeably in code (so even if RAML requires
+    Note that they are used interchangeably in code (so e.g. even if RAML requires
     only form_params, in reality we also accept the same params as query_params).
-    TODO: extend foor lookup-ids (uri_params, e.g. clientquestions/{clientid})
     """
-    raml = _load_raml(config)
-
-    api_config = config['api']
-
-    name = '/' + api_config['resource_name']
-    # only dealing with "get" method resources for now
-    resources = [r for r in raml.resources if r.name == name and r.method == 'get']
-    if len(resources) != 1:
-        raise ValueError(('RAML must contain exactly resource with name "{}" and '
-                         + 'method="get". There are {} matching ones. Resources in RAML: {}')
-                         .format(name, len(resources), raml.resources))
-
-    allParams = (resources[0].query_params or []) + (resources[0].form_params or [])
+    allParams = (resource.query_params or []) + (resource.form_params or [])
     addedArguments = set()
     parser = reqparse.RequestParser(bundle_errors=True)
     for p in allParams:
         if p.name in addedArguments and not p.repeat:
-            raise ValueError('Cannot handle RAML multiple parameters with same name %s',
-                             p.name)
+            raise ValueError('Cannot handle RAML multiple parameters with same name {}'
+                             .format(p.name))
 
         parser.add_argument(p.name,
                             type=_type_lookup[p.type],
                             required=p.required,
+                            default=p.default,
                             action='append' if p.repeat else 'store',
-                            help=str(p.description))
+                            choices=p.enum,
+                            help=str(p.description)+' - Error: {error_msg}')
         addedArguments.add(p.name)
+
+    if resource.uri_params and resource.uri_params[-1].name in addedArguments:
+        raise ValueError('Resource URI parameter in RAML "{}" must not have same name as a parameter'
+                         .format(resource.uri_params[-1].name))
 
     return parser
 
 
-class FlaskPredictionResource(Resource):
+def _get_resources(raml):
+    """
+    TODO: extend foor lookup-ids (uri_params, e.g. clientquestions/{clientid})
+    """
+    # only dealing with "get" method resources for now
+    usable_methods = ['get']
+    usable_rs = [r for r in raml.resources if r.method in usable_methods] # r.path == name and
+    rs_without_resource_id = [r for r in usable_rs if not r.uri_params]
+    rs_with_resource_id = [r for r in usable_rs if r.uri_params]
+    if len(usable_rs) == 0 or len(usable_rs) > 2 or\
+       len(rs_without_resource_id) > 1 or len(rs_with_resource_id) > 1:
+        raise ValueError(('RAML must contain one or two resources with a method of "{}". '
+                         + 'At most one resource each with and without uri parameter (resource id)'
+                         + 'There are {} resources with matching methods. Resources in RAML: {}')
+                         .format(usable_methods, len(usable_rs), raml.resources))
+
+    res_normal = rs_without_resource_id[0] if rs_without_resource_id else None
+    res_with_id = rs_with_resource_id[0] if rs_with_resource_id else None
+
+    return res_normal, res_with_id
+
+
+class QueryResource(Resource):
     # Adapted from https://flask-restful.readthedocs.io/en/latest/quickstart.html
 
     def __init__(self, model_api_obj, parser):
@@ -82,8 +97,23 @@ class FlaskPredictionResource(Resource):
         # todo (optional): marshal output?
 
     def get(self):  # todo: optional resource identifier like kltid?
-        args = self.parser.parse_args()  # treats query_params and form_params as interchangable
+        args = self.parser.parse_args(strict=True)  # treats query_params and form_params as interchangable
         logger.debug('Received GET request with arguments: %s', args)
+        return self.model_api.predict_using_model(args)
+
+
+class GetByIdResource(Resource):
+    def __init__(self, model_api_obj, parser, id_name):
+        self.model_api = model_api_obj
+        self.parser = parser
+        self.id_name = id_name
+        # todo (optional): marshal output?
+
+    def get(self, some_resource_id):
+        args = self.parser.parse_args(strict=True)  # treats query_params and form_params as interchangable
+        args[self.id_name] = some_resource_id  # todo: use name from raml
+        logger.debug('Received GET request for %s %s with arguments: %s',
+                     self.id_name, some_resource_id, args)
         return self.model_api.predict_using_model(args)
 
 
@@ -116,15 +146,33 @@ class ModelApi:
         logger.debug('Initializing RESTful API')
         api = Api(application)
 
-        api_name = config['api']['resource_name']
+        api_name = config['api']['name']
         api_version = _get_major_api_version(config)
         api_url = '/{}/{}'.format(api_name, api_version)
 
-        parser = _request_parser_from_raml(config)
-        api.add_resource(FlaskPredictionResource,
-                         api_url,
-                         resource_class_kwargs={'model_api_obj': self,
-                                                'parser': parser})
+        raml = _load_raml(config)
+        res_normal, res_with_id = _get_resources(raml)
+
+        if res_normal:
+            logger.debug('Adding resource %s to api %s', res_normal.path, api_url)
+            resource_url = api_url + res_normal.path
+            normal_parser = _create_request_parser(res_normal)
+            api.add_resource(QueryResource,
+                             resource_url,
+                             resource_class_kwargs={'model_api_obj': self,
+                                                    'parser': normal_parser})
+
+        if res_with_id:
+            logger.debug('Adding resource %s to api %s', res_with_id.path, api_url)
+            uri_param_name = res_with_id.uri_params[-1].name
+            resource_url = api_url + res_with_id.parent.path + '/<string:some_resource_id>'
+            with_id_parser = _create_request_parser(res_with_id)
+            api.add_resource(GetByIdResource,
+                             resource_url,
+                             resource_class_kwargs={'model_api_obj': self,
+                                                    'parser': with_id_parser,
+                                                    'id_name': uri_param_name})
+
 
     def predict_using_model(self, args_dict):
         logger.debug('Prediction input %s', dict(args_dict))

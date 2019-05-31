@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 # python clitool.py -c examples/complex_cfg.yml -a
 #
 # Example API call:
-# http://127.0.0.1:5000/guessiris/v0?x=3&sepal.length=4.9&sepal.width=2.4&petal.length=3.3&petal.width=1
+# http://127.0.0.1:5000/guessiris/v0/somethings?x=3&sepal.length=4.9&sepal.width=2.4&petal.length=3.3&petal.width=1
 
 
 def data_prep(X):
@@ -73,7 +73,7 @@ class MyModel(ModelInterface):
         logger.info('Hey, look at me -- I\'m carrying out a prediction')
 
         # Do some lame prediction (= addition)
-        x_raw = int(args_dict['x'])  # todo sanitize
+        x_raw = args_dict['x']
 
         # optional data prep/feature creation for x here...
         x = data_prep(x_raw)
@@ -87,10 +87,10 @@ class MyModel(ModelInterface):
         # Also try iris petal-based prediction:
         petal_predictor = self.content['petal_pred']
         X2 = pd.DataFrame({
-            'sepal.length': [float(args_dict['sepal.length'])],
-            'sepal.width': [float(args_dict['sepal.width'])],
-            'petal.length': [float(args_dict['petal.length'])],
-            'petal.width': [float(args_dict['petal.width'])]
+            'sepal.length': [args_dict['sepal.length']],
+            'sepal.width': [args_dict['sepal.width']],
+            'petal.length': [args_dict['petal.length']],
+            'petal.width': [args_dict['petal.width']]
             })
         y2 = petal_predictor.predict(X2)[0]
 

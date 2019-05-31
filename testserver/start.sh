@@ -2,8 +2,9 @@
 
 echo
 echo "Server will be started."
+echo "Config used: '$LAUNCHPAD_CFG'"
 echo "Test URL with HTTPS and Basic Auth (user: muleuser, pw: thepassword):"
-echo "https://localhost:8080/iris/v0?sepal.length=4.9&sepal.width=2.4&petal.length=3.3&petal.width=1"
+echo "https://localhost:8080/iris/v0/varieties?sepal.length=4.9&sepal.width=2.4&petal.length=3.3&petal.width=1"
 echo
 
 ORIGPATH=$PWD
