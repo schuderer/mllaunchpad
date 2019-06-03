@@ -14,7 +14,7 @@ def init_logging(filename=LOG_CONF_FILENAME_ENV):
     logging.captureWarnings(True)
     new_logger = logging.getLogger(__name__)
     if filename == LOG_CONF_FILENAME_DEFAULT:
-        new_logger.warning('Logging filename not set, using default: %s',
+        new_logger.warning('Logging filename environment variable LAUNCHPAD_LOG not set, using default: %s',
                             repr(LOG_CONF_FILENAME_DEFAULT))
 
     return new_logger

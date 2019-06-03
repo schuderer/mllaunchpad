@@ -267,17 +267,23 @@ class OracleDataSource(DbmsDataSource):
     def __init__(self, identifier, datasource_config, dbms_config):
         super().__init__(identifier, datasource_config, dbms_config)
 
-        import cx_Oracle  # TODO: check whether importing here actually saves space/time
+        import cx_Oracle  # Importing here avoids environment-specific dependencies
 
         logger.info('Establishing Oracle database connection for datasource {}...'.format(self.id))
 
-        user = os.environ.get(self.dbms_config['user_var'])
-        pw = os.environ.get(self.dbms_config['password_var'])
+        user_var_name = self.dbms_config['user_var']
+        pw_var_name = self.dbms_config['password_var']
+        user = os.environ.get(user_var_name)
+        pw = os.environ.get(pw_var_name)
+        if user is None:
+            raise ValueError('Oracle user name environment variable {} not set'.format(user_var_name))
+        if pw is None:
+            logger.warning('Oracle password environment variable %s not set', pw_var_name)
         dsn_tns = cx_Oracle.makedsn(
             self.dbms_config['host'],
             self.dbms_config['port'],
             service_name=self.dbms_config['service_name'])
-        logger.debug('Oracle connection string: {}'.format(dsn_tns))
+        logger.debug('Oracle connection string: %s', dsn_tns)
 
         kw_options = self.dbms_config.get('options', {})
         self.connection = cx_Oracle.connect(user, pw, dsn_tns, **kw_options)

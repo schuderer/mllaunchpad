@@ -11,8 +11,6 @@ def _get_model_maker(complete_conf):
     For this to work, your model module (.py file) needs to be in python's
     sys.path (usually the case).
     Also set the config's model: module property accordingly.
-    TODO: maybe add a module_location property or something so that it automatically
-    gets appended to the sys.path.
 
     Params:
         complete_conf: the configuration dict

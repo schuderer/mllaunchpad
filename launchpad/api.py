@@ -33,20 +33,24 @@ def _load_raml(config):
 _type_lookup = {
     'number': float,
     'integer': int,
-    'string': str # TODO: other types...
+    'string': str,
+    'boolean': bool
+    # RAML Types: any, object, array, union via type expression,
+    #             one of the following scalar types: number, boolean, string,
+    #             date-only, time-only, datetime-only, datetime, file, integer, or nil
     }
 
 
-def _create_request_parser(resource):
+def _create_request_parser(resource_obj):
     """We only use query_params and form_params for now (no custom headers, body, etc.).
     Note that they are used interchangeably in code (so e.g. even if RAML requires
     only form_params, in reality we also accept the same params as query_params).
     """
-    allParams = (resource.query_params or []) + (resource.form_params or [])
-    addedArguments = set()
+    all_params = (resource_obj.query_params or []) + (resource_obj.form_params or [])
+    added_arguments = set()
     parser = reqparse.RequestParser(bundle_errors=True)
-    for p in allParams:
-        if p.name in addedArguments and not p.repeat:
+    for p in all_params:
+        if p.name in added_arguments and not p.repeat:
             raise ValueError('Cannot handle RAML multiple parameters with same name {}'
                              .format(p.name))
 
@@ -57,22 +61,21 @@ def _create_request_parser(resource):
                             action='append' if p.repeat else 'store',
                             choices=p.enum,
                             help=str(p.description)+' - Error: {error_msg}')
-        addedArguments.add(p.name)
+        added_arguments.add(p.name)
 
-    if resource.uri_params and resource.uri_params[-1].name in addedArguments:
+    if resource_obj.uri_params and resource_obj.uri_params[-1].name in added_arguments:
         raise ValueError('Resource URI parameter in RAML "{}" must not have same name as a parameter'
-                         .format(resource.uri_params[-1].name))
+                         .format(resource_obj.uri_params[-1].name))
 
     return parser
 
 
 def _get_resources(raml):
     """
-    TODO: extend foor lookup-ids (uri_params, e.g. clientquestions/{clientid})
     """
     # only dealing with "get" method resources for now
     usable_methods = ['get']
-    usable_rs = [r for r in raml.resources if r.method in usable_methods] # r.path == name and
+    usable_rs = [r for r in raml.resources if r.method in usable_methods]  # r.path == name and
     rs_without_resource_id = [r for r in usable_rs if not r.uri_params]
     rs_with_resource_id = [r for r in usable_rs if r.uri_params]
     if len(usable_rs) == 0 or len(usable_rs) > 2 or\
@@ -94,9 +97,8 @@ class QueryResource(Resource):
     def __init__(self, model_api_obj, parser):
         self.model_api = model_api_obj
         self.parser = parser
-        # todo (optional): marshal output?
 
-    def get(self):  # todo: optional resource identifier like kltid?
+    def get(self):
         args = self.parser.parse_args(strict=True)  # treats query_params and form_params as interchangable
         logger.debug('Received GET request with arguments: %s', args)
         return self.model_api.predict_using_model(args)
@@ -107,11 +109,10 @@ class GetByIdResource(Resource):
         self.model_api = model_api_obj
         self.parser = parser
         self.id_name = id_name
-        # todo (optional): marshal output?
 
     def get(self, some_resource_id):
         args = self.parser.parse_args(strict=True)  # treats query_params and form_params as interchangable
-        args[self.id_name] = some_resource_id  # todo: use name from raml
+        args[self.id_name] = some_resource_id
         logger.debug('Received GET request for %s %s with arguments: %s',
                      self.id_name, some_resource_id, args)
         return self.model_api.predict_using_model(args)
@@ -172,7 +173,6 @@ class ModelApi:
                              resource_class_kwargs={'model_api_obj': self,
                                                     'parser': with_id_parser,
                                                     'id_name': uri_param_name})
-
 
     def predict_using_model(self, args_dict):
         logger.debug('Prediction input %s', dict(args_dict))

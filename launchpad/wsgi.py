@@ -25,7 +25,6 @@ if __name__ == '__main__':
 #  2. gunicorn --workers 4 --bind 127.0.0.1:5000 launchpad.wsgi
 #
 # Gunicorn is a WSGI server - usable for prod
-# TODO: logging stopped working when using gunicorn instead of flask
 
 # For performance/load balancing, use it with a reverse HTTP proxy like nginx:
 # https://gunicorn.org/#deployment

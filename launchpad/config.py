@@ -10,7 +10,7 @@ CONFIG_ENV = os.environ.get('LAUNCHPAD_CFG', CONFIG_DEFAULT)
 
 def get_validated_config(filename=CONFIG_ENV):
     if filename == CONFIG_DEFAULT:
-        logger.warning('Config filename not set, using default: %s', repr(CONFIG_DEFAULT))
+        logger.warning('Config filename environment variable LAUNCHPAD_CFG not set, using default: %s', repr(CONFIG_DEFAULT))
     logger.info('Loading configuration file %s...', filename)
 
     with open(filename) as f:
