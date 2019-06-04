@@ -17,7 +17,7 @@ class MyAdditionExampleModelMaker(ModelMakerInterface):
     """Creates a model which adds (this can't really be called training)
     """
 
-    def create_trained_model(self, model_conf, data_sources, old_model=None):
+    def create_trained_model(self, model_conf, data_sources, data_sinks, old_model=None):
 
         # We can get info from the model's config dictionary if necessary
         my_name = model_conf['name']
@@ -43,7 +43,7 @@ class MyAdditionExampleModelMaker(ModelMakerInterface):
         # First return value: model instance, second value: metrics dict
         return finished_model
 
-    def test_trained_model(self, model_conf, data_sources, model):
+    def test_trained_model(self, model_conf, data_sources, data_sinks, model):
 
         # Okay, this is a stupid stand-in for preparing test data (usually you
         # have a specific data source for that)
@@ -73,7 +73,7 @@ class MyAdditionExampleModel(ModelInterface):
     """Simplest possible 'Data Science Model' example, without using data sources.
     """
 
-    def predict(self, model_conf, data_sources, args_dict):
+    def predict(self, model_conf, data_sources, data_sinks, args_dict):
 
         # We can optionally get info from the model's config dictionary
         my_name = model_conf['name']

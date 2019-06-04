@@ -18,8 +18,8 @@ Parameters:
 if __name__ == '__main__':
     fullCmdArguments = sys.argv
     argumentList = fullCmdArguments[1:]
-    unixOptions = 'htrac:l:'
-    gnuOptions = ['help', 'train', 'retest', 'api', 'config=', 'logconfig=']
+    unixOptions = 'htrpac:l:'
+    gnuOptions = ['help', 'train', 'retest', 'predict' 'api', 'config=', 'logconfig=']
     try:
         arguments, values = getopt.getopt(argumentList, unixOptions, gnuOptions)
     except getopt.error as err:
@@ -39,6 +39,8 @@ if __name__ == '__main__':
             cmd = 'train'
         elif currentArgument in ('-r', '--retest'):
             cmd = 'retest'
+        elif currentArgument in ('-p', '--predict'):
+            cmd = 'predict'
         elif currentArgument in ('-a', '--api'):
             cmd = 'api'
         elif currentArgument in ('-h', '--help'):
@@ -55,7 +57,9 @@ if __name__ == '__main__':
     if cmd == 'train':
         model, metrics = lp.train_model(conf)
     elif cmd == 'retest':
-        metrics = lp.retest_model(conf)
+        metrics = lp.retest(conf)
+    elif cmd == 'predict':
+        metrics = lp.predict(conf, arg_dict={})  # TODO decide: get batch arguments from config? Don't support arguments?
     elif cmd == 'api':
         logger.warning("Starting Flask debug server. In production, please use a WSGI server, "
                        + "e.g. 'gunicorn -w 4 -b 127.0.0.1:5000 launchpad.entrypoint:app'")

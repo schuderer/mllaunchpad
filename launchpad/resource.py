@@ -7,11 +7,15 @@ from datetime import datetime
 import getpass
 import pandas as pd
 from time import time
+from typing import Tuple, Dict, TypeVar, Union, Type
+import typing
 import logging
+
+DS = TypeVar('DS', 'DataSource', 'DataSink')
 
 logger = logging.getLogger(__name__)
 
-SUPPORTED_FILE_TYPES = ['csv', 'euro_csv', 'rawfile']
+SUPPORTED_FILE_TYPES = ['csv', 'euro_csv', 'text_file', 'binary_file']
 DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 DATE_FORMAT_FILES = '%Y-%m-%d_%H-%M-%S'
 
@@ -21,7 +25,7 @@ class ModelStore:
     Abstracts away how and where the model is kept.
 
     TODO: Smarter querying like 'get me the model with the currently (next)
-    best metrics which serves a particular API resource.'
+    best metrics which serves a particular API.'
     """
 
     def __init__(self, config):
@@ -35,8 +39,8 @@ class ModelStore:
             os.makedirs(self.location)
 
     def _get_model_base_name(self, model_conf):
-        return os.path.join(self.location, '{}_{}'
-                .format(model_conf['name'], model_conf['version']))
+        return os.path.join(self.location,
+                            '{}_{}'.format(model_conf['name'], model_conf['version']))
 
     @staticmethod
     def _load_metadata(base_name):
@@ -131,7 +135,69 @@ class ModelStore:
         self._dump_metadata(base_name, meta)
 
 
-def create_data_sources(config, tags=None):
+def _tags_match(tags, other_tags) -> bool:
+    tags = tags or []
+    if type(tags) is str:
+        tags = [tags]
+
+    other_tags = other_tags or []
+    if type(other_tags) is str:
+        other_tags = [other_tags]
+
+    tags_required = bool(tags)
+    tags_matching = bool(set(tags) & set(other_tags))
+
+    return not tags_required or tags_matching
+
+
+def _create_data_sources_or_sinks(config, the_type: Type[Union['DataSource', 'DataSink']], tags=None) -> Dict[str, Union['DataSource', 'DataSink']]:
+    # TODO: this needs refactoring
+    # Implementation note: no generator used because we want to fail early
+    ds_objects: Dict[DS] = {}
+
+    if the_type == DataSource:
+        what = 'datasource'
+        config_key = 'datasources'
+    else:  # datasource_or_datasink == DataSink:
+        what = 'datasink'
+        config_key = 'datasinks'
+
+    if config_key not in config or type(config[config_key]) is not dict:
+        logger.info('No %s defined in configuration', config_key)
+        return ds_objects
+
+    for ds_id in config[config_key]:
+        ds_config = config[config_key][ds_id]
+
+        if not _tags_match(tags, ds_config.get('tags')):
+            continue
+
+        ds_type = ds_config['type']
+
+        logger.debug('Initializing %s %s of type %s...', what, ds_id, ds_type)
+        if ds_type in SUPPORTED_FILE_TYPES:
+            ds_objects[ds_id] = FileDataSource(ds_id, ds_config) if the_type == DataSource\
+                                else FileDataSink(ds_id, ds_config)
+        elif ds_type == 'dbms':
+            dbms_id = ds_config['dbms']
+            dbms = config['dbms'][dbms_id]
+            dbms_type = dbms['type']
+            if dbms_type == 'oracle':
+                ds_objects[ds_id] = OracleDataSource(ds_id, ds_config, dbms) if the_type == DataSource\
+                                    else OracleDataSink(ds_id, ds_config, dbms)
+            elif dbms_type == 'hive':
+                raise NotImplementedError('Sorry, still have to implement this one.')
+            else:
+                raise ValueError('Unsupported dbms type: {}'.format(dbms_type))
+        else:
+            raise ValueError('Unsupported datasource type: {}'.format(ds_type))
+        logger.debug('Datasource %s initialized', ds_id)
+
+    typing.cast(Dict[str, the_type], ds_objects)
+    return ds_objects
+
+
+def create_data_sources_and_sinks(config, tags=None) -> Tuple[Dict[str, 'DataSource'], Dict[str, 'DataSink']]:
     """Creates the data sources as defined in the configuration dict.
     Filters them by tag.
 
@@ -144,51 +210,12 @@ def create_data_sources(config, tags=None):
         dict with keys=datasource names, values=initialized DataSource objects
     """
 
-    tags = tags or []
-    if type(tags) is str:
-        tags = [tags]
+    sources: Dict[str, DataSource] = _create_data_sources_or_sinks(config, the_type=DataSource, tags=tags)
+    sinks: Dict[str, DataSink] = _create_data_sources_or_sinks(config, the_type=DataSink, tags=tags)
 
-    ds_objects = {}
-
-    if 'datasources' not in config or type(config['datasources']) is not dict:
-        logger.info('No datasources defined in configuration')
-        return ds_objects
-
-    datasources = config['datasources']
-    for ds_id in datasources:
-        ds_config = datasources[ds_id]
-
-        ds_config_tags = ds_config.get('tags') or []
-        if type(ds_config_tags) is str:
-            ds_config_tags = [ds_config_tags]
-
-        if tags and not set(tags) & set(ds_config_tags):
-            # User requires tag(s) but no overlap (intersection between tag sets is empty)
-            continue
-
-        ds_type = ds_config['type']
-
-        logger.debug('Initializing datasource %s of type %s...', ds_id, ds_type)
-        if ds_type in SUPPORTED_FILE_TYPES:
-            ds_objects[ds_id] = FileDataSource(ds_id, ds_config)
-        elif ds_type == 'dbms':
-            dbms_id = ds_config['dbms']
-            dbms = config['dbms'][dbms_id]
-            dbms_type = dbms['type']
-            if dbms_type == 'oracle':
-                ds_objects[ds_id] = OracleDataSource(ds_id, ds_config, dbms)
-            elif dbms_type == 'hive':
-                raise NotImplementedError('Sorry, still have to implement this one.')
-            else:
-                raise ValueError('Unsupported dbms type: {}'.format(dbms_type))
-        else:
-            raise ValueError('Unsupported datasource type: {}'.format(ds_type))
-        logger.debug('Datasource %s initialized', ds_id)
-
-    return ds_objects
+    return sources, sinks
 
 
-# TODO: We will probably also need DataSinks (e.g. for batch prediction)...
 class DataSource:
     """Interface, used by the Data Scientist's model to get its data from.
     Concrete DataSources (for files, data bases, etc.) need to inherit from this class.
@@ -208,13 +235,13 @@ class DataSource:
         self._cached_raw = None
         self._cached_raw_time = 0
 
-    def get_dataframe(self, arg_dict=None, buffer=False):
+    def get_dataframe(self, arg_dict=None, buffer=False) -> pd.DataFrame:
         ...
 
-    def get_raw(self, arg_dict=None, buffer=False):
+    def get_raw(self, arg_dict=None, buffer=False) -> bytes:
         ...
 
-    def try_get_cached_df(self):
+    def _try_get_cached_df(self):
         if self._cached_df is not None \
            and (self.expires == -1  # cache indefinitely
                 or (self.expires > 0
@@ -224,7 +251,7 @@ class DataSource:
         else:  # either immediately expires (0) or has expired in meantime (>0)
             return None
 
-    def try_get_cached_raw(self):
+    def _try_get_cached_raw(self):
         if self._cached_raw is not None \
            and (self.expires == -1  # cache indefinitely
                 or (self.expires > 0
@@ -234,12 +261,12 @@ class DataSource:
         else:  # either immediately expires (0) or has expired in meantime (>0)
             return None
 
-    def cache_df_if_required(self, df):
+    def _cache_df_if_required(self, df):
         if self.expires != 0:
             self._cached_df_time = time()
             self._cached_df = df
 
-    def cache_raw_if_required(self, raw):
+    def _cache_raw_if_required(self, raw):
         if self.expires != 0:
             self._cached_raw_time = time()
             self._cached_raw = raw
@@ -260,6 +287,29 @@ class DbmsDataSource(DataSource):
         self.dbms_config = dbms_config
 
 
+def get_oracle_connection(dbms_config):
+    import cx_Oracle  # Importing here avoids environment-specific dependencies
+
+    user_var_name = dbms_config['user_var']
+    pw_var_name = dbms_config['password_var']
+    user = os.environ.get(user_var_name)
+    pw = os.environ.get(pw_var_name)
+    if user is None:
+        raise ValueError('Oracle user name environment variable {} not set'.format(user_var_name))
+    if pw is None:
+        logger.warning('Oracle password environment variable %s not set', pw_var_name)
+    dsn_tns = cx_Oracle.makedsn(
+        dbms_config['host'],
+        dbms_config['port'],
+        service_name=dbms_config['service_name'])
+    logger.debug('Oracle connection string: %s', dsn_tns)
+
+    kw_options = dbms_config.get('options', {})
+    connection = cx_Oracle.connect(user, pw, dsn_tns, **kw_options)
+
+    return connection
+
+
 class OracleDataSource(DbmsDataSource):
     """DataSource for Oracle database connections
     """
@@ -267,29 +317,13 @@ class OracleDataSource(DbmsDataSource):
     def __init__(self, identifier, datasource_config, dbms_config):
         super().__init__(identifier, datasource_config, dbms_config)
 
-        import cx_Oracle  # Importing here avoids environment-specific dependencies
-
         logger.info('Establishing Oracle database connection for datasource {}...'.format(self.id))
 
-        user_var_name = self.dbms_config['user_var']
-        pw_var_name = self.dbms_config['password_var']
-        user = os.environ.get(user_var_name)
-        pw = os.environ.get(pw_var_name)
-        if user is None:
-            raise ValueError('Oracle user name environment variable {} not set'.format(user_var_name))
-        if pw is None:
-            logger.warning('Oracle password environment variable %s not set', pw_var_name)
-        dsn_tns = cx_Oracle.makedsn(
-            self.dbms_config['host'],
-            self.dbms_config['port'],
-            service_name=self.dbms_config['service_name'])
-        logger.debug('Oracle connection string: %s', dsn_tns)
-
-        kw_options = self.dbms_config.get('options', {})
-        self.connection = cx_Oracle.connect(user, pw, dsn_tns, **kw_options)
+        self.connection = get_oracle_connection(dbms_config)
 
     def get_dataframe(self, arg_dict=None, buffer=False):
-        """Get the FileDataSource's data as dataframe.
+        """Get the FileDataSource's data as pandas dataframe.
+        Configure the DataSource's options dict to pass keyword arguments to panda's read_sql.
 
         Params:
             argsDict: optional, parameters for SQL stored procedure
@@ -301,7 +335,7 @@ class OracleDataSource(DbmsDataSource):
         if buffer:
             raise NotImplementedError('Buffered reading not supported yet')
 
-        cached = self.try_get_cached_df()
+        cached = self._try_get_cached_df()
         if cached is not None:
             return cached
 
@@ -314,7 +348,7 @@ class OracleDataSource(DbmsDataSource):
                      .format(query, params, kw_options))
         df = pd.read_sql(query, con=self.connection, params=params, **kw_options)
 
-        self.cache_df_if_required(df)
+        self._cache_df_if_required(df)
 
         return df
 
@@ -343,7 +377,8 @@ class FileDataSource(DataSource):
         self.path = datasource_config['path']
 
     def get_dataframe(self, arg_dict=None, buffer=False):
-        """Get the FileDataSource's data as dataframe.
+        """Get the FileDataSource's data as pandas dataframe.
+        Configure the DataSource's options dict to pass keyword arguments to panda's read_csv.
 
         Params:
             argsDict: optional, currently not implemented
@@ -355,7 +390,7 @@ class FileDataSource(DataSource):
         if buffer:
             raise NotImplementedError('Buffered reading not supported yet')
 
-        cached = self.try_get_cached_df()
+        cached = self._try_get_cached_df()
         if cached is not None:
             return cached
 
@@ -368,9 +403,9 @@ class FileDataSource(DataSource):
         elif self.type == 'euro_csv':
             df = pd.read_csv(self.path, sep=';', decimal=',', **kw_options)
         else:
-            raise ValueError('Cannot read raw file as a data frame. Use method "get_raw" instead')
+            raise ValueError('Can only read csv files as dataframes. Use method "get_raw" for raw data')
 
-        self.cache_df_if_required(df)
+        self._cache_df_if_required(df)
 
         return df
 
@@ -382,22 +417,178 @@ class FileDataSource(DataSource):
             buffer: optional, currently not implemented
 
         Returns:
-            The file's bytes, possibly cached according to expires-config
+            The file's bytes (binary) or string (text) contents,
+            possibly cached according to expires-config
         """
         if buffer:
             raise NotImplementedError('Buffered reading not supported yet')
 
-        cached = self.try_get_cached_raw()
+        cached = self._try_get_cached_raw()
         if cached is not None:
             return cached
 
         kw_options = self.options
 
-        logger.debug('Loading raw binary file {} with options {}...'
+        logger.debug('Loading raw {} {} with options {}...'
                      .format(self.type, self.path, kw_options))
-        with open(self.path, 'rb') as bin_file:
-            raw = bin_file.read(**kw_options)
+        if self.type == 'text_file':
+            with open(self.path, 'r') as txt_file:
+                raw = txt_file.read(**kw_options)
+        elif self.type == 'binary_file':
+            with open(self.path, 'rb') as bin_file:
+                raw = bin_file.read(**kw_options)
+        else:
+            raise ValueError('Can only read binary data or text strings as raw file. '
+                             + 'Use method "get_dataframe" for dataframes')
 
-        self.cache_raw_if_required(raw)
+        self._cache_raw_if_required(raw)
 
         return raw
+
+
+class DataSink:
+    """Interface, used by the Data Scientist's model to persist data (usually prediction results).
+    Concrete DataSinks (for files, data bases, etc.) need to inherit from this class.
+    """
+
+    def __init__(self, identifier, datasink_config):
+        """Please call super().__init(...) when overwriting this method
+        """
+        self.id = identifier
+        self.config = datasink_config
+        self.options = self.config.get('options', {})
+
+    def put_dataframe(self, dataframe: pd.DataFrame, arg_dict=None, buffer=False):
+        ...
+
+    def put_raw(self, raw_data: Union[bytes, str], arg_dict=None, buffer=False):
+        ...
+
+    def __del__(self):
+        """Overwrite to clean up any resources (connections, temp files, etc.).
+        """
+        ...
+
+
+class FileDataSink(DataSink):
+    """DataSource for fetching data from files
+    """
+
+    def __init__(self, identifier, datasink_config):
+        super().__init__(identifier, datasink_config)
+
+        ds_type = datasink_config['type']
+        if ds_type not in SUPPORTED_FILE_TYPES:
+            raise ValueError('{} is not a datasink file type (in datasink {}).'
+                             .format(repr(ds_type), repr(identifier)))
+
+        self.type = ds_type
+        self.path = datasink_config['path']
+
+    def put_dataframe(self, dataframe, arg_dict=None, buffer=False):
+        """Write a pandas dataframe to file.
+        The default is not to save the dataframe's row index.
+        Configure the DataSink's options dict to pass keyword arguments to panda's to_csv.
+
+        Params:
+            dataframe: the pandas dataframe to save
+            argsDict: optional, currently not implemented
+            buffer: optional, currently not implemented
+        """
+        if buffer:
+            raise NotImplementedError('Buffered writing not supported yet')
+
+        kw_options = self.options
+        if 'index' not in kw_options:
+            kw_options['index'] = False
+
+        logger.debug('Writing dataframe to type {} file {} with options {}...'
+                     .format(self.type, self.path, kw_options))
+        if self.type == 'csv':
+            dataframe.to_csv(self.path, **kw_options)
+        elif self.type == 'euro_csv':
+            dataframe.to_csv(self.path, sep=';', decimal=',', **kw_options)
+        else:
+            raise ValueError('Can only write dataframes to csv file. Use method "put_raw" for raw data')
+
+    def put_raw(self, raw_data, arg_dict=None, buffer=False):
+        """Write raw data to file.
+
+        Params:
+            raw_data: the data to save (bytes for binary, string for text file)
+            argsDict: optional, currently not implemented
+            buffer: optional, currently not implemented
+
+        Returns:
+            The file's bytes, possibly cached according to expires-config
+        """
+        if buffer:
+            raise NotImplementedError('Buffered writing not supported yet')
+
+        kw_options = self.options
+
+        logger.debug('Writing raw binary file {} with options {}...'
+                     .format(self.type, self.path, kw_options))
+        if self.type == 'text_file':
+            with open(self.path, 'w', **kw_options) as txt_file:
+                txt_file.write(raw_data)
+        elif self.type == 'binary_file':
+            with open(self.path, 'wb', **kw_options) as bin_file:
+                bin_file.write(raw_data)
+        else:
+            raise ValueError('Can only write binary data or text strings as raw file. '
+                             + 'Use method "get_dataframe" for dataframes')
+
+
+class DbmsDataSink(DataSink):
+    """DataSink for database connections
+    """
+
+    def __init__(self, identifier, datasink_config, dbms_config):
+        super().__init__(identifier, datasink_config)
+
+        self.dbms_config = dbms_config
+
+
+class OracleDataSink(DbmsDataSink):
+    """DataSink for Oracle database connections
+    """
+
+    def __init__(self, identifier, datasource_config, dbms_config):
+        super().__init__(identifier, datasource_config, dbms_config)
+
+        logger.info('Establishing Oracle database connection for datasource {}...'.format(self.id))
+
+        self.connection = get_oracle_connection(dbms_config)
+
+    def put_dataframe(self, dataframe, arg_dict=None, buffer=False):
+        """Store the pandas dataframe as a table.
+        The default is not to store the dataframe's row index.
+        Configure the DataSink's options dict to pass keyword arguments to panda's to_sql.
+
+        Params:
+            dataframe: the pandas dataframe to store
+            argsDict: optional, currently not implemented
+            buffer: optional, currently not implemented
+        """
+        if buffer:
+            raise NotImplementedError('Buffered storing not supported yet')
+
+        # TODO: maybe want to open/close connection on every method call (shouldn't happen often)
+        query = self.config['table']
+        kw_options = self.options
+        if 'index' not in kw_options:
+            kw_options['index'] = False
+
+        logger.debug('Storing data in table {} with options {}...'
+                     .format(query, kw_options))
+        dataframe.to_sql(query, con=self.connection, **kw_options)
+
+    def put_raw(self, raw_data, arg_dict=None, buffer=False):
+        """Not implemented"""
+        raise TypeError('OracleDataSink currently does not not support raw format/blobs')
+
+    def __del__(self):
+        if hasattr(self, 'connection'):
+            self.connection.close()
+

@@ -10,19 +10,32 @@ datasources:
     path: ./examples/iris_holdout.csv  # The string can also be a URL. Valid URL schemes include http, ftp, s3, and file.
     expires: 0  # -1: never (=cached forever), 0: immediately (=no caching), >0: time in seconds.
     options: {}
-    tags: [train, test]
+    tags: test
+  batch_input:
+    type: csv
+    path: ./examples/iris_pred_input.csv
+    expires: 0  # -1: never (=cached forever), 0: immediately (=no caching), >0: time in seconds.
+    options: {}
+    tags: predict
+
+datasinks:
+  predictions:
+    type: csv
+    path: ./examples/iris_pred_output.csv
+    options: {}
+    tags: [predict]
 
 model_store:
   location: ./model_store  # TODO: maybe support sftp or other remote locations...
 
 model:
   name: IrisModel
-  version: '0.0.1'  # use semantic versioning (<breaking>.<adding>.<fix>)
+  version: '0.0.2'  # use semantic versioning (<breaking>.<adding>.<fix>)
   module: examples.tree_model  # same as file name without .py
   train_options: {}
   predict_options: {}
 
 api:
   name: iris  # name of the service api
-  version: '0.0.1'  # use semantic versioning (breaking.adding.fix), first segment will be used in url as .../vX
+  version: '0.0.2'  # use semantic versioning (breaking.adding.fix), first segment will be used in url as e.g. .../v1/...
   raml: examples/tree.raml

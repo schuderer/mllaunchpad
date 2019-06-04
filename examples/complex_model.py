@@ -25,7 +25,7 @@ class MyModelMaker(ModelMakerInterface):
     """
     """
 
-    def create_trained_model(self, model_conf, data_sources, old_model=None):
+    def create_trained_model(self, model_conf, data_sources, data_sinks, old_model=None):
         # demo: get the database data source
         limit = model_conf['train_options']['num_ora_rows']
         dbdf = data_sources['panel'].get_dataframe(arg_dict={'limit': limit})
@@ -49,7 +49,7 @@ class MyModelMaker(ModelMakerInterface):
 
         return finished_model
 
-    def test_trained_model(self, model_conf, data_sources, model):
+    def test_trained_model(self, model_conf, data_sources, data_sinks, model):
         df = data_sources['petals_test'].get_dataframe()
         X_test = df.drop('variety', axis=1)
         y_test = df['variety']
@@ -69,7 +69,7 @@ class MyModel(ModelInterface):
     """Does some simple prediction
     """
 
-    def predict(self, model_conf, data_sources, args_dict):
+    def predict(self, model_conf, data_sources, data_sinks, args_dict):
         logger.info('Hey, look at me -- I\'m carrying out a prediction')
 
         # Do some lame prediction (= addition)

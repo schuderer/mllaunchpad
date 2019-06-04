@@ -71,7 +71,7 @@ def _create_request_parser(resource_obj):
 
 
 def _get_resources(raml):
-    """
+    """Gets relevant resources from RAML
     """
     # only dealing with "get" method resources for now
     usable_methods = ['get']
@@ -99,7 +99,7 @@ class QueryResource(Resource):
         self.parser = parser
 
     def get(self):
-        args = self.parser.parse_args(strict=True)  # treats query_params and form_params as interchangable
+        args = self.parser.parse_args(strict=True)  # treats query_params and form_params as interchangeable
         logger.debug('Received GET request with arguments: %s', args)
         return self.model_api.predict_using_model(args)
 
@@ -111,7 +111,7 @@ class GetByIdResource(Resource):
         self.id_name = id_name
 
     def get(self, some_resource_id):
-        args = self.parser.parse_args(strict=True)  # treats query_params and form_params as interchangable
+        args = self.parser.parse_args(strict=True)  # treats query_params and form_params as interchangeable
         args[self.id_name] = some_resource_id
         logger.debug('Received GET request for %s %s with arguments: %s',
                      self.id_name, some_resource_id, args)
@@ -142,7 +142,7 @@ class ModelApi:
         self.model_config = config['model']
         model_store = resource.ModelStore(config)
         self.model = self._load_model(model_store, self.model_config)
-        self.datasources = self._init_datasources(config)
+        self.datasources, self.datasinks = self._init_datasources(config)
 
         logger.debug('Initializing RESTful API')
         api = Api(application)
@@ -177,17 +177,18 @@ class ModelApi:
     def predict_using_model(self, args_dict):
         logger.debug('Prediction input %s', dict(args_dict))
         logger.info('Starting prediction')
-        output = self.model.predict(self.model_config, self.datasources, args_dict)
+        output = self.model.predict(self.model_config, self.datasources, self.datasinks, args_dict)
         logger.debug('Prediction output %s', output)
         return output
 
     @staticmethod
     def _init_datasources(config):
         logger.info('Initializing datasources...')
-        ds = resource.create_data_sources(config, tags='predict')
-        logger.info('%s datasource(s) initialized: %s', len(ds), list(ds.keys()))
+        dso, dsi = resource.create_data_sources_and_sinks(config, tags='predict')
+        logger.info('%s datasource(s) initialized: %s', len(dso), list(dso.keys()))
+        logger.info('%s datasink(s) initialized: %s', len(dsi), list(dsi.keys()))
 
-        return ds
+        return dso, dsi
 
     @staticmethod
     def _load_model(model_store, model_config):
