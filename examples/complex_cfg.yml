@@ -1,0 +1,80 @@
+dbms: # TODO: is some smartness with tnsnames.ora possible (auto-populate)?
+  # Convention for user name/password: environment variables <dbms-name>_USER, <dbms-name>_PW
+  xob10:  # https://cx-oracle.readthedocs.io/en/latest/installation.html#quick-start-cx-oracle-installation
+    type: oracle  # using cx_Oracle python package
+    host: host.example.com  # IP address might work, too
+    port: 1521
+    user_var: XOB10_USER  # name of environment variable
+    password_var: XOB10_PW  # name of environment variable
+    service_name: servicename.example.com  # create dsn_tns, compare with tnsnames.ora: https://stackoverflow.com/questions/245465/cx-oracle-connecting-to-oracle-db-remotely
+    options: {}
+  bda:  # TODO check: https://dwgeek.com/guide-connecting-hiveserver2-using-python-pyhive.html/, https://stackoverflow.com/questions/21370431/how-to-access-hive-via-python
+    type: hive  # using pyhive.hive TODO: might need to use Impala
+    host: host.example.com  # maybe need to use IP?
+    port: 9083
+    auth_mechanism: PLAIN  # or CUSTOM? -- TODO: probably have to use Kerberos
+#    user: myuser
+#    password: secretpassword
+    database: default  # instead of changing here, use full table names in query
+    options: {}
+
+datasources:
+  panel:
+     type: dbms  # type can also be: csv, euro_csv (european formatting), text_file, binary_file
+     dbms: xob10
+     query: SELECT * FROM TEST_TABLE WHERE ROWNUM < :limit # WHERE BLA = :someparam AND BLU = :foobar # https://legacy.python.org/dev/peps/pep-0249/#paramstyle
+     expires: 60*60*1  # -1: never (=cached forever), 0: immediately (=no caching), >0: time in seconds.
+     options: {}  # query options, NOT params
+     tags: train #, test] # , predict]
+  first_names:
+    type: euro_csv  # uses ; as separators and , as decimal point
+    path: ./examples/firstnames.csv  # The string can also be a URL. Valid URL schemes include http, ftp, s3, and file.
+    expires: -1  # -1: never (=cached forever), 0: immediately (=no caching), >0: time in seconds.
+    options: {}
+    tags: [train, test, predict]
+  petals:
+    type: csv  # uses , as separators and . as decimal point
+    path: ./examples/iris_train.csv  # The string can also be a URL. Valid URL schemes include http, ftp, s3, and file.
+    expires: 0  # -1: never (=cached forever), 0: immediately (=no caching), >0: time in seconds.
+    options: {}
+    tags: train
+  petals_test:
+    type: csv  # uses , as separators and . as decimal point
+    path: ./examples/iris_holdout.csv  # The string can also be a URL. Valid URL schemes include http, ftp, s3, and file.
+    expires: 0  # -1: never (=cached forever), 0: immediately (=no caching), >0: time in seconds.
+    options: {}
+    tags: test
+  # l3.3:
+  #   type: dbms
+  #   dbms: bda
+  #   query: SELECT * FROM MYSCHEMA.BLABLA WHERE X = :myparam # https://legacy.python.org/dev/peps/pep-0249/#paramstyle
+  #   expires: 60*60*24  # -1: never (=cached forever), 0: immediately (=no caching), >0: time in seconds.
+  #   options: {}
+  #   tags: [train, test, predict]
+  # old_tweets:
+  #   type: csv
+  #   path: sftp://username:password@someplace.org/file.csv
+  #   expires: -1  # -1: never (=cached forever), 0: immediately (=no caching), >0: time in seconds.
+  #   options: {}
+  # data sources can also be instantiated/subclassed and registered in code
+  # (e.g. in cases of complex auth, for image recognition from a camera, audio streams, ...)
+
+
+model_store:
+  location: ./model_store  # TODO: maybe support sftp or other remote locations...
+
+
+# TODO: data sinks
+# TODO: configure that model output will be saved in a data sink automatically instead of returned via api???
+
+model:
+  name: AwesomeModel
+  version: '0.1.0'  # use semantic versioning (<breaking>.<adding>.<fix>)
+  module: examples.complex_model  # same as file name without .py
+  train_options: {magic_number: 13, num_ora_rows: 10}
+  predict_options: {}
+
+api:
+  name: guessiris  # name of the service api, also what comes in the URL after the first /
+  version: '0.0.1'  # use semantic versioning (breaking.adding.fix), first segment will be used in url as .../vX
+  raml: examples/complex.raml
