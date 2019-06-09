@@ -189,6 +189,10 @@ class ModelApi:
         dso, dsi = resource.create_data_sources_and_sinks(config, tags='predict')
         logger.info('%s datasource(s) initialized: %s', len(dso), list(dso.keys()))
         logger.info('%s datasink(s) initialized: %s', len(dsi), list(dsi.keys()))
+        if config['api'].get('preload_datasources', False):
+            logger.info('Preloading datasources...')
+            for ds in dso.values():
+                _ = ds.get_dataframe()
 
         return dso, dsi
 
