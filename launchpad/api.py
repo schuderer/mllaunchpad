@@ -7,6 +7,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# TODO: factor out datasource/model preparation code -- use model_actions instead of low-level functionality
+
 
 def _get_major_api_version(config):
     match = re.match(r'\d+', config['api']['version'])

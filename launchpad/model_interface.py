@@ -74,7 +74,7 @@ class ModelInterface(abc.ABC):
 
     When initializing your derived model, pass it an object
     which contains what is needed for prediction (usually your trained regressor
-    or classifier, but can be anything). It is stored in self.obj.
+    or classifier, but can be anything). It is stored in self.content.
     """
 
     def __init__(self, content=None):
