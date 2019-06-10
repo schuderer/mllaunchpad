@@ -36,7 +36,7 @@ def train_model(complete_conf, cache=True):
     try:
         logger.debug('Trying to load old model...')
         old_model, meta = _get_model(complete_conf, cache=cache)
-        logger.info('Loaded old model %s %s', meta['name'], meta['version'])
+        # logger.info('Loaded old model %s %s', meta['name'], meta['version'])
     except FileNotFoundError:
         logger.info('No old model to load')
         old_model = None

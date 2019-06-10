@@ -20,11 +20,10 @@ dbms: # TODO: is some smartness with tnsnames.ora possible (auto-populate)?
 
 datasources:
   panel:
-     type: dbms  # type can also be: csv, euro_csv (european formatting), text_file, binary_file
-     dbms: xob10
-     query: SELECT * FROM TEST_TABLE WHERE ROWNUM < :limit # WHERE BLA = :someparam AND BLU = :foobar # https://legacy.python.org/dev/peps/pep-0249/#paramstyle
+     type: dbms.xob10  # type can also be: csv, euro_csv (european formatting), text_file, binary_file
+     query: SELECT * FROM TEST_TABLE WHERE ROWNUM < :limit # Providing params: mydf = data_sources['panel'].get_dataframe(arg_dict={'limit': 10})
      expires: 60*60*1  # -1: never (=cached forever), 0: immediately (=no caching), >0: time in seconds.
-     options: {}  # query options, NOT params
+     options: {}  # query options to pd.read_sql(), NOT params
      tags: train #, test] # , predict]
   first_names:
     type: euro_csv  # uses ; as separators and , as decimal point
@@ -45,8 +44,7 @@ datasources:
     options: {}
     tags: test
   # l3.3:
-  #   type: dbms
-  #   dbms: bda
+  #   type: dbms.bda
   #   query: SELECT * FROM MYSCHEMA.BLABLA WHERE X = :myparam # https://legacy.python.org/dev/peps/pep-0249/#paramstyle
   #   expires: 60*60*24  # -1: never (=cached forever), 0: immediately (=no caching), >0: time in seconds.
   #   options: {}

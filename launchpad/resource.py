@@ -172,25 +172,28 @@ def _create_data_sources_or_sinks(config, the_type: Type[Union['DataSource', 'Da
         if not _tags_match(tags, ds_config.get('tags')):
             continue
 
-        ds_type = ds_config['type']
+        ds_types = ds_config['type'].split('.')
+        main_type = ds_types[0]
+        sub_type = ds_types[1] if len(ds_types) >= 2 else None
+        ds_subtype_config = dbms_cfg = config[main_type][sub_type] if sub_type else None
 
-        logger.debug('Initializing %s %s of type %s...', what, ds_id, ds_type)
-        if ds_type in SUPPORTED_FILE_TYPES:
+        logger.debug('Initializing %s %s of type %s...', what, ds_id, ds_config['type'])
+        if main_type in SUPPORTED_FILE_TYPES:
             ds_objects[ds_id] = FileDataSource(ds_id, ds_config) if the_type == DataSource\
                                 else FileDataSink(ds_id, ds_config)
-        elif ds_type == 'dbms':
-            dbms_id = ds_config['dbms']
-            dbms = config['dbms'][dbms_id]
-            dbms_type = dbms['type']
+        elif main_type == 'dbms':
+            dbms_cfg = ds_subtype_config
+            dbms_type = dbms_cfg['type']
             if dbms_type == 'oracle':
-                ds_objects[ds_id] = OracleDataSource(ds_id, ds_config, dbms) if the_type == DataSource\
-                                    else OracleDataSink(ds_id, ds_config, dbms)
+                ds_objects[ds_id] = OracleDataSource(ds_id, ds_config, dbms_cfg)\
+                                    if the_type == DataSource\
+                                    else OracleDataSink(ds_id, ds_config, dbms_cfg)
             elif dbms_type == 'hive':
-                raise NotImplementedError('Sorry, still have to implement this one.')
+                raise NotImplementedError('Sorry, still have to implement HIVE support.')
             else:
                 raise ValueError('Unsupported dbms type: {}'.format(dbms_type))
         else:
-            raise ValueError('Unsupported datasource type: {}'.format(ds_type))
+            raise ValueError('Unsupported datasource type: {}'.format(ds_config['type']))
         logger.debug('Datasource %s initialized', ds_id)
 
     typing.cast(Dict[str, the_type], ds_objects)
@@ -246,7 +249,7 @@ class DataSource:
            and (self.expires == -1  # cache indefinitely
                 or (self.expires > 0
                     and time() <= self._cached_df_time + self.expires)):
-            logger.debug('Returning cached dataframe')
+            logger.debug('Returning cached dataframe for datasource %s', self.id)
             return self._cached_df
         else:  # either immediately expires (0) or has expired in meantime (>0)
             return None
@@ -256,7 +259,7 @@ class DataSource:
            and (self.expires == -1  # cache indefinitely
                 or (self.expires > 0
                     and time() <= self._cached_raw_time + self.expires)):
-            logger.debug('Returning cached raw data')
+            logger.debug('Returning cached raw data for datasource %s', self.id)
             return self._cached_raw
         else:  # either immediately expires (0) or has expired in meantime (>0)
             return None
@@ -275,16 +278,6 @@ class DataSource:
         """Overwrite to clean up any resources (connections, temp files, etc.).
         """
         ...
-
-
-class DbmsDataSource(DataSource):
-    """DataSource for database connections
-    """
-
-    def __init__(self, identifier, datasource_config, dbms_config):
-        super().__init__(identifier, datasource_config)
-
-        self.dbms_config = dbms_config
 
 
 def get_oracle_connection(dbms_config):
@@ -310,15 +303,16 @@ def get_oracle_connection(dbms_config):
     return connection
 
 
-class OracleDataSource(DbmsDataSource):
+class OracleDataSource(DataSource):
     """DataSource for Oracle database connections
     """
 
     def __init__(self, identifier, datasource_config, dbms_config):
-        super().__init__(identifier, datasource_config, dbms_config)
+        super().__init__(identifier, datasource_config)
+
+        self.dbms_config = dbms_config
 
         logger.info('Establishing Oracle database connection for datasource {}...'.format(self.id))
-
         self.connection = get_oracle_connection(dbms_config)
 
     def get_dataframe(self, arg_dict=None, buffer=False):
@@ -540,22 +534,14 @@ class FileDataSink(DataSink):
                              + 'Use method "get_dataframe" for dataframes')
 
 
-class DbmsDataSink(DataSink):
-    """DataSink for database connections
+class OracleDataSink(DataSink):
+    """DataSink for Oracle database connections
     """
 
     def __init__(self, identifier, datasink_config, dbms_config):
         super().__init__(identifier, datasink_config)
 
         self.dbms_config = dbms_config
-
-
-class OracleDataSink(DbmsDataSink):
-    """DataSink for Oracle database connections
-    """
-
-    def __init__(self, identifier, datasource_config, dbms_config):
-        super().__init__(identifier, datasource_config, dbms_config)
 
         logger.info('Establishing Oracle database connection for datasource {}...'.format(self.id))
 
@@ -591,4 +577,3 @@ class OracleDataSink(DbmsDataSink):
     def __del__(self):
         if hasattr(self, 'connection'):
             self.connection.close()
-
