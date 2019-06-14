@@ -1,0 +1,106 @@
+#%RAML 0.8
+---
+title: S.O.M.E. example model with API
+baseUri: https://{host}/some/{version}
+version: v0  # increment only for API-breaking updates
+documentation:
+    - title: An API for predicting Iris Varieties
+      content: |
+        Plants are not very intelligent. Some don't even know who they are.
+        They need our help.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/varieties:
+  get:
+    description: Get a prediction for the variety of iris flower based on measurements of physical petal and sepal dimensions
+    queryParameters:
+      sepal.length:
+        displayName: Sepal Length
+        type: number
+        description: Measured length of iris flower sepals (flower leaves)
+        example: 3.14
+        required: false  # test, should be true
+        minimum: 0
+      sepal.width:
+        displayName: Sepal Width
+        type: number
+        description: Measured width of iris flower sepals (flower leaves)
+        example: 3.14
+        required: false  # test, should be true
+        minimum: 0
+      petal.length:
+        displayName: Petal Length
+        type: number
+        description: Measured length of iris flower petals
+        example: 3.14
+        required: false  # test, should be true
+        minimum: 0
+      petal.width:
+        displayName: Petal Width
+        type: number
+        description: Measured width of iris flower petals
+        example: 3.14
+        required: false  # test, should be true
+        minimum: 0
+        #minimum: -39  # for numbers or integers
+        #maximum: 100  # for numbers or integers
+        #minLength: 3  # for strings
+        #maxLength: 100  # for strings
+        #default: 0
+    responses:
+      200:  # OK
+        body:
+          application/json:
+            schema: | #prediction_result  # or type: ...?
+              {
+                "type": "object",
+                "$schema": "http://json-schema.org/draft-03/schema",
+                "id": "http://jsonschema.net",
+                "required": true,
+                "properties": {
+                  "iris_variety": {
+                    "type": "string",
+                    "required": true,
+                    "enum": ["Virginica", "Versicolor", "Setosa"]
+                  },
+                  "probability": {
+                    "type": "number",
+                    "required": false
+                  }
+                }
+              }
+            example: |
+              {
+                "iris_variety": "Setosa"
+              }

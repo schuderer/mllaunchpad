@@ -1,0 +1,29 @@
+datasources:
+  petals:
+    type: csv
+    path: ./examples/iris_train.csv  # The string can also be a URL. Valid URL schemes include http, ftp, s3, and file.
+    expires: 0  # -1: never (=cached forever), 0: immediately (=no caching), >0: time in seconds.
+    options: {}
+    tags: train
+  petals_test:
+    type: csv
+    path: ./examples/iris_holdout.csv  # The string can also be a URL. Valid URL schemes include http, ftp, s3, and file.
+    expires: 3600  # -1: never (=cached forever), 0: immediately (=no caching), >0: time in seconds.
+    options: {}
+    tags: test
+
+model_store:
+  location: ./model_store  # TODO: maybe support sftp or other remote locations...
+
+model:
+  name: SomeModel
+  version: '0.0.1'  # use semantic versioning (<breaking>.<adding>.<fix>)
+  module: examples.some_model  # same as file name without .py
+  train_options: {}
+  predict_options: {}
+
+api:
+  name: some  # name of the service api
+  version: '0.0.1'  # use semantic versioning (breaking.adding.fix), first segment will be used in url as e.g. .../v1/...
+  raml: examples/some.raml
+  preload_datasources: False  # Load datasources into memory before any predictions. Only makes sense with caching.
