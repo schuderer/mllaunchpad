@@ -17,6 +17,12 @@ dbms: # TODO: is some smartness with tnsnames.ora possible (auto-populate)?
 #    password: secretpassword
     database: default  # instead of changing here, use full table names in query
     options: {}
+  datacore:
+    type: jdbc  # !!Could also work with just cx_Oracle, same as XOB10...
+    connect: jdbc:oracle:thin:@//hl-scan.office01.internalcorp.net:1521/A0BBKP01.office01.internalcorp.net # TODO: pluck apart
+    user_var: DATACORE_USER  # name of environment variable
+    password_var: DATACORE_PW  # name of environment variable
+    options: {}
 
 datasources:
   panel:
