@@ -23,9 +23,9 @@ class MyExampleModelMaker(ModelMakerInterface):
     def create_trained_model(self, model_conf, data_sources, data_sinks, old_model=None):
         df = data_sources['petals'].get_dataframe()
 
-        finished_model = MyExampleModel(content=...)
+        ...
 
-        return finished_model
+        return model
 
     def test_trained_model(self, model_conf, data_sources, data_sinks, model):
         ...
@@ -37,7 +37,7 @@ class MyExampleModel(ModelInterface):
     """Uses the created Data Science Model
     """
 
-    def predict(self, model_conf, data_sources, data_sinks, args_dict):
+    def predict(self, model_conf, data_sources, data_sinks, model, args_dict):
         ...
 
         return output

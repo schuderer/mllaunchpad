@@ -15,8 +15,8 @@ class ModelMakerInterface(abc.ABC):
         test_trained_model without extending the latter with optional keyword
         arguments that might be confusing for the 90% of cases where they are
         not needed. So we rely on the smarts of the person inheriting from this
-        class to find a solution/shortcuts if they e.g. want to do the train/test
-        split themselves.
+        class to find a solution/shortcuts if they want to do more difficult
+        things e.g. want to do the train/test split themselves.
     """
 
     @abc.abstractmethod
@@ -38,8 +38,12 @@ class ModelMakerInterface(abc.ABC):
                           for incremental training. default: None
 
         Return:
-            Model for running, i.e. an instance of your ModelInterface-derived
-            class (which you passed your trained classifier/... as constructor parameter)
+            The trained model/data/anything which you want to use in the predict()
+            function. (usually simply a fitted model object, but can be anything,
+            like a dict of several models, a model with some extra info, etc.)
+            (Whatever you return here gets automatically stuffed into your
+            ModelInterface-inherited object and is accessible there using
+            predict's model parameter (or the self.contents attribute.))
         """
         ...
 
@@ -58,7 +62,8 @@ class ModelMakerInterface(abc.ABC):
                           config file
             data_sinks:   dict containing the data sinks, as configured in the
                           config file. Usually unused when testing.
-            model:        instance of your model object (inherited from ModelInterface)
+            model:        your model object (whatever you returned
+                          in create_trained_model)
 
         Return:
             Return a dict of metrics (like 'accuracy', 'f1', 'confusion_matrix',
@@ -72,24 +77,25 @@ class ModelInterface(abc.ABC):
     Please inherit from this class when creating your model to make
     it usable for ModelApi.
 
-    When initializing your derived model, pass it an object
-    which contains what is needed for prediction (usually your trained regressor
-    or classifier, but can be anything). It is stored in self.content.
+    You don't need to create this object yourself when training.
+    It is created automatically and the model/info returned from create_trained_model
+    is made accessible to you through the self.contents attribute.
     """
 
-    def __init__(self, content=None):
+    def __init__(self, contents=None):
         """If you overwrite __init__, please call super().__init__(...)
-        at the beginning. Otherwise, you need to assign self.content to the
-        content parameter manually in __init__.
+        at the beginning. Otherwise, you need to assign self.contents to the
+        contents parameter manually in __init__.
 
         Params:
-            content:  any object that is needed for prediction (usually a trained
-                      classifier or predictor)
+            contents:  any object that is needed for prediction (usually a trained
+                      classifier or predictor). It is passed to the predict()
+                      method as the "model" parameter for convenience.
         """
-        self.content = content
+        self.contents = contents
 
     @abc.abstractmethod
-    def predict(self, model_conf, data_sources, data_sinks, args_dict):
+    def predict(self, model_conf, data_sources, data_sinks, model, args_dict):
         """Implement this method, including data prep/feature creation based on argsDict.
         argsDict can also contain an id which the model can use to fetch data
         from any data_sources.
@@ -101,6 +107,8 @@ class ModelInterface(abc.ABC):
             data_sources: dict containing the data sources
             data_sinks:   dict containing the data sinks, as configured in the
                           config file.
+            model:        your model object (whatever you returned
+                          in create_trained_model)
             argsDict:     parameters the API was called with, dict of strings
                           (any type conversion needs to be done by you)
 

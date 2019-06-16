@@ -129,7 +129,7 @@ class ModelApi:
     It needs to provide certain functionality:
        - a predict function
 
-    For details, see the doc-comments in the module modelinterface
+    For details, see the doc-comments in the module model_interface
     """
 
     def __init__(self, config, application):
@@ -143,7 +143,7 @@ class ModelApi:
         """
         self.model_config = config['model']
         model_store = resource.ModelStore(config)
-        self.model = self._load_model(model_store, self.model_config)
+        self.model_wrapper = self._load_model(model_store, self.model_config)
         self.datasources, self.datasinks = self._init_datasources(config)
 
         logger.debug('Initializing RESTful API')
@@ -179,7 +179,12 @@ class ModelApi:
     def predict_using_model(self, args_dict):
         logger.debug('Prediction input %s', dict(args_dict))
         logger.info('Starting prediction')
-        output = self.model.predict(self.model_config, self.datasources, self.datasinks, args_dict)
+        inner_model = self.model_wrapper.contents
+        output = self.model_wrapper.predict(self.model_config,
+                                            self.datasources,
+                                            self.datasinks,
+                                            inner_model,
+                                            args_dict)
         logger.debug('Prediction output %s', output)
         return output
 

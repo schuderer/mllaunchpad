@@ -21,11 +21,13 @@ create_trained_model <- function(model_conf, old_model=NULL) {
     print("Old model:")
     print(old_model)
 
-    print("Training model")
-    finished_model <- rpart(variety ~ ., data = df, method = "class")
+    print("Training model:")
+    tree <- rpart(variety ~ ., data = df, method = "class")
+
+    finished_model <- list(mymodel=tree, favcolor="green")
     print(finished_model)
 
-    return(list(mymodel = finished_model, favcolor = "green"))
+    return(finished_model)
 }
 
 test_trained_model <- function(model_conf, model) {
@@ -39,26 +41,35 @@ test_trained_model <- function(model_conf, model) {
     print(model)
     tree <- model$mymodel
 
-    print("Testing model")
+    print("Testing model:")
     pred <- predict(tree, df, type="class")
     acc <- mean(pred == df$variety)
+    metrics <- list(accuracy=acc, favoritecolor=model$favcolor)
 
-    return(list(accuracy = acc, favoritecolor = model$favcolor))
+    print("Resulting metrics:")
+    print(metrics)
+
+    return(metrics)
 }
 
 # TODO: I may have to change the name of the predict function in python for consistency...
-predict_with_model <- function(model_conf, args_dict, model) {
+predict_with_model <- function(model_conf, args_list, model) {
     # use get_dataframe(name) and put_dataframe(name) to access configured data_sources and data_sinks
+    print("Prediction input:")
+    print(args_list)
+
     tree <- model$mymodel
 
     print("Predicting with model")
-    pred <- predict(tree, data.frame(args_dict), type="class")
+    pred <- predict(tree, data.frame(args_list), type="class")
 
     print("Raw prediction:")
     print(pred)
 
-    print("Prediction output in R:")
     output <- list(iris_variety=pred, probability=0.9999, test="hello")
+
+    print("Prediction output in R:")
+    print(output)
 
     return(output)
 }
@@ -83,5 +94,3 @@ predict_with_model <- function(model_conf, args_dict, model) {
 # args_dict = list('Sepal.Length'=4.1, 'Sepal.Width'=2.1, 'Petal.Length'=1.6, 'Petal.Width'=0.4)
 # output <- predict_with_model(0, 0, 0, args_dict, model)
 # print(output)
-
-

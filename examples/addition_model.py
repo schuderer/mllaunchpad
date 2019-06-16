@@ -28,20 +28,15 @@ class MyAdditionExampleModelMaker(ModelMakerInterface):
 
         # Usually, we put one or several trained regressors/classifiers into the
         # model, but in this example we just use our function.
-        model_contents = {'lame_pred': my_lame_predictor}
+        model = {'lame_pred': my_lame_predictor}
         # In addition to regressors/classifiers/etc., you can also use this to
         # tell prediction about e.g. calculated parameters, thresholds, etc.
         # that have been calculated during the training process.
-        # For (near) constant parameters, please
+        # For parameters that are stable from one training to the next, please
         # use the config's model: prediction_config/training_config instead.
 
-        # We instantiate our model class. This will be the object that will be
-        # saved and later loaded to run in the API. You can get 'model_contents'
-        # at prediction time using the self.content property.
-        finished_model = MyAdditionExampleModel(content=model_contents)
-
-        # First return value: model instance, second value: metrics dict
-        return finished_model
+        # First return value: model, second value: metrics dict
+        return model
 
     def test_trained_model(self, model_conf, data_sources, data_sinks, model):
 
@@ -54,7 +49,7 @@ class MyAdditionExampleModelMaker(ModelMakerInterface):
         # Prediction happens here. Usually (though you *can*), you will not call
         # your own predict method, but get the inner model (classifier/regressor/...)
         # and use it directly.
-        lame_predictor = model.content['lame_pred']
+        lame_predictor = model['lame_pred']
         y = lame_predictor(x1_test, x2_test)
 
         # Calculate some metrics
@@ -73,7 +68,7 @@ class MyAdditionExampleModel(ModelInterface):
     """Simplest possible 'Data Science Model' example, without using data sources.
     """
 
-    def predict(self, model_conf, data_sources, data_sinks, args_dict):
+    def predict(self, model_conf, data_sources, data_sinks, model, args_dict):
 
         # We can optionally get info from the model's config dictionary
         my_name = model_conf['name']
@@ -84,7 +79,7 @@ class MyAdditionExampleModel(ModelInterface):
         x2 = args_dict['x2']
 
         # Get the predictor from the dict that we stuffed into this model when training
-        my_lame_predictor = self.content['lame_pred']
+        my_lame_predictor = model['lame_pred']
 
         # Our sophisticated model does its magic here
         y = my_lame_predictor(x1, x2)

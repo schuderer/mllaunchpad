@@ -35,16 +35,14 @@ class MyExampleModelMaker(ModelMakerInterface):
         my_tree = tree.DecisionTreeClassifier()
         my_tree.fit(X, y)
 
-        finished_model = MyExampleModel(content=my_tree)
-
-        return finished_model
+        return my_tree
 
     def test_trained_model(self, model_conf, data_sources, data_sinks, model):
         df = data_sources['petals_test'].get_dataframe()
         X_test = df.drop('variety', axis=1)
         y_test = df['variety']
 
-        my_tree = model.content
+        my_tree = model
 
         y_predict = my_tree.predict(X_test)
 
@@ -60,7 +58,7 @@ class MyExampleModel(ModelInterface):
     """Uses the created Data Science Model
     """
 
-    def predict(self, model_conf, data_sources, data_sinks, args_dict):
+    def predict(self, model_conf, data_sources, data_sinks, model, args_dict):
 
         if 'test_key' in args_dict:
             # URI param example (an uri param is part in the args_dict just like any other input)
@@ -69,14 +67,14 @@ class MyExampleModel(ModelInterface):
             df = data_sources['batch_input'].get_dataframe()
             df['myid'] = df['myid'].apply(str)
             X = df.loc[df['myid'] == key]
-            my_tree = self.content
+            my_tree = model
             y = my_tree.predict(X.drop('myid', axis=1))[0]
             return {'iris_variety': y}
         elif 'sepal.length' not in args_dict or args_dict['sepal.length'] is None:
             # Batch prediction example
             logger.info('Doing batch prediction')
             X = data_sources['batch_input'].get_dataframe()
-            my_tree = self.content
+            my_tree = model
             y = my_tree.predict(X.drop('myid', axis=1))
             X['pred'] = y
             data_sinks['predictions'].put_dataframe(X)
@@ -91,7 +89,7 @@ class MyExampleModel(ModelInterface):
             'petal.width': [args_dict['petal.width']]
             })
 
-        my_tree = self.content
+        my_tree = model
         y = my_tree.predict(X)[0]
 
         return {'iris_variety': y}

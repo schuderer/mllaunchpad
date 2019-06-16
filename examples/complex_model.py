@@ -44,17 +44,16 @@ class MyModelMaker(ModelMakerInterface):
         my_tree = tree.DecisionTreeClassifier()
         my_tree.fit(X_train, y_train)
 
-        model_contents = {'lame_pred': my_lame_predictor, 'petal_pred': my_tree}
-        finished_model = MyModel(content=model_contents)
+        model = {'lame_pred': my_lame_predictor, 'petal_pred': my_tree}
 
-        return finished_model
+        return model
 
     def test_trained_model(self, model_conf, data_sources, data_sinks, model):
         df = data_sources['petals_test'].get_dataframe()
         X_test = df.drop('variety', axis=1)
         y_test = df['variety']
 
-        my_tree = model.content['petal_pred']
+        my_tree = model['petal_pred']
 
         y_predict = my_tree.predict(X_test)
 
@@ -69,7 +68,7 @@ class MyModel(ModelInterface):
     """Does some simple prediction
     """
 
-    def predict(self, model_conf, data_sources, data_sinks, args_dict):
+    def predict(self, model_conf, data_sources, data_sinks, model, args_dict):
         logger.info('Hey, look at me -- I\'m carrying out a prediction')
 
         # Do some lame prediction (= addition)
@@ -81,11 +80,11 @@ class MyModel(ModelInterface):
         name_df = data_sources['first_names'].get_dataframe()
         random_name = name_df.sample(n=1)['name'].values[0]
 
-        lame_predictor = self.content['lame_pred']
+        lame_predictor = ModelInterface()['lame_pred']
         y = lame_predictor(x)
 
         # Also try iris petal-based prediction:
-        petal_predictor = self.content['petal_pred']
+        petal_predictor = model['petal_pred']
         X2 = pd.DataFrame({
             'sepal.length': [args_dict['sepal.length']],
             'sepal.width': [args_dict['sepal.width']],

@@ -4,10 +4,15 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-scikit-learn = "*"
-gunicorn = "*"
+# packages for development and for running examples
+# tzlocal should not be necessary, error in current rpy2 distribution
 ipykernel = "*"
 python-language-server = {extras = ["all"],version = "*"}
+gunicorn = "*"
+cx-oracle = "*"
+scikit-learn = "*"
+rpy2 = "==3.0.4"
+tzlocal = "*"
 
 [packages]
 flask = "*"
@@ -15,7 +20,6 @@ flask-restful = "*"
 ramlfications = "*"
 dill = "*"
 pandas = "*"
-cx-oracle = "*"
 
 [requires]
 python_version = "3.7"
