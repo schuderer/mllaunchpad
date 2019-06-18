@@ -1,4 +1,5 @@
 import logging
+import rpy2
 import rpy2.robjects as ro
 import rpy2.robjects.packages as rp
 import rpy2.rinterface as ri
@@ -8,6 +9,15 @@ from launchpad import ModelInterface, ModelMakerInterface
 logger = logging.getLogger(__name__)
 # numpy2ri.activate()  # vector=rpyn.ri2numpy(vector_R)
 pandas2ri.activate()  # If wishing to convert explicitly for any reason, the functions are pandas2ri.py2rpy() and pandas2ri.rpy2py (rpy2 >= 3.0.0) (rpy2 2.9.4: pandas2ri.py2ri() and pandas2ri.ri2py(), which earlier were pandas2ri.pandas2ri() and pandas2ri.ri2pandas())).
+
+if rpy2.__version__[0] == '2':  # tested with rpy2 == 2.9.4
+    rpy2_v2 = True
+    py2rpy = pandas2ri.py2ri
+    rpy2py = pandas2ri.ri2py
+else:  # tested with rpy2 == 3.0.4
+    rpy2_v2 = False
+    py2rpy = ro.conversion.py2rpy
+    rpy2py = ro.conversion.rpy2py
 
 
 def load_dependencies(model_conf):
@@ -45,8 +55,10 @@ def r_list_to_dict(d):
     elif type(d) is not ro.ListVector:
         return d
     else:
-        return {key: r_list_to_dict(val[0]) for key, val in d.items()}
-        # return {key: r_list_to_dict(d.rx2(key))[0] for key in d.names}  # rpy2 == 2.9.4
+        if rpy2_v2:
+            return {key: r_list_to_dict(d.rx2(key))[0] for key in d.names}  # rpy2 == 2.9.4
+        else:
+            return {key: r_list_to_dict(val[0]) for key, val in d.items()}
 
 
 #  (rpy2 >= 3.0.x) Workaround to keep functions from being garbage-collected
@@ -63,15 +75,13 @@ def prepare_r_data_sources_and_sinks(data_sources, data_sinks, kind):
             name = name_vec[0]
             logger.debug("Calling python DS %s's get_dataframe and returning R dataframe", name)
             pd_df = data_sources[name].get_dataframe(arg_dict)
-            return ro.conversion.py2rpy(pd_df) # rpy2 >= 3.0.0
-            # return pandas2ri.py2ri(pd_df)  # rpy2 == 2.9.4
+            return py2rpy(pd_df)
 
         @ri.rternalize
         def put_dataframe(name_vec, r_df, arg_dict=None):
             name = name_vec[0]
             logger.debug("Calling python DS %s's put_dataframe with ri2py converted pandas dataframe", name)
-            # df = pandas2ri.ri2py(r_df)  # rpy2 == 2.9.4
-            df = ro.conversion.rpy2py(r_df)  # rpy2 >= 3.0.0
+            df = rpy2py(r_df)
             data_sinks[name].put_dataframe(df, arg_dict)
 
         ro.globalenv['get_dataframe'] = get_dataframe
