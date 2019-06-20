@@ -144,6 +144,17 @@ class ModelApi:
         self.model_config = config['model']
         model_store = resource.ModelStore(config)
         self.model_wrapper = self._load_model(model_store, self.model_config)
+        # Workaround (tensorflow has problem with spontaneously created threads such as with Flask):
+        # https://kobkrit.com/tensor-something-is-not-an-element-of-this-graph-error-in-keras-on-flask-web-server-4173a8fe15e1
+        try:
+            import tensorflow as tf
+            graph = tf.get_default_graph()
+            self.model_wrapper.graph = graph
+        except Exception as e:
+            logger.debug('Optional tensorflow/flask workaround for "<tensor> is not an element of this graph" problem'
+                         + 'resulted in: %s', e)
+        else:
+            logger.info('Stored tensorflow model\'s graph - tensorflow/flask workaround for "<tensor> is not an element of this graph" problem')
         self.datasources, self.datasinks = self._init_datasources(config)
 
         logger.debug('Initializing RESTful API')
@@ -180,11 +191,18 @@ class ModelApi:
         logger.debug('Prediction input %s', dict(args_dict))
         logger.info('Starting prediction')
         inner_model = self.model_wrapper.contents
-        output = self.model_wrapper.predict(self.model_config,
-                                            self.datasources,
-                                            self.datasinks,
-                                            inner_model,
-                                            args_dict)
+        predict_args = [self.model_config,
+                        self.datasources,
+                        self.datasinks,
+                        inner_model,
+                        args_dict]
+        if hasattr(self.model_wrapper, 'graph'):
+            with self.model_wrapper.graph.as_default():
+                logger.info('Restored tensorflow model\'s graph')
+                raw_output = self.model_wrapper.predict(*predict_args)
+        else:
+            raw_output = self.model_wrapper.predict(*predict_args)
+        output = resource.to_plain_python_obj(raw_output)
         logger.debug('Prediction output %s', output)
         return output
 
