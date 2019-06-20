@@ -2,7 +2,7 @@ import getopt
 import sys
 from flask import Flask
 import launchpad as lp
-from launchpad import logutil
+from . import logutil
 
 HELP_STRING = '''
 Parameters:
@@ -15,7 +15,7 @@ Parameters:
 '''
 
 
-if __name__ == '__main__':
+def main():
     fullCmdArguments = sys.argv
     argumentList = fullCmdArguments[1:]
     unixOptions = 'htrpac:l:'
@@ -59,10 +59,13 @@ if __name__ == '__main__':
     elif cmd == 'retest':
         metrics = lp.retest(conf)
     elif cmd == 'predict':
-        metrics = lp.predict(conf, arg_dict={})  # TODO decide: get batch arguments from config? Don't support arguments?
+        output = lp.predict(conf, arg_dict={})  # TODO decide: get batch arguments from config? Don't support arguments?
     elif cmd == 'api':
         logger.warning("Starting Flask debug server. In production, please use a WSGI server, "
-                       + "e.g. 'gunicorn -w 4 -b 127.0.0.1:5000 launchpad.entrypoint:app'")
+                       + "e.g. 'gunicorn -w 4 -b 127.0.0.1:5000 launchpad.wsgi:app'")
         app = Flask(__name__)
         lp.ModelApi(conf, app)
         app.run(debug=True)
+
+if __name__ == '__main__':
+    main()
