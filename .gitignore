@@ -1,6 +1,7 @@
 # Data
 model_store/
 testserver/temp/
+private/
 
 # PyCharm IDE
 .idea/
