@@ -6,6 +6,7 @@ import json
 from datetime import datetime
 import getpass
 import pandas as pd
+import numpy as np
 from time import time
 from typing import Tuple, Dict, TypeVar, Union, Type
 import typing
@@ -51,10 +52,15 @@ class ModelStore:
         return meta
 
     @staticmethod
-    def _dump_metadata(base_name, metadata):
+    def _dump_metadata(base_name, raw_metadata):
         metadata_name = base_name + '.json'
-        with open(metadata_name, 'w') as f:
-            json.dump(metadata, f)
+        metadata = to_plain_python_obj(raw_metadata)
+        try:
+            with open(metadata_name, 'w') as f:
+                json.dump(metadata, f, indent=2)
+        except TypeError as e:
+            os.remove(metadata_name)
+            raise e
 
     def _backup_old_model(self, base_name):
         backup_dir = os.path.join(self.location, 'previous')
@@ -577,3 +583,20 @@ class OracleDataSink(DataSink):
     def __del__(self):
         if hasattr(self, 'connection'):
             self.connection.close()
+
+
+def to_plain_python_obj(possible_ndarray):
+    if type(possible_ndarray) is dict:
+        return {key: to_plain_python_obj(val) for key, val in possible_ndarray.items()}
+    elif type(possible_ndarray) is list or type(possible_ndarray) is tuple:
+        return [to_plain_python_obj(val) for val in possible_ndarray]
+    elif type(possible_ndarray) is np.ndarray:
+        logger.debug("Automatically converting ndarray to plain python list")
+        return possible_ndarray.tolist()
+    elif type(possible_ndarray) is pd.DataFrame:
+        logger.debug("Automatically converting DataFrame to plain python dict")
+        return possible_ndarray.to_dict()
+    else:
+        return possible_ndarray
+
+

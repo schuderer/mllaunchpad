@@ -118,6 +118,7 @@ def predict(complete_conf, arg_dict=None, cache=True):
 
     model_conf = complete_conf['model']
     output = model_wrapper.predict(model_conf, dso, dsi, inner_model, arg_dict or {})
+    output = resource.to_plain_python_obj(output)
 
     return output
 
