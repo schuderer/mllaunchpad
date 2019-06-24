@@ -227,3 +227,108 @@ class ModelApi:
                     .format(meta['name'], meta['version'], meta['created']))
 
         return model
+
+
+_pd_type_lookup = {
+    'object': 'string',
+    'int64': 'integer',
+    'float64': 'number',
+    'bool': 'boolean',
+    'datetime64': 'date',  # https://github.com/raml-org/raml-spec/blob/master/versions/raml-08/raml-08.md#date-representations
+    'category': 'string'  # plus enum: list(series.cat.categories)
+    # RAML Types: any, object, array, union via type expression,
+    #             one of the following scalar types: number, boolean, string,
+    #             date-only, time-only, datetime-only, datetime, file, integer, or nil
+    }
+
+
+def generate_raml(complete_conf, data_source_name=None, data_frame=None, resource_name='mythings'):
+    from .model_actions import _get_data_sources_and_sinks
+    from urllib.parse import quote_plus
+    if data_source_name is not None:
+        dso, dsi = _get_data_sources_and_sinks(complete_conf, tags='', cache=True)
+        df = dso[data_source_name].get_dataframe()
+    elif data_frame is not None:
+        df = data_frame
+    else:
+        raise ValueError("Please provide a data_source_name or a data_frame")
+    sample = df.sample(1).reset_index(drop=True)
+    api_name = complete_conf['api']['name']
+    api_version = _get_major_api_version(complete_conf)
+    url_start = f'http://127.0.0.1:5000/{quote_plus(api_name)}/{api_version}/{resource_name}?'
+    url_params = []
+    output = f'''
+#%RAML 0.8
+---
+title: Put title of your {api_name} API here
+baseUri: https://{{host}}/{api_name}/{{version}}
+version: {api_version}  # new version only for API-breaking updates
+documentation:
+  - title: Example section title
+    content: |
+      Example section contents
+
+
+/{resource_name}:  # This should be a plural form of what you're predicting, e.g. "/client_activations"
+  get:  # We can support 'post' as well if needed (let us know if necessary)
+    description: Briefly describe what {resource_name} exactly you get from this API
+    queryParameters:  # For all possibilities of specifying parameters see https://github.com/raml-org/raml-spec/blob/master/versions/raml-08/raml-08.md#named-parameters'''
+    for col_name in sample.columns:
+        series = sample[col_name]
+        type_str = str(series.dtype)
+        raml_type = _pd_type_lookup[type_str]
+        example = str(series[0])
+        url_params += [quote_plus(col_name) + '=' + quote_plus(example)]
+        output += f'''
+      {col_name}:
+        displayName: Friendly Name of {col_name}
+        type: {raml_type}
+        description: Description of what {col_name} really is
+        example: {example}
+        required: true  # can be false if optional, then provide a default here or be prepared to deal with missing values in your prediction
+        #default: {example}  # only makes sense for required: false
+        #minimum: 0  # optional, maximum, minLength and others are also possible.'''
+        if type_str == 'category':
+            output += '\n' + str(list(series.cat.categories))
+
+    output += f'''
+    responses:
+      200:  # OK
+        body:
+          application/json:
+            # Provide an example of your prediction result:
+            example: |
+              {{
+                "my prediction result": "Rainbows and Unicorns!"
+              }}
+  # /{{test_key}}: # This becomes relevant if you want the API user to provide e.g. ids for the model to look up data to predict for
+  #   get:
+  #     queryParameters:
+  #       hello:
+  #         description: some demo query parameter in addition to the uri param
+  #         type: string
+  #         required: true
+  #         enum: ['metric', 'imperial']
+  #         #default: 42
+
+
+  # Example URL API call (to copy and paste into browser (e.g. Chrome) to test):
+  # {url_start + '&'.join(url_params)}
+
+
+
+  #########################################################################
+  # Above is printed an example RAML for your data to copy/paste into your
+  # RAML file and adapt to fully define your API.
+  #
+  # What you should do now:
+  #   - Paste the above text into a <mymodel>.raml file (from the line '#%RAML 0.8')
+  #   - Find and remove your target variable(s) in the RAML and example URL
+  #   - Check and correct the resource name (currently /{resource_name})
+  #   - Check the examples for sensitive data
+  #   - Fill in the titles and descriptions, adapt as needed
+  #
+  # Official RAML specification: https://github.com/raml-org/raml-spec/blob/master/versions/raml-08/raml-08.md
+  #########################################################################
+'''
+    return output

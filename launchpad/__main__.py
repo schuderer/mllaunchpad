@@ -2,24 +2,26 @@ import getopt
 import sys
 from flask import Flask
 import launchpad as lp
+from launchpad.api import generate_raml
 from . import logutil
 
 HELP_STRING = '''
 Parameters:
--h        / --help               : Print this help
--t        / --train              : Run training, store model and metrics
--r        / --retest             : Retest model, update metrics
--a        / --api                : Run API Server (Debug Mode!)
--c <file> / --config=<file>      : Config file to use
--l <file> / --logconfig=<file>   : Log config file to use
+-h          / --help                  : Print this help
+-t          / --train                 : Run training, store model and metrics
+-r          / --retest                : Retest model, update metrics
+-a          / --api                   : Run API Server (Debug Mode!)
+-c <file>   / --config=<file>         : Config file to use
+-l <file>   / --logconfig=<file>      : Log config file to use
+-g <datsrc> / --generateraml=<datsrc> : Generate and print RAML template from data source name
 '''
 
 
 def main():
     fullCmdArguments = sys.argv
     argumentList = fullCmdArguments[1:]
-    unixOptions = 'htrpac:l:'
-    gnuOptions = ['help', 'train', 'retest', 'predict' 'api', 'config=', 'logconfig=']
+    unixOptions = 'htrpac:l:g:'
+    gnuOptions = ['help', 'train', 'retest', 'predict' 'api', 'config=', 'logconfig=', 'generateraml=']
     try:
         arguments, values = getopt.getopt(argumentList, unixOptions, gnuOptions)
     except getopt.error as err:
@@ -30,6 +32,7 @@ def main():
     cmd = None
     conf = None
     logger = None
+    raml_ds = None
     for currentArgument, currentValue in arguments:
         if currentArgument in ('-c', '--config'):
             conf = lp.get_validated_config(currentValue)
@@ -43,6 +46,9 @@ def main():
             cmd = 'predict'
         elif currentArgument in ('-a', '--api'):
             cmd = 'api'
+        elif currentArgument in ('-g', '--generateraml'):
+            cmd = 'genraml'
+            raml_ds = currentValue
         elif currentArgument in ('-h', '--help'):
             print(HELP_STRING)
             exit(0)
@@ -66,6 +72,9 @@ def main():
         app = Flask(__name__)
         lp.ModelApi(conf, app)
         app.run(debug=True)
+    elif cmd == 'genraml':
+        print(generate_raml(conf, data_source_name=raml_ds))
+
 
 if __name__ == '__main__':
     main()
