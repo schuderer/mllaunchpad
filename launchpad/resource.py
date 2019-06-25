@@ -142,6 +142,7 @@ class ModelStore:
 
 
 def _tags_match(tags, other_tags) -> bool:
+    print(tags, other_tags)
     tags = tags or []
     if type(tags) is str:
         tags = [tags]
@@ -151,13 +152,35 @@ def _tags_match(tags, other_tags) -> bool:
         other_tags = [other_tags]
 
     tags_required = bool(tags)
+    tags_provided = bool(other_tags)
     tags_matching = bool(set(tags) & set(other_tags))
 
-    return not tags_required or tags_matching
+    return not tags_required or not tags_provided or tags_matching
+
+
+def _get_all_classes(config, the_type: Type[Union['DataSource', 'DataSink']]):
+    modules = [__name__]  # find built_in types using same mechanism
+    if 'plugins' in config:
+        logger.info('Loading %s plugins', the_type)
+        modules += config['plugins']
+
+    ds_cls = {}
+    for module in modules:
+        __import__(module)
+        for cls in the_type.__subclasses__():
+            if hasattr(cls, 'serves') and hasattr(cls.serves, '__iter__'):
+                for k in cls.serves:
+                    if k in ds_cls:
+                        logger.warning(f'Plugin class {cls} shadows {ds_cls[k]} which also serves {k}')
+                    ds_cls[k] = cls
+                logger.debug('Loaded %s.%s, serving %s}',
+                             module, cls.__name__, cls.serves)
+            else:
+                logger.warning(f'Class {cls} has no list attribute "serves"')
+    return ds_cls
 
 
 def _create_data_sources_or_sinks(config, the_type: Type[Union['DataSource', 'DataSink']], tags=None) -> Dict[str, Union['DataSource', 'DataSink']]:
-    # TODO: this needs refactoring
     # Implementation note: no generator used because we want to fail early
     ds_objects: Dict[DS] = {}
 
@@ -167,6 +190,9 @@ def _create_data_sources_or_sinks(config, the_type: Type[Union['DataSource', 'Da
     else:  # datasource_or_datasink == DataSink:
         what = 'datasink'
         config_key = 'datasinks'
+
+    ds_cls = _get_all_classes(config, the_type)
+    logger.debug('ds_cls=%s', ds_cls)
 
     if config_key not in config or type(config[config_key]) is not dict:
         logger.info('No %s defined in configuration', config_key)
@@ -183,23 +209,17 @@ def _create_data_sources_or_sinks(config, the_type: Type[Union['DataSource', 'Da
         sub_type = ds_types[1] if len(ds_types) >= 2 else None
         ds_subtype_config = config[main_type][sub_type] if sub_type else None
 
+        service_need = main_type + ('.' + ds_subtype_config['type'] if ds_subtype_config else '')
+
+        if service_need not in ds_cls:
+            raise ValueError(f'No {what} class for {service_need} available. Check the configuration for typos in the {what} type or add a suitable plugin.')
+
         logger.debug('Initializing %s %s of type %s...', what, ds_id, ds_config['type'])
-        if main_type in SUPPORTED_FILE_TYPES:
-            ds_objects[ds_id] = FileDataSource(ds_id, ds_config) if the_type == DataSource\
-                                else FileDataSink(ds_id, ds_config)
-        elif main_type == 'dbms':
-            dbms_cfg = ds_subtype_config
-            dbms_type = dbms_cfg['type']
-            if dbms_type == 'oracle':
-                ds_objects[ds_id] = OracleDataSource(ds_id, ds_config, dbms_cfg)\
-                                    if the_type == DataSource\
-                                    else OracleDataSink(ds_id, ds_config, dbms_cfg)
-            elif dbms_type == 'hive':
-                raise NotImplementedError('Sorry, still have to implement HIVE support.')
-            else:
-                raise ValueError('Unsupported dbms type: {}'.format(dbms_type))
+        if ds_subtype_config is None:
+            ds_objects[ds_id] = ds_cls[service_need](ds_id, ds_config)
         else:
-            raise ValueError('Unsupported datasource type: {}'.format(ds_config['type']))
+            ds_objects[ds_id] = ds_cls[service_need](ds_id, ds_config, ds_subtype_config)
+
         logger.debug('Datasource %s initialized', ds_id)
 
     typing.cast(Dict[str, the_type], ds_objects)
@@ -229,6 +249,7 @@ class DataSource:
     """Interface, used by the Data Scientist's model to get its data from.
     Concrete DataSources (for files, data bases, etc.) need to inherit from this class.
     """
+    serves = []
 
     def __init__(self, identifier, datasource_config):
         """Please call super().__init(...) when overwriting this method
@@ -312,6 +333,7 @@ def get_oracle_connection(dbms_config):
 class OracleDataSource(DataSource):
     """DataSource for Oracle database connections
     """
+    serves = ['dbms.oracle']
 
     def __init__(self, identifier, datasource_config, dbms_config):
         super().__init__(identifier, datasource_config)
@@ -364,6 +386,7 @@ class OracleDataSource(DataSource):
 class FileDataSource(DataSource):
     """DataSource for fetching data from files
     """
+    serves = SUPPORTED_FILE_TYPES
 
     def __init__(self, identifier, datasource_config):
         super().__init__(identifier, datasource_config)
@@ -450,6 +473,7 @@ class DataSink:
     """Interface, used by the Data Scientist's model to persist data (usually prediction results).
     Concrete DataSinks (for files, data bases, etc.) need to inherit from this class.
     """
+    serves = []
 
     def __init__(self, identifier, datasink_config):
         """Please call super().__init(...) when overwriting this method
@@ -473,6 +497,7 @@ class DataSink:
 class FileDataSink(DataSink):
     """DataSource for fetching data from files
     """
+    serves = SUPPORTED_FILE_TYPES
 
     def __init__(self, identifier, datasink_config):
         super().__init__(identifier, datasink_config)
@@ -543,6 +568,7 @@ class FileDataSink(DataSink):
 class OracleDataSink(DataSink):
     """DataSink for Oracle database connections
     """
+    serves = ['dbms.oracle']
 
     def __init__(self, identifier, datasink_config, dbms_config):
         super().__init__(identifier, datasink_config)

@@ -1,3 +1,6 @@
+plugins:
+  - examples.bogusdatasource
+
 datasources:
   petals:
     type: csv
@@ -17,6 +20,8 @@ datasources:
     expires: 3600  # -1: never (=cached forever), 0: immediately (=no caching), >0: time in seconds.
     options: {}
     tags: predict
+  blabla:
+    type: bogus
 
 datasinks:
   predictions:
