@@ -257,6 +257,9 @@ def generate_raml(complete_conf, data_source_name=None, data_frame=None, resourc
     api_version = _get_major_api_version(complete_conf)
     url_start = f'http://127.0.0.1:5000/{quote_plus(api_name)}/{api_version}/{resource_name}?'
     url_params = []
+    param_hints = '''# can be false if optional, then provide a default here or be prepared to deal with missing values in your prediction
+        #default: {}  # only makes sense for required: false
+        #minimum: 0  # optional, maximum, minLength and others are also possible.'''
     output = f'''
 #%RAML 0.8
 ---
@@ -272,24 +275,26 @@ documentation:
 /{resource_name}:  # This should be a plural form of what you're predicting, e.g. "/client_activations"
   get:  # We can support 'post' as well if needed (let us know if necessary)
     description: Briefly describe what {resource_name} exactly you get from this API
-    queryParameters:  # For all possibilities of specifying parameters see https://github.com/raml-org/raml-spec/blob/master/versions/raml-08/raml-08.md#named-parameters'''
+    queryParameters:  # For all ways to specify parameters see https://github.com/raml-org/raml-spec/blob/master/versions/raml-08/raml-08.md#named-parameters'''
     for col_name in sample.columns:
         series = sample[col_name]
         type_str = str(series.dtype)
         raml_type = _pd_type_lookup[type_str]
-        example = str(series[0])
+        example = repr(series[0])
         url_params += [quote_plus(col_name) + '=' + quote_plus(example)]
+        illegal_chars = ':.,[]\'"\\ \n\t'
+        quoted_col_name = f"'{col_name}'" if any(c in illegal_chars for c in col_name) else col_name
+        cleaned_col_name = ''.join('_' if c in illegal_chars else c for c in col_name)
         output += f'''
-      {col_name}:
-        displayName: Friendly Name of {col_name}
+      {quoted_col_name}:
+        displayName: Friendly Name of {cleaned_col_name}
         type: {raml_type}
-        description: Description of what {col_name} really is
+        description: Description of what {cleaned_col_name} really is
         example: {example}
-        required: true  # can be false if optional, then provide a default here or be prepared to deal with missing values in your prediction
-        #default: {example}  # only makes sense for required: false
-        #minimum: 0  # optional, maximum, minLength and others are also possible.'''
+        required: true  ''' + param_hints.format(example)
         if type_str == 'category':
             output += '\n' + str(list(series.cat.categories))
+        param_hints = ''
 
     output += f'''
     responses:

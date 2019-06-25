@@ -4,10 +4,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Train this example from the command line:
-# python clitool.py -c examples/addition_cfg.yml -t
+# python -m launchpad -c examples/addition_cfg.yml -t
 #
 # Start REST API:
-# python clitool.py -c examples/addition_cfg.yml -a
+# python -m launchpad -c examples/addition_cfg.yml -a
 #
 # Example API call:
 # http://127.0.0.1:5000/add/v0/sum?x1=3&x2=2

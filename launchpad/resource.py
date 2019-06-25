@@ -181,7 +181,7 @@ def _create_data_sources_or_sinks(config, the_type: Type[Union['DataSource', 'Da
         ds_types = ds_config['type'].split('.')
         main_type = ds_types[0]
         sub_type = ds_types[1] if len(ds_types) >= 2 else None
-        ds_subtype_config = dbms_cfg = config[main_type][sub_type] if sub_type else None
+        ds_subtype_config = config[main_type][sub_type] if sub_type else None
 
         logger.debug('Initializing %s %s of type %s...', what, ds_id, ds_config['type'])
         if main_type in SUPPORTED_FILE_TYPES:
