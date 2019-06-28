@@ -142,7 +142,6 @@ class ModelStore:
 
 
 def _tags_match(tags, other_tags) -> bool:
-    print(tags, other_tags)
     tags = tags or []
     if type(tags) is str:
         tags = [tags]
@@ -614,6 +613,10 @@ class OracleDataSink(DataSink):
 def to_plain_python_obj(possible_ndarray):
     if type(possible_ndarray) is dict:
         return {key: to_plain_python_obj(val) for key, val in possible_ndarray.items()}
+    if type(possible_ndarray) is np.int64:
+        return int(possible_ndarray)
+    if type(possible_ndarray) is np.float32:
+        return float(possible_ndarray)
     elif type(possible_ndarray) is list or type(possible_ndarray) is tuple:
         return [to_plain_python_obj(val) for val in possible_ndarray]
     elif type(possible_ndarray) is np.ndarray:

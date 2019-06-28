@@ -3,6 +3,9 @@ model_store/
 testserver/temp/
 private/
 
+# pipenv
+Pipfile.lock
+
 # PyCharm IDE
 .idea/
 
