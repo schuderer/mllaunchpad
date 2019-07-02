@@ -17,7 +17,7 @@ ModelApi(conf, application)
 
 if __name__ == '__main__':
     logger.warning("Starting Flask debug server.\nIn production, please use a WSGI server, "
-                   + "e.g. 'gunicorn -w 4 -b 127.0.0.1:5000 launchpad.entrypoint:app'")
+                   + "e.g. 'gunicorn -w 4 -b 127.0.0.1:5000 launchpad.wsgi:application'")
     application.run(debug=True)
 
 # To start an instance of production server with 4 workers:
