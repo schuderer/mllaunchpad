@@ -10,12 +10,12 @@ python-language-server = {extras = ["all"],version = "*"}
 gunicorn = "*"
 cx-oracle = "*"
 scikit-learn = "*"
-rpy2 = {version = "==3.0.4",sys_platform = "== 'darwin'"}
 # tzlocal is no requirement of launchpad but of rpy2.python2pi
 tzlocal = "*"
-# Removed due to incompatibility with pip on windows.
+# Removed due to incompatibility of rpy2 with pip on windows.
 # The conda install of 2.9.4 works (you have to adapt some code)
 #rpy2 = {version = "==2.9.4", sys_platform = "== 'win32'"}
+#rpy2 = {version = "==3.0.4",sys_platform = "== 'darwin'"}
 keras = "*"
 tensorflow = "*"
 
