@@ -7,17 +7,18 @@ verify_ssl = true
 # packages for development and for running examples
 ipykernel = "*"
 python-language-server = {extras = ["all"],version = "*"}
-gunicorn = "*"
 cx-oracle = "*"
 scikit-learn = "*"
-# tzlocal is no requirement of launchpad but of rpy2.python2pi
-tzlocal = "*"
-# Removed due to incompatibility of rpy2 with pip on windows.
-# The conda install of 2.9.4 works (you have to adapt some code)
-#rpy2 = {version = "==2.9.4", sys_platform = "== 'win32'"}
-#rpy2 = {version = "==3.0.4",sys_platform = "== 'darwin'"}
 keras = "*"
 tensorflow = "*"
+# Gunicorn only works on Linux and macOS:
+gunicorn = "*"
+# Removed rpy2 due to incompatibility of its wheel on Windows:
+# The conda install of 2.9.4 on Windows works (you have to adapt some code)
+#rpy2 = {version = "==2.9.4", sys_platform = "== 'win32'"}
+#rpy2 = {version = "==3.0.4", sys_platform = "== 'darwin'"}
+# tzlocal is no requirement of launchpad but of rpy2.python2pi:
+#tzlocal = "*"
 
 [packages]
 flask = "*"
