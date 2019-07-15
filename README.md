@@ -26,6 +26,11 @@ $ pipenv install
 ```
 (Use `pipenv install --dev` if you want to try out the examples -- not all development dependencies are needed for all examples, so don't sweat it if there are problems installing all of them)
 
+This enviroment now contains all necessary packages. To activate this enviroment, enter:
+```bash
+$ pipenv shell
+```
+
 Don't have `pipenv`? Have a look at the file `Pipfile` to see which dependencies might need installing.
 
 ## What do I see?
