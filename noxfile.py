@@ -22,7 +22,7 @@ def install_requirements(session, dev=True, safety_check=True):
         "--bare",
         "install",
         "--skip-lock"  # 'soft' requirements (for libraries)
-        # '--deploy'  # use for applications (freezed reqs), not libraries
+        # '--deploy'  # use for applications (freezed reqs), not libraries, gives error if Pipfile not in sync with Pipfile.lock
     ]
     if dev:
         pipenv_args.append("--dev")
@@ -74,12 +74,8 @@ def tests(session):
 @nox.session(python=my_py_ver)
 def coverage(session):
     """Run the unit test suite and check coverage"""
-    # already part of dev-Pipfile
-    # session.install('pytest', 'pytest-cov')
     safety_check = "safety" in session.posargs
     install_requirements(session, safety_check=safety_check)
-    # session.install('-e', '.')  # we're testing a package
-    # session.run('pipenv', 'install', '-e', '.')
     pytest_args = ["pipenv", "run", "pytest", "tests", "--quiet"]
     session.run(
         *pytest_args,
@@ -104,13 +100,17 @@ def docs(session):
     session.run("rm", "-rf", "docs/generated", external=True)
     session.run("rm", "-f", "docs/modules.rst", external=True)
     session.run("rm", "-f", "docs/" + package_name + ".rst", external=True)
-    session.run("rm", "-f", ".rst", external=True)
-    session.install("sphinx")
-    session.install(".")
-    # install_requirements(session, safety_check=False)
-    # session.install('-e', '.')  # we're dealing with a package
-    # session.run('pipenv', 'install', '-e', '.')
-    session.run(
+    session.run("rm", "-f", "docs/requirements.txt", external=True)
+    # These two installs would suffice did we not have to create requirements.
+    # Then we also wouldn't have to use pipenv here at all.
+    # session.install("sphinx")
+    # session.install(".")
+    install_requirements(session, dev=True, safety_check=False)
+    session.chdir("docs")
+    session.run('make', 'reqs', external=True)
+    session.chdir("..")
+
+    session.run('pipenv', 'run',
         "sphinx-apidoc",
         "-o",
         "docs/",
@@ -127,7 +127,7 @@ def docs(session):
     if "monitor" in session.posargs:  # session.interactive:
         # session.run('pipenv', 'run', 'sphinx-autobuild', *sphinx_args)
         session.install("sphinx-autobuild")
-        session.run("sphinx-autobuild", *sphinx_args)
+        session.run('pipenv', 'run', "sphinx-autobuild", *sphinx_args)
     else:
         # session.run('pipenv', 'run', 'sphinx-build', *sphinx_args)
-        session.run("sphinx-build", *sphinx_args)
+        session.run('pipenv', 'run', "sphinx-build", *sphinx_args)

@@ -1,4 +1,7 @@
 @ECHO OFF
+REM THIS FILE IS NOT PART OF THE MAIN WORKFLOW
+REM ONLY EXISTS AS FALLBACK AND FOR READTHEDOCS
+REM Please use 'nox' for generating docs
 
 pushd %~dp0
 
@@ -12,6 +15,7 @@ set BUILDDIR=_build
 set SPHINXPROJ=mllaunchpad
 
 if "%1" == "" goto help
+if "%1" == "reqs" goto reqs
 
 %SPHINXBUILD% >NUL 2>NUL
 if errorlevel 9009 (
@@ -31,6 +35,13 @@ goto end
 
 :help
 %SPHINXBUILD% -M help %SOURCEDIR% %BUILDDIR% %SPHINXOPTS%
+goto end
+
+:reqs
+REM Exclusively used in the nox docs session to create doc-requirements file
+pipenv lock --dev -r >requirements.txt
+goto end
 
 :end
+
 popd
