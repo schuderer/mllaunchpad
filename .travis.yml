@@ -63,7 +63,7 @@ deploy:
   distributions: sdist bdist_wheel
   user: schuderer
   password:
-    secure: PLEASE_REPLACE_ME
+    secure: secure: RG3A8u/F5Dff6O7E5y/BxwevEPwyI8sp9JasvfWDjUfRHQAM1xNJMqaYe5D+tDuD6yVIIJQVjmtHz6pu8O+KF8W4PZ/Qbxx5Fhupwmw7ugAcQBcieXLZdzkMQvCDsVNQyZL0+/z5uq4zU0X1pXS9Dv3sXCNzRn/Cfsh/K3KTbaNBc/1zu4Y+oRrkYCk7O+X8R77xLsBP+RX5BYxk0H9rtzNfiw0rwSUlZ7IB4wzwWNFHO8LYvu6t4W4ML6PROroU70C0u4rhExBVxvWmDypM/TAwfBmQ5GgUOuIrCOEDZlID18uvQzYpwmnfBT+HI95uh+jUnQflEbwbtsXxylIOUw/tRPyu8aRhmuAsMdX6wfEaCgo8udNp3n3YzXiDYQUX1//3xoiWRkp3nh4pJEzmD91csBo/Go/hUWUETZfyfVamKsUMMcrQ+PyNhgXgTrWy8K/OSjrGxnNW6jLSU4ofqOv2UWB+e3G5Me0Wm/WlCqC3jnr5TDM+aSKKnclb8FB7o8Nim7ByEMLIWf0Nsraqi5unkUTSHwfU1745h0uCdo0afofmJEsjytTjcc2is4fbub+JcUwIHkwr1/57YXFBuy918rwLDUR9dNcnwsZF0VmLmnkknKWyzkQKJQU9NwJArEYW52c2Vv5oyrfOUVR+QZmhyxfpeq2ksaMs/t3gaXU=
   on:
     tags: true
     repo: schuderer/mllaunchpad
