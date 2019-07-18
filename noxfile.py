@@ -1,4 +1,5 @@
 import os
+from sys import platform
 import nox
 
 # Intro to Nox: https://www.youtube.com/watch?v=P3dY3uDmnkU
@@ -96,17 +97,25 @@ def coverage(session):
 
 @nox.session(python=my_py_ver)
 def docs(session):
-    session.run("rm", "-rf", "docs/_build", external=True)
-    session.run("rm", "-rf", "docs/generated", external=True)
-    session.run("rm", "-f", "docs/modules.rst", external=True)
-    session.run("rm", "-f", "docs/" + package_name + ".rst", external=True)
-    session.run("rm", "-f", "docs/requirements.txt", external=True)
+    if platform == "win32" or platform == "cygwin":
+        session.run("rmdir", "/S", "docs\\_build", external=True)
+        session.run("rmdir", "/S", "docs\\_build", external=True)
+        session.run("del", "docs\\modules.rst", external=True)
+        session.run("del", "docs\\" + package_name + ".rst", external=True)
+        session.run("del", "docs\\requirements.txt", external=True)
+    else:  # darwin, linux, linux2
+        session.run("rm", "-rf", "docs/_build", external=True)
+        session.run("rm", "-rf", "docs/generated", external=True)
+        session.run("rm", "-f", "docs/modules.rst", external=True)
+        session.run("rm", "-f", "docs/" + package_name + ".rst", external=True)
+        session.run("rm", "-f", "docs/requirements.txt", external=True)
     # These two installs would suffice did we not have to create requirements.
     # Then we also wouldn't have to use pipenv here at all.
     # session.install("sphinx")
     # session.install(".")
     install_requirements(session, dev=True, safety_check=False)
     session.chdir("docs")
+    # TODO: get rid of Makefile and make.bat
     session.run("make", "reqs", external=True)
     session.chdir("..")
 
@@ -115,7 +124,7 @@ def docs(session):
         "run",
         "sphinx-apidoc",
         "-o",
-        "docs/",
+        "docs",
         package_name,
         "*wsgi*",  # exclude_patterns doesn't seem to work
     )
