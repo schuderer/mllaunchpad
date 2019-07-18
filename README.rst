@@ -18,6 +18,13 @@ About ML Launchpad
      :target: https://pyup.io/repos/github/schuderer/mllaunchpad/
      :alt: Updates
 
+.. image:: https://coveralls.io/repos/github/schuderer/mllaunchpad/badge.svg?branch=master
+      :target: https://coveralls.io/github/schuderer/mllaunchpad?branch=master
+
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+      :target: https://github.com/python/black
+      :alt: Code Style Black
+
 
 ML Launchpad lets you easily make Machine Learning models available as
 REST API. It also offers lightweight model life cycle
