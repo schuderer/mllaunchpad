@@ -107,10 +107,12 @@ def docs(session):
     # session.install(".")
     install_requirements(session, dev=True, safety_check=False)
     session.chdir("docs")
-    session.run('make', 'reqs', external=True)
+    session.run("make", "reqs", external=True)
     session.chdir("..")
 
-    session.run('pipenv', 'run',
+    session.run(
+        "pipenv",
+        "run",
         "sphinx-apidoc",
         "-o",
         "docs/",
@@ -127,7 +129,7 @@ def docs(session):
     if "monitor" in session.posargs:  # session.interactive:
         # session.run('pipenv', 'run', 'sphinx-autobuild', *sphinx_args)
         session.install("sphinx-autobuild")
-        session.run('pipenv', 'run', "sphinx-autobuild", *sphinx_args)
+        session.run("pipenv", "run", "sphinx-autobuild", *sphinx_args)
     else:
         # session.run('pipenv', 'run', 'sphinx-build', *sphinx_args)
-        session.run('pipenv', 'run', "sphinx-build", *sphinx_args)
+        session.run("pipenv", "run", "sphinx-build", *sphinx_args)
