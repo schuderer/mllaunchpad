@@ -6,17 +6,23 @@ About ML Launchpad
 .. image:: https://img.shields.io/pypi/v/mllaunchpad.svg
         :target: https://pypi.python.org/pypi/mllaunchpad
 
+.. image:: https://img.shields.io/pypi/pyversions/mllaunchpad.svg
+        :target: https://pypi.python.org/pypi/mllaunchpad
+
 .. image:: https://img.shields.io/travis/schuderer/mllaunchpad.svg
         :target: https://travis-ci.org/schuderer/mllaunchpad
 
-.. image:: https://readthedocs.org/projects/mllaunchpad/badge/?version=latest
-        :target: https://mllaunchpad.readthedocs.io/en/latest/?badge=latest
-        :alt: Documentation Status
-
+.. image:: https://img.shields.io/github/license/schuderer/mllaunchpad.svg
+     :target: https://pyup.io/repos/github/schuderer/mllaunchpad/
+     :alt: LGPLv3 License
 
 .. image:: https://pyup.io/repos/github/schuderer/mllaunchpad/shield.svg
      :target: https://pyup.io/repos/github/schuderer/mllaunchpad/
      :alt: Updates
+
+.. image:: https://readthedocs.org/projects/mllaunchpad/badge/?version=latest
+        :target: https://mllaunchpad.readthedocs.io/en/latest/?badge=latest
+        :alt: Documentation Status
 
 .. image:: https://coveralls.io/repos/github/schuderer/mllaunchpad/badge.svg?branch=master
       :target: https://coveralls.io/github/schuderer/mllaunchpad?branch=master
@@ -52,13 +58,13 @@ using git:
 
 .. code:: bash
 
-  $ git clone git@github.com:schuderer/launchpad.git
+  $ git clone git@github.com:schuderer/mllaunchpad.git
 
-Go to the ``launchpad`` directory in a terminal:
+Go to the ``mllaunchpad`` directory in a terminal:
 
 .. code:: bash
 
-  $ cd launchpad
+  $ cd mllaunchpad
 
 If you have ``pipenv`` available (if not, it can be easily installed
 using ``pip install pipenv``), create the environment with all the
@@ -85,7 +91,7 @@ dependencies might need installing.
 What do I see?
 --------------
 
-The subfolder ``launchpad`` is the actual ML Launchpad package. The rest
+The subfolder ``mllaunchpad`` is the actual ML Launchpad package. The rest
 are examples and development tools.
 
 The subfolder ``examples`` contains a few example model implementations.
@@ -108,7 +114,7 @@ numbers, use the command:
 
 .. code:: bash
 
-  $ python -m launchpad -c examples/addition_cfg.yml -t
+  $ python -m mllaunchpad -c examples/addition_cfg.yml -t
 
 (We give it a config file after the ``-c`` parameter, and ``-t`` is
 short for the command ``--train``. There’s also a parameter ``-h`` to
@@ -127,26 +133,26 @@ To re-test the previously trained model, use the command ``-r``:
 
 .. code:: bash
 
-   $ python -m launchpad -c examples/addition_cfg.yml -r
+   $ python -m mllaunchpad -c examples/addition_cfg.yml -r
 
 To run a (debugging-only!) REST API for the model, use the command
 ``-a``:
 
 .. code:: bash
 
-   $ python -m launchpad -c examples/addition_cfg.yml -a
+   $ python -m mllaunchpad -c examples/addition_cfg.yml -a
 
 To quickly try out out our fancy addition model API, open this link in a
 browser: http://127.0.0.1:5000/add/v0/sum?x1=3&x2=2
 (``curl http://127.0.0.1:5000/add/v0/sum?x1=3&x2=2`` on the command
 line)
 
-If you get ``ModuleNotFoundError: No module named 'launchpad'`` (in
-``launchpad/__main__.py``), try to start flask the following way:
+If you get ``ModuleNotFoundError: No module named 'mllaunchpad'`` (in
+``mllaunchpad/__main__.py``), try to start flask the following way:
 
 .. code:: bash
 
-   $ set FLASK_APP=launchpad/wsgi.py:application
+   $ set FLASK_APP=mllaunchpad/wsgi.py:application
    $ set LAUNCHPAD_CFG=examples/addition_cfg.yml
    $ flask run
 
@@ -174,7 +180,7 @@ Is it for me?
 
 -  ☐ fill in this section
 
-.. _please let us know: https://github.com/schuderer/launchpad/issues/30
+.. _please let us know: https://github.com/schuderer/mllaunchpad/issues/30.
 
 * Free software: GNU Lesser General Public License v3
 * Documentation: https://mllaunchpad.readthedocs.io.
