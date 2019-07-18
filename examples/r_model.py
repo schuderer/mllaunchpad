@@ -5,7 +5,7 @@ import rpy2.robjects.packages as rp
 import rpy2.rinterface as ri
 from rpy2.robjects import pandas2ri
 # from rpy2.robjects import numpy2ri
-from launchpad import ModelInterface, ModelMakerInterface
+from mllaunchpad import ModelInterface, ModelMakerInterface
 logger = logging.getLogger(__name__)
 # numpy2ri.activate()  # vector=rpyn.ri2numpy(vector_R)
 pandas2ri.activate()  # If wishing to convert explicitly for any reason, the functions are pandas2ri.py2rpy() and pandas2ri.rpy2py (rpy2 >= 3.0.0) (rpy2 2.9.4: pandas2ri.py2ri() and pandas2ri.ri2py(), which earlier were pandas2ri.pandas2ri() and pandas2ri.ri2pandas())).

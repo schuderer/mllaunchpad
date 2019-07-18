@@ -1,0 +1,71 @@
+# For example with nox, see:
+# https://github.com/theacodes/nox/blob/master/.travis.yml
+
+# branches:
+#   only:
+#     master
+
+os:
+  - linux  # TODO: test on other OSs?
+
+language: python
+
+# python:
+#   - '2.7'
+#   - '3.5'
+#   - '3.6'
+#   # - '3.7'  # Explicitly included below for docs building
+#   # - "3.7-dev"  # 3.7 development branch
+#   # - "3.8-dev"  # 3.8 development branch
+#   # - "nightly"  # nightly build
+
+matrix:
+  include:
+    - python: '3.5'
+      env: NOXSESSIONS="tests-3.5"
+    - python: '3.6'
+      env: NOXSESSIONS="tests-3.6"
+    - python: '3.7'  # Also test docs with latest supported python version
+      dist: xenial  # required for Python >= 3.7
+      env: NOXSESSIONS="coverage-3.7 lint docs"
+    - python: '3.6'
+      env: NOXSESSIONS="tests-2.7"
+  allow_failures:
+    - python: '3.6'
+      env: NOXSESSIONS="tests-2.7"
+
+cache: pip
+
+install:
+  - pip install pipenv nox
+  # - pipenv --bare install --deploy --dev
+
+script:
+  - nox --non-interactive -s $NOXSESSIONS
+
+# deploy:
+#   provider: pypi
+#   user: theacodes
+#   password:
+#     secure: ETRTnYg+8cilT0/HidhyPljERgE/u0boKdH9TW+JrY0De40Km5C+TUmPagKJuwPx1Gw8HNN1vN7M1pqaQ/flQaY9iNbuJZr5ZaApiZW1pw5/nO2wWoANx0hiChdjvwbJZdqUFEoba6MS9aBY7TroFlLjW6dUg8MZFSiUFRQDF9rTCyzB/juC7wiLTgrjlFpOvaOmf1qpVOajY5kfn8MLELms8itRUa04X4kqqgtOfifoA1CevObrScGSXlpPtqmoxUrCmwbnHu9qnqgAWLHe3y7fI4ZqscYQv/JCW8NdJgqMTn0jctLXibHt5vC/DtUYo47mFSRBfn55ZwAFiV6IiwVbtDKby0ZdNO2uIFn4B/7l0qrLTwnZbRy4vkPqEeJoS75vl4JQrauGmI+hgdtesHjZxLzs94H4vINVt0fGpkYqbgtMQO8HUQnnj0FJXcGKo4A5OuLjnk5+rgTSvLT/5qNg/cyve5BXkn1ib6ecah21MHSQyhl5CxIFBH6S6BRrGoxXluLqXPVv/w+QA0lxXCpAPfbHuMt4r9522YN/XfGQNHfNqK/836UbLEX5ZXZiZLl01IvVPl+3eC/Qmpc+tNXb51d53Qsm89VtaNGGvuV2eLPBR+gfXcQ8wFB1HW3Q3oshHCGW4KKApyzyYKWq27JPlGV13Yh+NMHWs9PGHyI=
+#   on:
+#     tags: true
+#     distributions: sdist bdist_wheel
+#     repo: theacodes/nox
+#     condition: "$NOXSESSION = \"tests-3.6\""
+
+# Assuming you have installed the travis-ci CLI tool, after you
+# create the Github repo and add it to Travis, run the
+# following command to finish PyPI deployment setup:
+# $ travis encrypt --add deploy.password
+deploy:
+  provider: test.pypi
+  distributions: sdist bdist_wheel
+  user: schuderer
+  password:
+    secure: PLEASE_REPLACE_ME
+  on:
+    tags: true
+    repo: schuderer/mllaunchpad
+    python: 3.7
+    condition: "$NOXSESSION = \"tests-3.7\""

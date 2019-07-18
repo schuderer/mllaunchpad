@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import abc
 import logging
 
@@ -20,7 +22,9 @@ class ModelMakerInterface(abc.ABC):
     """
 
     @abc.abstractmethod
-    def create_trained_model(self, model_conf, data_sources, data_sinks, old_model=None):
+    def create_trained_model(
+        self, model_conf, data_sources, data_sinks, old_model=None
+    ):
         """Implement this method, including data prep/feature creation.
         No need to test your model here. Put testing code in test_trained_model, which
         will be called automatically after training.
@@ -29,13 +33,9 @@ class ModelMakerInterface(abc.ABC):
 
         Params:
             model_conf:   the model configuration dict from the config file
-            data_sources: dict containing the data sources (this includes your
-                          train/validation/test data), as configured in the
-                          config file
-            data_sinks:   dict containing the data sinks, as configured in the
-                          config file. Usually unused when training.
-            old_model:    contains an old model, if it exists, which can be used
-                          for incremental training. default: None
+            data_sources: dict containing the data sources (this includes your train/validation/test data), as configured in the config file
+            data_sinks:   dict containing the data sinks, as configured in the config file. Usually unused when training.
+            old_model:    contains an old model, if it exists, which can be used for incremental training. default: None
 
         Return:
             The trained model/data/anything which you want to use in the predict()
@@ -57,17 +57,12 @@ class ModelMakerInterface(abc.ABC):
 
         Params:
             model_conf:   the model configuration dict from the config file
-            data_sources: dict containing the data sources (this includes your
-                          train/validation/test data), as configured in the
-                          config file
-            data_sinks:   dict containing the data sinks, as configured in the
-                          config file. Usually unused when testing.
-            model:        your model object (whatever you returned
-                          in create_trained_model)
+            data_sources: dict containing the data sources (this includes your train/validation/test data), as configured in the config file
+            data_sinks:   dict containing the data sinks, as configured in the config file. Usually unused when testing.
+            model:        your model object (whatever you returned in create_trained_model)
 
         Return:
-            Return a dict of metrics (like 'accuracy', 'f1', 'confusion_matrix',
-            etc.)
+            Return a dict of metrics (like 'accuracy', 'f1', 'confusion_matrix', etc.)
         """
         ...
 
@@ -105,16 +100,12 @@ class ModelInterface(abc.ABC):
         Params:
             model_conf:   the model configuration dict from the config file
             data_sources: dict containing the data sources
-            data_sinks:   dict containing the data sinks, as configured in the
-                          config file.
-            model:        your model object (whatever you returned
-                          in create_trained_model)
-            argsDict:     parameters the API was called with, dict of strings
-                          (any type conversion needs to be done by you)
+            data_sinks:   dict containing the data sinks, as configured in the config file.
+            model:        your model object (whatever you returned in create_trained_model)
+            argsDict:     parameters the API was called with, dict of strings (any type conversion needs to be done by you)
 
         Return:
-            Prediction result as a dictionary/list structure which will be
-            automatically turned into JSON.
+            Prediction result as a dictionary/list structure which will be automatically turned into JSON.
         """
         ...
 

@@ -1,0 +1,22 @@
+# setup.py, setup.cfg and MANIFEST.in work together when creating distributions
+# using `python setup.py sdist bdist_wheel`
+# Note: MANIFEST.in does not affect binary distributions such as wheels.
+
+# MANIFEST.in is part of the distutils which setup.py internally uses.
+# It is needed when you need to package additional files that are not
+# automatically included in a source distribution.
+# https://packaging.python.org/guides/distributing-packages-using-setuptools/#manifest-in
+
+include AUTHORS.rst
+include CONTRIBUTING.rst
+include HISTORY.rst
+include LICENSE
+include README.rst
+
+recursive-include examples *
+
+recursive-include tests *
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+
+recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif

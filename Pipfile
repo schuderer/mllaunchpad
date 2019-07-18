@@ -5,8 +5,8 @@ verify_ssl = true
 
 [dev-packages]
 # packages for development and for running examples
-ipykernel = "*"
-python-language-server = {extras = ["all"],version = "*"}
+ipykernel = {version = "*",sys_platform = "== 'darwin'"}
+python-language-server = {extras = ["all"],version = "*",sys_platform = "== 'darwin'"}
 cx-oracle = "*"
 scikit-learn = "*"
 keras = "*"
@@ -19,6 +19,20 @@ gunicorn = "*"
 #rpy2 = {version = "==3.0.4", sys_platform = "== 'darwin'"}
 # tzlocal is no requirement of launchpad but of rpy2.python2pi:
 #tzlocal = "*"
+bumpversion = "*"
+twine = "*"
+wheel = "*"
+pytest = "*"
+pytest-runner = "*"
+pytest-cov = "*"
+coverage = "*"
+watchdog = "*"
+nox = "*"
+#flake8 = "*"
+#black = "*"
+#sphinx = "*"
+#sphinx-autobuild = "*"
+mllaunchpad = {editable = true,path = "."}
 
 [packages]
 flask = "*"

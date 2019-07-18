@@ -1,5 +1,5 @@
 import pandas as pd
-from launchpad.resource import DataSource
+from mllaunchpad.resource import DataSource
 import logging
 
 logger = logging.getLogger(__name__)

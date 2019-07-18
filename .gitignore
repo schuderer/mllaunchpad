@@ -9,6 +9,9 @@ Pipfile.lock
 # PyCharm IDE
 .idea/
 
+# Testing
+.nox
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

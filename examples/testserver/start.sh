@@ -11,16 +11,16 @@ ORIGPATH=$PWD
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 
 cd "$SCRIPTPATH/.."
-if gunicorn --workers 2 --bind 127.0.0.1:5000 launchpad.wsgi & #>>"$SCRIPTPATH/launchpad.log" 2>&1 &
+if gunicorn --workers 2 --bind 127.0.0.1:5000 mllaunchpad.wsgi & #>>"$SCRIPTPATH/mllaunchpad.log" 2>&1 &
 then
   SERVERPID=$!
-  echo Started launchpad gunicorn server in backgroud, pid $SERVERPID
+  echo Started mllaunchpad gunicorn server in backgroud, pid $SERVERPID
 else
-  echo Failed starting launchpad gunicorn server. Aborting.
+  echo Failed starting mllaunchpad gunicorn server. Aborting.
   exit 1
 fi
 
-mkdir -p "$SCRIPTPATH/temp"
+# mkdir -p "$SCRIPTPATH/temp"
 
 nginx -c "$SCRIPTPATH/nginx.conf" -p "$SCRIPTPATH"
 
