@@ -48,10 +48,28 @@ automatically persists a model, including its metrics, in the model
 store, and automatically retrieves it for launching its API or
 re-training. Previous models are backed up.
 
--  ☐ better description of what problem ML Launchpad solves
+-  TODO: better description of what problem ML Launchpad solves
 
 Getting started
----------------
+------------------------------------------------------------------------------
+
+Direct installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+
+  $ pipenv install mllaunchpad
+
+(Or ``pip install mllaunchpad`` if you don't have ``pipenv``)
+
+`Direct download <https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/schuderer/mllaunchpad/tree/master/examples>`_
+of the example files. They might need some extra packages (e.g. scikit-learn),
+depending on what they demonstrate.
+
+Source installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+-  TODO: prune this section/merge with :doc:`contributing`. Please see :doc:`installation` for a better source installation guide.
 
 Download and unzip the repository as a zip file or clone the repository
 using git:
@@ -88,26 +106,27 @@ enviroment, enter:
 Don’t have ``pipenv``? Have a look at the file ``Pipfile`` to see which
 dependencies might need installing.
 
-What do I see?
---------------
+What's in the box?
+------------------------------------------------------------------------------
 
-The subfolder ``mllaunchpad`` is the actual ML Launchpad package. The rest
-are examples and development tools.
+If you installed from source, you see several subfolders, where ``mllaunchpad``
+is the actual ML Launchpad package and the rest are examples and
+development tools. You can safely ignore anything except the examples.
 
-The subfolder ``examples`` contains a few example model implementations.
+The ``examples`` contain a few example model implementations.
 Look here for inspiration on how to use this package. Every model here
 consists of at least three files: - ``<examplename>_model.py``: the
 example’s actual model code - ``<examplename>_cfg.yml``: the example’s
 configuration file - ``<examplename>.raml``: example’s RESTful API
 specification. Used, among others, to parse and validate parameters. -
 There are also some extra files, like CSV files to use, or datasource
-extensions
+extensions.
 
 The subfolder ``testserver`` contains an example for running a REST API
 in gunicorn behind nginx.
 
 Try Out the Examples
---------------------
+------------------------------------------------------------------------------
 
 To train a very, *very* simple example model whose job it is to add two
 numbers, use the command:
@@ -161,7 +180,7 @@ different installations. If you know what this is about, `please let us
 know`_
 
 What next?
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Have a look at the ``addition`` example’s python code (and comments),
 its yml config, then look at the other examples. First, we suggest the
@@ -176,23 +195,23 @@ line parameter, which does a lot of work (almost all of it, in fact) for
 getting you started with a first RAML.
 
 Is it for me?
--------------
+------------------------------------------------------------------------------
 
--  ☐ fill in this section
+-  TODO: fill in this section
 
 .. _please let us know: https://github.com/schuderer/mllaunchpad/issues/30.
 
-* Free software: GNU Lesser General Public License v3
-* Documentation: https://mllaunchpad.readthedocs.io.
-
 
 Features
---------
+------------------------------------------------------------------------------
 
 * TODO
 
 Credits
 -------
+
+* Free software: GNU Lesser General Public License v3
+* Documentation: https://mllaunchpad.readthedocs.io.
 
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
 
