@@ -50,6 +50,8 @@ re-training. Previous models are backed up.
 
 -  TODO: better description of what problem ML Launchpad solves
 
+The full documentation is available at https://mllaunchpad.readthedocs.io
+
 Getting started
 ------------------------------------------------------------------------------
 
