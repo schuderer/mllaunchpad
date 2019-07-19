@@ -3,29 +3,29 @@ About ML Launchpad
 ==============================================================================
 
 
-.. image:: https://img.shields.io/pypi/v/mllaunchpad.svg
+.. image:: https://img.shields.io/pypi/v/mllaunchpad.svg?color=blue
         :target: https://pypi.python.org/pypi/mllaunchpad
 
-.. image:: https://img.shields.io/pypi/pyversions/mllaunchpad.svg
+.. image:: https://img.shields.io/pypi/pyversions/mllaunchpad.svg?color=blue
         :target: https://pypi.python.org/pypi/mllaunchpad
 
-.. image:: https://img.shields.io/travis/schuderer/mllaunchpad.svg
-        :target: https://travis-ci.org/schuderer/mllaunchpad
-
-.. image:: https://img.shields.io/github/license/schuderer/mllaunchpad.svg
+.. image:: https://img.shields.io/github/license/schuderer/mllaunchpad.svg?color=blue
      :target: https://pyup.io/repos/github/schuderer/mllaunchpad/
      :alt: LGPLv3 License
 
-.. image:: https://pyup.io/repos/github/schuderer/mllaunchpad/shield.svg
-     :target: https://pyup.io/repos/github/schuderer/mllaunchpad/
-     :alt: Updates
+.. image:: https://img.shields.io/travis/schuderer/mllaunchpad.svg
+       :target: https://travis-ci.org/schuderer/mllaunchpad
+
+.. image:: https://coveralls.io/repos/github/schuderer/mllaunchpad/badge.svg?branch=master
+     :target: https://coveralls.io/github/schuderer/mllaunchpad?branch=master
+
+.. .. image:: https://pyup.io/repos/github/schuderer/mllaunchpad/shield.svg
+..     :target: https://pyup.io/repos/github/schuderer/mllaunchpad/
+..     :alt: Updates
 
 .. image:: https://readthedocs.org/projects/mllaunchpad/badge/?version=latest
         :target: https://mllaunchpad.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
-
-.. image:: https://coveralls.io/repos/github/schuderer/mllaunchpad/badge.svg?branch=master
-      :target: https://coveralls.io/github/schuderer/mllaunchpad?branch=master
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
       :target: https://github.com/python/black

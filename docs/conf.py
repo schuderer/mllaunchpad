@@ -97,13 +97,30 @@ html_theme = 'alabaster'
 # theme further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
-
+# Theme options are theme-specific and customize the look and feel of a theme
+# further.  For a list of options available for each theme, see the
+# documentation.
+html_theme_options = {
+    'logo': 'logo.png',
+    'logo_name': True,
+    'description': 'Deploy Machine Learning solutions with ease',
+    'github_user': 'schuderer',
+    'github_repo': 'mllaunchpad',
+    'github_banner': True,
+    'github_button': False,
+    'travis_button': False,
+    'codecov_button': False,
+    'analytics_id': False,
+    'font_family': "Georgia, sans",
+    'head_font_family': "Georgia, serif",
+    'code_font_family': "'Consolas', monospace",
+    # 'pre_bg': '#433e56'
+}
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ['_static']
-html_static_path = []
+html_static_path = ['_static']
+# html_static_path = []
 
 
 # -- Options for HTMLHelp output ---------------------------------------
