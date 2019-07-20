@@ -215,7 +215,7 @@ If you get ``ModuleNotFoundError: No module named 'mllaunchpad'`` (in
 
 .. code:: console
 
-   $ export FLASK_APP=mllaunchpad/wsgi.py:application
+   $ export FLASK_APP=mllaunchpad.wsgi:application
    $ export LAUNCHPAD_CFG=addition_cfg.yml
    $ flask run
 
