@@ -8,9 +8,6 @@ from setuptools import setup, find_packages
 with open("README.rst", encoding="utf-8") as readme_file:
     readme = readme_file.read()
 
-with open("HISTORY.rst", encoding="utf-8") as history_file:
-    history = history_file.read()
-
 requirements = ["flask", "flask-restful", "ramlfications", "dill", "pandas"]
 
 setup_requirements = ["pytest-runner"]
@@ -34,9 +31,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
     ],
-    description="Easily make Machine Learning models "
-    "available as REST API. Lightweight model "
-    "life cycle management.",
+    description="Deploy Machine Learning Solutions with ease",
     entry_points={"console_scripts": ["mllaunchpad=mllaunchpad.cli:main"]},
     python_requires=">=2.7,!=3.0.*,!=3.1.*,,!=3.2.*,!=3.3.*,!=3.4.*",
     install_requires=requirements,

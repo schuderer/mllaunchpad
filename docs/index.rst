@@ -11,7 +11,7 @@ ML Launchpad documentation
    modules
    contributing
    authors
-   history
+   changelog
 
 Indices and tables
 ==================
