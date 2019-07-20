@@ -71,8 +71,8 @@ of some extra packages (e.g. scikit-learn), depending on what they demonstrate.
 Source installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  TODO: prune this section/merge with :doc:`contributing`.
-   Please see :doc:`installation` for a better source installation guide.
+-  TODO: prune this section/merge with `Contributing`.
+   Please see `Installation` for a better source installation guide.
 
 Download and unzip the repository as a zip file or clone the repository
 using git:
