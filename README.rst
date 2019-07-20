@@ -71,7 +71,8 @@ of some extra packages (e.g. scikit-learn), depending on what they demonstrate.
 Source installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  TODO: prune this section/merge with :doc:`contributing`. Please see :doc:`installation` for a better source installation guide.
+-  TODO: prune this section/merge with :doc:`contributing`.
+   Please see :doc:`installation` for a better source installation guide.
 
 Download and unzip the repository as a zip file or clone the repository
 using git:
@@ -117,12 +118,17 @@ development tools. You can safely ignore anything except the examples.
 
 The ``examples`` contain a few example model implementations.
 Look here for inspiration on how to use this package. Every model here
-consists of at least three files: - ``<examplename>_model.py``: the
-example’s actual model code - ``<examplename>_cfg.yml``: the example’s
-configuration file - ``<examplename>.raml``: example’s RESTful API
-specification. Used, among others, to parse and validate parameters. -
-There are also some extra files, like CSV files to use, or datasource
-extensions.
+consists of at least three files:
+
+* ``<examplename>_model.py``: the example’s actual model code
+
+* ``<examplename>_cfg.yml``: the example’s configuration file
+
+* ``<examplename>.raml``: example’s RESTful API specification.
+  Used, among others, to parse and validate parameters.
+
+* There are also some extra files, like CSV files to use, or datasource
+  extensions.
 
 The subfolder ``testserver`` contains an example for running a REST API
 in gunicorn behind nginx.

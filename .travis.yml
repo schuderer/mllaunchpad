@@ -55,7 +55,7 @@ deploy:
     tags: true
     repo: schuderer/mllaunchpad
     python: 3.7
-    condition: "$NOXSESSION = \"coverage-3.7 lint docs\""
+    condition: "NOXSESSIONS=\"coverage-3.7 lint docs\""
 
 
 # deploy:
