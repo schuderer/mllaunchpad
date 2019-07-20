@@ -4,8 +4,8 @@
 import sys
 
 # Application imports
-import mllaunchpad as lp
+import mllaunchpad.cli as cli
 
 
 if __name__ == "__main__":
-    sys.exit(lp.cli.main())  # pragma: no cover
+    sys.exit(cli.main())  # pragma: no cover

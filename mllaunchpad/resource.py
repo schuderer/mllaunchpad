@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import shutil
+import sys
 from time import time
 import typing
 from typing import Dict, Tuple, Type, TypeVar, Union
@@ -134,6 +135,9 @@ class ModelStore:
             Tuple of model object and metadata dictionary
         """
         base_name = self._get_model_base_name(model_conf)
+
+        if "." not in sys.path:
+            sys.path.append(".")
 
         pkl_name = base_name + ".pkl"
         with open(pkl_name, "rb") as f:

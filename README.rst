@@ -37,15 +37,15 @@ REST API. It also offers lightweight model life cycle
 management functionality.
 
 What this means is that it creates a separation between machine learning
-models, and their environment. This way, you can run your model with
+models and their environment. This way, you can run your model with
 different data sources and on different environments, by just swapping
-out the configuration, no code changes required. It also makes it very
-easy to make your model available as a business-facing *RESTful API*
+out the configuration, no code changes required. ML Launchpad makes your
+model available as a business-facing *RESTful API*
 without extra coding.
 
 Currently, some basic model life cycle management is supported. Training
-automatically persists a model, including its metrics, in the model
-store, and automatically retrieves it for launching its API or
+automatically persists a model in the model store together with its metrics,
+and automatically retrieves it for launching its API or
 re-training. Previous models are backed up.
 
 -  TODO: better description of what problem ML Launchpad solves
@@ -58,15 +58,15 @@ Getting started
 Direct installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: bash
+.. code:: console
 
   $ pipenv install mllaunchpad
 
 (Or ``pip install mllaunchpad`` if you don't have ``pipenv``)
 
-`Direct download <https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/schuderer/mllaunchpad/tree/master/examples>`_
-of the example files. They might need some extra packages (e.g. scikit-learn),
-depending on what they demonstrate.
+Download the `example files <https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/schuderer/mllaunchpad/tree/master/examples>`_
+from the ML Launchpad GitHub repo. Some of them might require the installations
+of some extra packages (e.g. scikit-learn), depending on what they demonstrate.
 
 Source installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,13 +76,13 @@ Source installation
 Download and unzip the repository as a zip file or clone the repository
 using git:
 
-.. code:: bash
+.. code:: console
 
   $ git clone git@github.com:schuderer/mllaunchpad.git
 
 Go to the ``mllaunchpad`` directory in a terminal:
 
-.. code:: bash
+.. code:: console
 
   $ cd mllaunchpad
 
@@ -90,7 +90,7 @@ If you have ``pipenv`` available (if not, it can be easily installed
 using ``pip install pipenv``), create the environment with all the
 dependencies.
 
-.. code:: bash
+.. code:: console
 
   $ pipenv install
 
@@ -101,7 +101,7 @@ it if there are problems installing all of them)
 This enviroment now contains all necessary packages. To activate this
 enviroment, enter:
 
-.. code:: bash
+.. code:: console
 
   $ pipenv shell
 
@@ -130,12 +130,22 @@ in gunicorn behind nginx.
 Try Out the Examples
 ------------------------------------------------------------------------------
 
+If you're using an environment manager, e.g. ``pipenv``, activate the
+environment:
+
+.. code-block:: console
+
+  $ pipenv shell
+
+In the following, it is assumed that the examples are located in the
+current directory.
+
 To train a very, *very* simple example model whose job it is to add two
 numbers, use the command:
 
-.. code:: bash
+.. code:: console
 
-  $ python -m mllaunchpad -c examples/addition_cfg.yml -t
+  $ mllaunchpad -c addition_cfg.yml -t
 
 (We give it a config file after the ``-c`` parameter, and ``-t`` is
 short for the command ``--train``. There’s also a parameter ``-h`` to
@@ -152,34 +162,21 @@ its metadata.
 
 To re-test the previously trained model, use the command ``-r``:
 
-.. code:: bash
+.. code:: console
 
-   $ python -m mllaunchpad -c examples/addition_cfg.yml -r
+   $ mllaunchpad -c addition_cfg.yml -r
 
 To run a (debugging-only!) REST API for the model, use the command
 ``-a``:
 
-.. code:: bash
+.. code:: console
 
-   $ python -m mllaunchpad -c examples/addition_cfg.yml -a
+   $ mllaunchpad -c addition_cfg.yml -a
 
 To quickly try out out our fancy addition model API, open this link in a
 browser: http://127.0.0.1:5000/add/v0/sum?x1=3&x2=2
 (``curl http://127.0.0.1:5000/add/v0/sum?x1=3&x2=2`` on the command
 line)
-
-If you get ``ModuleNotFoundError: No module named 'mllaunchpad'`` (in
-``mllaunchpad/__main__.py``), try to start flask the following way:
-
-.. code:: bash
-
-   $ set FLASK_APP=mllaunchpad/wsgi.py:application
-   $ set LAUNCHPAD_CFG=examples/addition_cfg.yml
-   $ flask run
-
-This appears to be connected to Flask restarting in different ways on
-different installations. If you know what this is about, `please let us
-know`_
 
 What next?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -195,6 +192,38 @@ specification standard that is used in some corporate environments, and
 a good idea in general), also look at the ``-g`` (generate raml) command
 line parameter, which does a lot of work (almost all of it, in fact) for
 getting you started with a first RAML.
+
+Troubleshooting
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In case the console command ``mllaunchpad <your_arguments>`` is not recognized,
+try:
+
+.. code:: console
+
+  $ python -m mllaunchpad <your_arguments>
+
+If you get an error like ``No module named 'your_model'``, the file
+``your_model.py`` is not in the python path. You can try to set the
+`PYTHONPATH environment variable <https://docs.python.org/3/using/cmdline.html#envvar-PYTHONPATH>`_
+to the path(s) to your file(s), or, if you're using ``mllaunchpad``
+from your own python code, append the path(s) to
+`sys.path <https://docs.python.org/3/library/sys.html?highlight=sys.path#sys.path>`_.
+
+If you get ``ModuleNotFoundError: No module named 'mllaunchpad'`` (in
+``mllaunchpad/__main__.py``), try to start flask the following way:
+
+.. code:: console
+
+   $ export FLASK_APP=mllaunchpad/wsgi.py:application
+   $ export LAUNCHPAD_CFG=addition_cfg.yml
+   $ flask run
+
+(On Windows, use ``set`` instead of ``export``)
+
+This problem appears to be connected to Flask restarting in different ways on
+different installations. If you know what exactly this is about, `please let us
+know`_.
 
 Is it for me?
 ------------------------------------------------------------------------------

@@ -27,19 +27,19 @@ datasources:
      tags: train #, test] # , predict]
   first_names:
     type: euro_csv  # uses ; as separators and , as decimal point
-    path: ./examples/firstnames.csv  # The string can also be a URL. Valid URL schemes include http, ftp, s3, and file.
+    path: ./firstnames.csv  # The string can also be a URL. Valid URL schemes include http, ftp, s3, and file.
     expires: -1  # -1: never (=cached forever), 0: immediately (=no caching), >0: time in seconds.
     options: {}
     tags: [train, test, predict]
   petals:
     type: csv  # uses , as separators and . as decimal point
-    path: ./examples/iris_train.csv  # The string can also be a URL. Valid URL schemes include http, ftp, s3, and file.
+    path: ./iris_train.csv  # The string can also be a URL. Valid URL schemes include http, ftp, s3, and file.
     expires: 0  # -1: never (=cached forever), 0: immediately (=no caching), >0: time in seconds.
     options: {}
     tags: train
   petals_test:
     type: csv  # uses , as separators and . as decimal point
-    path: ./examples/iris_holdout.csv  # The string can also be a URL. Valid URL schemes include http, ftp, s3, and file.
+    path: ./iris_holdout.csv  # The string can also be a URL. Valid URL schemes include http, ftp, s3, and file.
     expires: 0  # -1: never (=cached forever), 0: immediately (=no caching), >0: time in seconds.
     options: {}
     tags: test
@@ -68,12 +68,12 @@ model_store:
 model:
   name: AwesomeModel
   version: '0.1.0'  # use semantic versioning (<breaking>.<adding>.<fix>)
-  module: examples.complex_model  # same as file name without .py
+  module: complex_model  # same as file name without .py
   train_options: {magic_number: 13, num_ora_rows: 10}
   predict_options: {}
 
 api:
   name: guessiris  # name of the service api, also what comes in the URL after the first /
   version: '0.0.1'  # use semantic versioning (breaking.adding.fix), first segment will be used in url as .../vX
-  raml: examples/complex.raml
+  raml: complex.raml
   preload_datasources: False  # Load datasources into memory before any predictions. Only makes sense with caching.

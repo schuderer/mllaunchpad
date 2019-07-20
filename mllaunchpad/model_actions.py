@@ -4,6 +4,7 @@
 
 # Stdlib imports
 import logging
+import sys
 
 # Application imports
 from . import resource
@@ -176,6 +177,9 @@ def _find_subclass(module_name, superclass, cache=True):
     Returns:
         subclass as found in data scientist's module
     """
+
+    if "." not in sys.path:
+        sys.path.append(".")
 
     __import__(module_name)
 

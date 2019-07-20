@@ -114,7 +114,7 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds or changes functionality, the docs should be updated.
    Update and add docstrings as needed, and update the ``docs/usage.rst``, and
    if it's a major addition, the ``README.rst``. List your contribution in
-   the ``Latest`` section of ``CONTRIBUTING.rst``.
+   the ``Latest`` section of ``HISTORY.rst``.
 3. The pull request should work for Python 2.7, 3.6 and 3.7, and for PyPy.
    Check https://travis-ci.org/schuderer/mllaunchpad/pull_requests
    and make sure that the tests pass for all supported Python versions.
