@@ -4,7 +4,7 @@
 
 __author__ = """Andreas Schuderer"""
 __email__ = "pypi@schuderer.net"
-__version__ = "0.0.4"
+__version__ = "0.0.5"
 
 from .api import ModelApi
 from .config import get_validated_config
