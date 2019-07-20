@@ -10,7 +10,7 @@ About ML Launchpad
         :target: https://pypi.python.org/pypi/mllaunchpad
 
 .. image:: https://img.shields.io/github/license/schuderer/mllaunchpad.svg?color=blue
-     :target: https://pyup.io/repos/github/schuderer/mllaunchpad/
+     :target: https://github.com/schuderer/mllaunchpad/blob/master/LICENSE
      :alt: LGPLv3 License
 
 .. image:: https://img.shields.io/travis/schuderer/mllaunchpad.svg
