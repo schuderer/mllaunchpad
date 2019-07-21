@@ -1,6 +1,11 @@
 mllaunchpad package
 ===================
 
+.. automodule:: mllaunchpad
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -60,11 +65,3 @@ mllaunchpad.resource module
    :undoc-members:
    :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: mllaunchpad
-   :members:
-   :undoc-members:
-   :show-inheritance:

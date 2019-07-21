@@ -123,6 +123,8 @@ def docs(session):
         "pipenv",
         "run",
         "sphinx-apidoc",
+        "-M",  # put module documentation before submodule documentation
+        "-T",  # don't generate table of contents file
         "-o",
         "docs",
         package_name,

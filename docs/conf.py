@@ -34,7 +34,8 @@ import mllaunchpad
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.viewcode',
-              'sphinx.ext.autosummary'
+              'sphinx.ext.autosummary',
+              # 'sphinx-napoleon',  # Support Google docstring style
               # 'recommonmark',
               # http://www.sphinx-doc.org/en/master/usage/markdown.html
               ]
@@ -103,7 +104,7 @@ html_theme = 'alabaster'
 html_theme_options = {
     'logo': 'logo.png',
     'logo_name': True,
-    'description': 'Deploy Machine Learning solutions with ease',
+    'description': 'Deploy Machine Learning Solutions with Ease',
     'github_user': 'schuderer',
     'github_repo': 'mllaunchpad',
     'github_banner': True,
@@ -180,8 +181,6 @@ texinfo_documents = [
      u'ML Launchpad Documentation',
      author,
      'mllaunchpad',
-     "ML Launchpad lets you easily make Machine Learning models "
-     "available as REST API. It also offers lightweight model "
-     "life cycle management functionality.",
+     "Deploy Machine Learning Solutions with Ease",
      'Miscellaneous'),
 ]

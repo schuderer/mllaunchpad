@@ -8,7 +8,7 @@ ML Launchpad documentation
    readme
    installation
    usage
-   modules
+   mllaunchpad
    contributing
    authors
    changelog
