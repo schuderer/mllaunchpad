@@ -6,6 +6,7 @@ ML Launchpad documentation
    :caption: Contents:
 
    readme
+   about
    installation
    usage
    mllaunchpad
