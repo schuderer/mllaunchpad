@@ -7,10 +7,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Train this example from the command line:
-# python -m mllaunchpad -c examples/some_cfg.yml -t
+# python -m mllaunchpad -c some_cfg.yml -t
 #
 # Start REST API:
-# python -m mllaunchpad -c examples/some_cfg.yml -a
+# python -m mllaunchpad -c some_cfg.yml -a
 #
 # Example API call:
 # http://127.0.0.1:5000/some/v0/varieties?sepal.length=4.9&sepal.width=2.4&petal.length=3.3&petal.width=1

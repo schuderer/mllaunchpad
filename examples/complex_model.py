@@ -7,10 +7,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Train this example from the command line:
-# python -m mllaunchpad -c examples/complex_cfg.yml -t
+# python -m mllaunchpad -c complex_cfg.yml -t
 #
 # Start REST API:
-# python -m mllaunchpad -c examples/complex_cfg.yml -a
+# python -m mllaunchpad -c complex_cfg.yml -a
 #
 # Example API call:
 # http://127.0.0.1:5000/guessiris/v0/somethings?x=3&sepal.length=4.9&sepal.width=2.4&petal.length=3.3&petal.width=1
