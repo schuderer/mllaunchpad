@@ -25,7 +25,7 @@ setup(
         "License :: OSI Approved "
         ":: GNU Lesser General Public License v3 (LGPLv3)",
         "Natural Language :: English",
-        "Programming Language :: Python :: 2.7",
+        # "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         # "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
@@ -33,7 +33,7 @@ setup(
     ],
     description="Deploy Machine Learning Solutions with Ease",
     entry_points={"console_scripts": ["mllaunchpad=mllaunchpad.cli:main"]},
-    python_requires=">=2.7,!=3.0.*,!=3.1.*,,!=3.2.*,!=3.3.*,!=3.4.*",
+    python_requires=">=3.6",
     install_requires=requirements,
     license="GNU Lesser General Public License v3",
     long_description=readme,  # + "\n\n" + history,

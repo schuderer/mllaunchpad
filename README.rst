@@ -13,6 +13,10 @@ Quick Introduction to ML Launchpad
      :target: https://github.com/schuderer/mllaunchpad/blob/master/LICENSE
      :alt: LGPLv3 License
 
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+     :target: https://github.com/python/black
+     :alt: Code Style Black
+
 .. image:: https://img.shields.io/travis/schuderer/mllaunchpad.svg
        :target: https://travis-ci.org/schuderer/mllaunchpad
 
@@ -26,10 +30,6 @@ Quick Introduction to ML Launchpad
 .. image:: https://readthedocs.org/projects/mllaunchpad/badge/?version=latest
         :target: https://mllaunchpad.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
-
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
-      :target: https://github.com/python/black
-      :alt: Code Style Black
 
 
 ML Launchpad lets you easily make Machine Learning models available as

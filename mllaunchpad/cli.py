@@ -12,7 +12,7 @@ from flask import Flask
 # Application imports
 import mllaunchpad as lp
 from mllaunchpad.api import generate_raml
-from . import logutil
+from mllaunchpad import logutil
 
 HELP_STRING = """
 Parameters:

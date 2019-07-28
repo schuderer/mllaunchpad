@@ -14,9 +14,9 @@ import logging
 from flask import Flask
 
 # Application imports
-from . import config
-from . import logutil
-from .api import ModelApi
+from mllaunchpad import config
+from mllaunchpad import logutil
+from mllaunchpad.api import ModelApi
 
 logutil.init_logging()
 logger = logging.getLogger(__name__)

@@ -7,8 +7,8 @@ import logging
 import sys
 
 # Application imports
-from . import resource
-from .model_interface import ModelInterface, ModelMakerInterface
+from mllaunchpad import resource
+from mllaunchpad.model_interface import ModelInterface, ModelMakerInterface
 
 logger = logging.getLogger(__name__)
 

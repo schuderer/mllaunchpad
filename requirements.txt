@@ -1,9 +1,9 @@
-# It is recommended to use a virtual environment
+# It is recommended to use a virtual environment.
 # Instructions below:
 
 # Before installing these requirements,
 # cd into your project directory and
-# create a virtual environment (if you did 
+# create a virtual environment (if you did
 # not do so earlier) using the command:
 # $ python -m venv .venv
 # (if you get an error and using conda,
