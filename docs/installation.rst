@@ -12,21 +12,10 @@ To install ML Launchpad, run this command in your terminal:
 
 .. code-block:: console
 
-    $ pipenv install mllaunchpad
-
-Or, if don't use pipenv (why not? It's awesome! 😀):
-
-.. code-block:: console
-
     $ pip install mllaunchpad
 
-These two are the preferred methods for installing ML Launchpad, as they will
+This is the preferred method for installing ML Launchpad, as it will
 always install the most recent stable release.
-
-We recommend using `pipenv`_ for installing and uninstalling mllaunchpad
-and other packages in your project. It automatically manages a
-project-folder-level virtual environment and tracks your project's
-requirements for you.
 
 If you don't have `pip`_ installed, this `Python installation guide`_ can guide
 you through the process.
@@ -59,6 +48,5 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _pipenv: https://pipenv.readthedocs.io/en/latest/
 .. _Github repo: https://github.com/schuderer/mllaunchpad
 .. _tarball: https://github.com/schuderer/mllaunchpad/tarball/master

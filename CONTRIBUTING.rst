@@ -17,7 +17,8 @@ Report Bugs
 
 Report bugs at https://github.com/schuderer/mllaunchpad/issues.
 
-If you are reporting a bug, please include:
+If you are reporting a bug, please search the existing issues to
+make sure that it is not a duplicate, and include:
 
 * Your operating system name and version.
 * Any details about your local setup that might be helpful in troubleshooting.
@@ -64,14 +65,23 @@ Ready to contribute? Here's how to set up ``mllaunchpad`` for local development.
 
     $ git clone git@github.com:your_name_here/mllaunchpad.git
 
-3. Install your local copy. Assuming you have pipenv installed, this is how
-   you set up your fork for local development::
+3. Install your local copy for development. We recommend to use a
+   virtual environment and are going to use ``venv`` in our examples
+   (though any kind of virtual environment should work)::
 
     $ cd mllaunchpad/
-    $ pipenv install --dev
+    $ python -m venv .venv
 
-   If you don't have pipenv installed, you can do so with ``pip install pipenv``
-   or ``pip install pipenv --user``.
+   Activate the virtual environment::
+
+   $ source .venv/bin/activate
+
+   (On Windows, use the command ``.venv\Scripts\activate.bat``.)
+
+   Install the development requirements (this also installs
+   the package in editable mode)::
+
+   $ pip -r requirements/dev.txt
 
 4. Create a branch for local development::
 
@@ -98,7 +108,7 @@ Ready to contribute? Here's how to set up ``mllaunchpad`` for local development.
     $ git commit -m "Your detailed description of your changes"
     $ git push origin name-of-your-bugfix-or-feature
 
-    Some tips for `good commit messages <https://gist.github.com/robertpainsi/b632364184e70900af4ab688decf6f53>`_.
+   Some tips for `good commit messages <https://gist.github.com/robertpainsi/b632364184e70900af4ab688decf6f53>`_.
 
 7. `Submit a pull request <https://github.com/schuderer/mllaunchpad/compare>`_
    through the GitHub website: ``base: master <- compare: name-of-your-bugfix-or-feature``.
@@ -110,22 +120,39 @@ Pull Request Guidelines
 
 Before you submit a pull request, check that it meets these guidelines:
 
+0. Make sure you have checked that it is not a duplicate, and it should
+   be an attempt to solve a issue on GitHub. If no such issue exists, it is
+   never a bad idea to create one first. This offers the chance
+   to discuss the proposed change you propose with maintainers and
+   other users before doing the actual work.
 1. The pull request should include tests.
 2. If the pull request adds or changes functionality, the docs should be updated.
    Update and add docstrings as needed, and update the ``docs/usage.rst``, and
    if it's a major addition, the ``README.rst``. List your contribution in
-   the ``Latest`` section of ``HISTORY.rst``.
-3. The pull request should work for Python 2.7, 3.6 and 3.7, and for PyPy.
+   the ``Unreleased`` section of ``CHANGELOG.rst``.
+3. The pull request should work for Python 3.6 and 3.7.
    Check https://travis-ci.org/schuderer/mllaunchpad/pull_requests
    and make sure that the tests pass for all supported Python versions.
 
-Tips
+Tips and Troubleshooting
 ------------------------------------------------------------------------------
 
 To run a subset of tests::
 
-$ pytest tests.test_module_testing_your_changes
+  $ pytest tests.test_module_testing_your_changes
 
+If on step 3, you get an error creating the virtual environment
+and are on an Anaconda,
+installation, you might need to update conda and
+then python before being able to create the virtual environment::
+
+  $ conda update -n base -c defaults conda
+  $ conda update python
+
+On step 5: When editing documentation, it is handy to see your edits reflected
+in the docs on-the-fly::
+
+  $ nox -s docs -- monitor
 
 Deploying
 ------------------------------------------------------------------------------

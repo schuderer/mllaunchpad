@@ -17,6 +17,13 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 .. |Removed| replace:: :raw-html:`<span style="font-family: Sans-Serif; font-size: 0.6em; color: white; font-weight: bold; padding: 0.05em; border-radius: 0.2em; display: inline-block; background-color: black">&nbsp;REMOVED&nbsp;</span>`
 .. |Security| replace:: :raw-html:`<span style="font-family: Sans-Serif; font-size: 0.6em; color: white; font-weight: bold; padding: 0.05em; border-radius: 0.2em; display: inline-block; background-color: #666699">&nbsp;SECURITY&nbsp;</span>`
 
+Unreleased
+------------------------------------------------------------------------------
+
+* |Fixed| Fix some examples which could not be run on Windows
+* |Fixed| Migrated from ``pipenv`` to ``pip`` with ``requirements/*.txt``
+* |Enhancement| Improved documentation
+
 
 0.0.5 (2019-07-20)
 ------------------------------------------------------------------------------
@@ -28,4 +35,5 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 0.0.1 (2019-07-18)
 ------------------------------------------------------------------------------
 
-* |Feature| First release on PyPI.
+* |Feature| First release on PyPI,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.

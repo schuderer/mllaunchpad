@@ -39,7 +39,7 @@ matrix:
 cache: pip
 
 install:
-  - pip install pipenv nox
+  - pip install nox
 
 script:
   - nox --non-interactive -s $NOXSESSIONS
