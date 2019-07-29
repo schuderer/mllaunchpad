@@ -13,6 +13,7 @@ from flask import Flask
 import mllaunchpad as lp
 from mllaunchpad import logutil
 from mllaunchpad.api import generate_raml
+from mllaunchpad.api import ModelApi
 
 HELP_STRING = """
 Parameters:
@@ -99,7 +100,7 @@ def main():
             "'gunicorn -w 4 -b 127.0.0.1:5000 launchpad.wsgi:app'"
         )
         app = Flask(__name__)
-        lp.ModelApi(conf, app)
+        ModelApi(conf, app)
         app.run(debug=True)
     elif cmd == "genraml":
         print(generate_raml(conf, data_source_name=raml_ds))
