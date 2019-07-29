@@ -1,5 +1,5 @@
 ==============================================================================
-Quick Introduction to ML Launchpad
+ML Launchpad Quick Start
 ==============================================================================
 
 
@@ -48,9 +48,10 @@ automatically persists a model in the model store together with its metrics,
 and automatically retrieves it for launching its API or
 re-training. Previous models are backed up.
 
--  TODO: better description of what problem ML Launchpad solves
+The full documentation is available at https://mllaunchpad.readthedocs.io.
 
-The full documentation is available at https://mllaunchpad.readthedocs.io
+To learn more about the rationale and structure of ML Launchpad,
+see section `In Depth <https://mllaunchpad.readthedocs.io/en/latest/about.html>`_.
 
 Getting started
 ------------------------------------------------------------------------------
@@ -63,8 +64,10 @@ Download the `example files <https://minhaskamal.github.io/DownGit/#/home?url=ht
 from the ML Launchpad GitHub repo. Some of them might require the installations
 of some extra packages (e.g. scikit-learn), depending on what they demonstrate.
 
-For source installation as a user, please see the section ``Installation``.
-If you are planning development of ML Launchpad itself, see ``Contributing``.
+For more about installation, or if you don't want to use ``pip``
+and instead install from source (as a user), please see the section `Installation <https://mllaunchpad.readthedocs.io/en/latest/installation.html>`_.
+
+If you want to work on ML Launchpad itself, see `Contributing <https://mllaunchpad.readthedocs.io/en/latest/contributing.html>`_.
 
 What's in the box?
 ------------------------------------------------------------------------------
@@ -149,6 +152,11 @@ a good idea in general), also look at the ``-g`` (generate raml) command
 line parameter, which does a lot of work (almost all of it, in fact) for
 getting you started with a first RAML.
 
+To learn how to use ML Launchpad, see `Usage <https://mllaunchpad.readthedocs.io/en/latest/usage.html>`_.
+
+For more details on how ML Launchpad actually works and why we created it,
+see `In Depth <https://mllaunchpad.readthedocs.io/en/latest/about.html>`_.
+
 Troubleshooting
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -179,28 +187,4 @@ If you get ``ModuleNotFoundError: No module named 'mllaunchpad'`` (in
 
 This problem appears to be connected to Flask restarting in different ways on
 different installations. If you know what exactly this is about, `please let us
-know`_.
-
-Is it for me?
-------------------------------------------------------------------------------
-
--  TODO: fill in this section
-
-.. _please let us know: https://github.com/schuderer/mllaunchpad/issues/30.
-
-
-Features
-------------------------------------------------------------------------------
-
-* TODO
-
-Credits
--------
-
-* Free software: GNU Lesser General Public License v3
-* Documentation: https://mllaunchpad.readthedocs.io.
-
-This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
-
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
+know <https://github.com/schuderer/mllaunchpad/issues/30>`_.
