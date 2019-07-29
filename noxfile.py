@@ -66,21 +66,17 @@ def coverage(session):
 def docs(session):
     if platform == "win32" or platform == "cygwin":
         cmdc = ["cmd", "/c"]  # Needed for calling builtin commands
-        session.run(*cmdc, "RD", "/S", "/Q", "docs\\_build", external=True)
-        session.run(*cmdc, "RD", "/S", "/Q", "docs\\_build", external=True)
+        session.run(*cmdc, "DEL", "/S", "/Q", "docs\\_build", external=True)
+        session.run(*cmdc, "DEL", "/S", "/Q", "docs\\generated", external=True)
         session.run(*cmdc, "DEL", "/Q", "docs\\modules.rst", external=True)
         session.run(
             *cmdc, "DEL", "/Q", "docs\\" + package_name + ".rst", external=True
-        )
-        session.run(
-            *cmdc, "DEL", "/Q", "docs\\requirements.txt", external=True
         )
     else:  # darwin, linux, linux2
         session.run("rm", "-rf", "docs/_build", external=True)
         session.run("rm", "-rf", "docs/generated", external=True)
         session.run("rm", "-f", "docs/modules.rst", external=True)
         session.run("rm", "-f", "docs/" + package_name + ".rst", external=True)
-        session.run("rm", "-f", "docs/requirements.txt", external=True)
     # These two installs would suffice did we not have to create API-docs.
     # Then we also wouldn't have to use pip-installs here at all.
     # session.install("sphinx")

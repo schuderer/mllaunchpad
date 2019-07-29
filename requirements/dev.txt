@@ -33,3 +33,4 @@ bumpversion
 twine
 wheel
 setuptools
+nox
