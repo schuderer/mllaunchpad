@@ -11,8 +11,8 @@ from flask import Flask
 
 # Application imports
 import mllaunchpad as lp
+from mllaunchpad import logutil
 from mllaunchpad.api import generate_raml
-from . import logutil
 
 HELP_STRING = """
 Parameters:

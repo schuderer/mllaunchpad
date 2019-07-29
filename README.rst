@@ -13,6 +13,10 @@ Quick Introduction to ML Launchpad
      :target: https://github.com/schuderer/mllaunchpad/blob/master/LICENSE
      :alt: LGPLv3 License
 
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+     :target: https://github.com/python/black
+     :alt: Code Style Black
+
 .. image:: https://img.shields.io/travis/schuderer/mllaunchpad.svg
        :target: https://travis-ci.org/schuderer/mllaunchpad
 
@@ -26,10 +30,6 @@ Quick Introduction to ML Launchpad
 .. image:: https://readthedocs.org/projects/mllaunchpad/badge/?version=latest
         :target: https://mllaunchpad.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
-
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
-      :target: https://github.com/python/black
-      :alt: Code Style Black
 
 
 ML Launchpad lets you easily make Machine Learning models available as
@@ -55,59 +55,16 @@ The full documentation is available at https://mllaunchpad.readthedocs.io
 Getting started
 ------------------------------------------------------------------------------
 
-Direct installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 .. code:: console
 
-  $ pipenv install mllaunchpad
-
-(Or ``pip install mllaunchpad`` if you don't have ``pipenv``)
+  $ pip install mllaunchpad
 
 Download the `example files <https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/schuderer/mllaunchpad/tree/master/examples>`_
 from the ML Launchpad GitHub repo. Some of them might require the installations
 of some extra packages (e.g. scikit-learn), depending on what they demonstrate.
 
-Source installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
--  TODO: prune this section/merge with `Contributing`.
-   Please see `Installation` for a better source installation guide.
-
-Download and unzip the repository as a zip file or clone the repository
-using git:
-
-.. code:: console
-
-  $ git clone git@github.com:schuderer/mllaunchpad.git
-
-Go to the ``mllaunchpad`` directory in a terminal:
-
-.. code:: console
-
-  $ cd mllaunchpad
-
-If you have ``pipenv`` available (if not, it can be easily installed
-using ``pip install pipenv``), create the environment with all the
-dependencies.
-
-.. code:: console
-
-  $ pipenv install
-
-(Use ``pipenv install --dev`` if you want to try out the examples – not
-all development dependencies are needed for all examples, so don’t sweat
-it if there are problems installing all of them)
-
-This enviroment now contains all necessary packages. To activate this
-enviroment, enter:
-
-.. code:: console
-
-  $ pipenv shell
-
-Don’t have ``pipenv``? Have a look at the file ``Pipfile`` to see which
-dependencies might need installing.
+For source installation as a user, please see the section ``Installation``.
+If you are planning development of ML Launchpad itself, see ``Contributing``.
 
 What's in the box?
 ------------------------------------------------------------------------------
@@ -135,13 +92,6 @@ in gunicorn behind nginx.
 
 Try Out the Examples
 ------------------------------------------------------------------------------
-
-If you're using an environment manager, e.g. ``pipenv``, activate the
-environment:
-
-.. code-block:: console
-
-  $ pipenv shell
 
 In the following, it is assumed that the examples are located in the
 current directory.

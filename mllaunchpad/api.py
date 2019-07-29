@@ -16,7 +16,7 @@ from flask_restful import Api, reqparse, Resource
 import ramlfications
 
 # Application imports
-from . import resource
+from mllaunchpad import resource
 
 logger = logging.getLogger(__name__)
 
