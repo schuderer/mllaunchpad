@@ -89,7 +89,7 @@ Ready to contribute? Here's how to set up ``mllaunchpad`` for local development.
 
    Now you can make your changes locally. Don't forget to create tests for
    your code.
-   Recommended style is google style, particularly `docstrings: <https://google.github.io/styleguide/pyguide.html#381-docstrings>`_.
+   Recommended style is Google style, particularly `docstrings <https://google.github.io/styleguide/pyguide.html#381-docstrings>`_.
 
    Add the upstream remote. This saves a reference to the main mllaunchpad
    repository, which you can use to keep your repository synchronized
