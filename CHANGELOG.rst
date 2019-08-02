@@ -37,3 +37,7 @@ Unreleased
 
 * |Feature| First release on PyPI,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
+* |Fixed| Improve contribution documentation,
+  `issue #35 <https://github.com/schuderer/mllaunchpad/issues/35>`_,
+  by `Gosia Rorat <https://github.com/gosiarorat>`_.
+

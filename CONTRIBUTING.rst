@@ -149,6 +149,8 @@ Before you submit a pull request, check that it meets these guidelines:
 
 Tips and Troubleshooting
 ------------------------------------------------------------------------------
+If installing the development requirements (pip install -r requirements/dev.txt) fails
+try to run the command again.
 
 To run a subset of tests::
 
