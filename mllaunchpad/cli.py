@@ -97,7 +97,8 @@ def main():
         logger.warning(
             "Starting Flask debug server. In production, please "
             "use a WSGI server, e.g. "
-            "'gunicorn -w 4 -b 127.0.0.1:5000 launchpad.wsgi:app'"
+            "'export LAUNCHPAD_CFG=addition_cfg.yml'"
+            "'gunicorn -w 4 -b 127.0.0.1:5000 mllaunchpad.wsgi:application'"
         )
         app = Flask(__name__)
         ModelApi(conf, app)
