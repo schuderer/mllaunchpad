@@ -81,7 +81,7 @@ Ready to contribute? Here's how to set up ``mllaunchpad`` for local development.
    Install the development requirements (this also installs
    the package in editable mode)::
 
-   $ pip -r requirements/dev.txt
+   $ pip install -r requirements/dev.txt
 
 4. Create a branch for local development::
 
@@ -89,6 +89,19 @@ Ready to contribute? Here's how to set up ``mllaunchpad`` for local development.
 
    Now you can make your changes locally. Don't forget to create tests for
    your code.
+   Recommended style is Google style, particularly `docstrings <https://google.github.io/styleguide/pyguide.html#381-docstrings>`_.
+
+   Add the upstream remote. This saves a reference to the main mllaunchpad
+   repository, which you can use to keep your repository synchronized
+   with the latest changes::
+
+    $ git remote add upstream https://github.com/schuderer/mllaunchpad.git
+
+   It is often helpful to keep your local branch synchronized with the latest
+   changes of the main mllaunchpad repository::
+
+    $ git fetch upstream
+    $ git merge upstream/master
 
 5. To quickly test just the relevant modified files while still developing::
 
@@ -136,6 +149,8 @@ Before you submit a pull request, check that it meets these guidelines:
 
 Tips and Troubleshooting
 ------------------------------------------------------------------------------
+If installing the development requirements (pip install -r requirements/dev.txt) fails
+try to run the command again.
 
 To run a subset of tests::
 
