@@ -23,6 +23,9 @@ Unreleased
 * |Fixed| Fix some examples which could not be run on Windows
 * |Fixed| Migrated from ``pipenv`` to ``pip`` with ``requirements/*.txt``
 * |Enhancement| Improved documentation
+* |Fixed| Improve contribution documentation,
+  `issue #35 <https://github.com/schuderer/mllaunchpad/issues/35>`_,
+  by `Gosia Rorat <https://github.com/gosiarorat>`_.
 
 
 0.0.5 (2019-07-20)
@@ -37,7 +40,4 @@ Unreleased
 
 * |Feature| First release on PyPI,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
-* |Fixed| Improve contribution documentation,
-  `issue #35 <https://github.com/schuderer/mllaunchpad/issues/35>`_,
-  by `Gosia Rorat <https://github.com/gosiarorat>`_.
 
