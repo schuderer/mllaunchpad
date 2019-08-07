@@ -8,13 +8,15 @@ Tutorial
 This tutorial will guide you through using ML Launchpad to publish
 a small machine learning project as a Web API.
 
-Let's assume that you have developed a python script which does
-everything needed to train, test and use your model from Python::
+Let's assume that you have developed a Python script called ``tree_script.py``
+which contains the code to train, test and apply your model from Python::
 
     my_project/
         iris_train.csv
         iris_holdout.csv
         tree_script.py
+
+Contents of ``tree_script.py``:
 
 .. code-block:: python
 
@@ -126,22 +128,24 @@ The file ``tree_model.py`` looks like this at first:
             return output
 
 
-You can find a template like this (``TEMPLATE_model.py``) in
-ML Launchpad's examples
-(`download <https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/schuderer/mllaunchpad/tree/master/examples>`_,
-or copy-paste from `GitHub <https://github.com/schuderer/mllaunchpad/blob/master/examples/TEMPLATE_model.py>`_).
+You can find a template like this in ML Launchpad's examples
+(`download the examples <https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/schuderer/mllaunchpad/tree/master/examples>`_,
+or copy-paste from ``TEMPLATE_model.py`` on `GitHub <https://github.com/schuderer/mllaunchpad/blob/master/examples/TEMPLATE_model.py>`_).
 
-The three methods :meth:`create_trained_model`, :meth:`test_trained_model`
-and :meth:`predict` correspond to the three functions in our script above.
+The three methods
+:meth:`~mllaunchpad.model_interface.ModelMakerInterface.create_trained_model`,
+:meth:`~mllaunchpad.model_interface.ModelMakerInterface.test_trained_model`
+and :meth:`~mllaunchpad.model_interface.ModelInterface.predict`
+correspond to the three functions in our script above.
 We can essentially copy and paste the contents of our three functions into
 those, but we will need to change some details to make the code work with
 ML Launchpad.
 
 Here, we'll make use of the method arguments ``data_sources`` and ``model``.
-See :mod:`model_interface` for details on all available
+See :mod:`~mllaunchpad.model_interface` for details on all available
 parameters.
 
-If we call our training :class:`DataSource` ``petals`` and our test
+If we call our training :class:`~mllaunchpad.resource.DataSource` ``petals`` and our test
 DataSource ``petals_test``, our completed ``tree_model.py`` looks
 like this (we highlight changed code with ``#comments``):
 
@@ -199,19 +203,21 @@ object passed as an argument, same as before.
 
 The three methods return the same things as our own functions:
 
-* :meth:`create_trained_model` returns a trained model object
-  (can be pretty much anything),
+* :meth:`~mllaunchpad.model_interface.ModelMakerInterface.create_trained_model`
+  returns a trained model object (can be pretty much anything),
 
-* :meth:`test_trained_model` returns a ``dict`` with
+* :meth:`~mllaunchpad.model_interface.ModelMakerInterface.test_trained_model`
+  returns a ``dict`` with
   metrics (can also contain ``lists``, numpy arrays or pandas DataFrames), and
 
-* :meth:`predict` returns a prediction (usually a ``dict``, but
+* :meth:`~mllaunchpad.model_interface.ModelInterface.predict`
+  returns a prediction (usually a ``dict``, but
   can also contain ``lists``, numpy arrays or pandas DataFrames).
 
 
 Next, we will configure some extra info about our model,
 as well as tell ML Launchpad where to find
-the ``petal`` and ``petal_test`` :class:`DataSource` s.
+the ``petal`` and ``petal_test`` :class:`~mllaunchpad.resource.DataSource` s.
 
 Create a file called ``tree_cfg.yml``::
 
@@ -261,9 +267,9 @@ Contents of ``tree_cfg.yml``:
 Here, we define our ``datasources`` so ML Launchpad knows where to find the
 data we refer to from our model. Besides ``csv`` files,
 other types of DataSources are supported, and
-:doc:`extending DataSources <about>` is also possible.
-(see :class:`resource` for more information on supported builtin
-:class:`DataSources`).
+:ref:`extending DataSources <extending>` is also possible.
+(see module :class:`~mllaunchpad.resource` for more information on supported
+builtin :class:`~mllaunchpad.resource.DataSources`).
 
 The ``model_store`` is just a directory where all trained models will
 be stored together with their metrics.
@@ -331,8 +337,12 @@ immediately:
         "prediction": "Versicolor"
     }
 
-This is a so-called RESTful API. Web APIs like this are easy to use by
-other systems or web sites to include your model's
+Automatic input validation is included for free. Try changing the URL to
+provide a string value instead of a number, or remove one of the parameters,
+and you get a message explaining what is wrong.
+
+What we have now is what is called RESTful API. Web APIs like this are easy
+to use by other systems or web sites to include your model's
 predictions in their functionality.
 
 Here's a quick hacked-together HTML page which makes the predictions
@@ -373,4 +383,4 @@ available to an end user:
 
 
 To learn more, have a look at the examples provided in `mllaunchpad's GitHub repository <https://github.com/schuderer/mllaunchpad/>`_
-(`download <https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/schuderer/mllaunchpad/tree/master/examples>`_).
+(`examples as zip file <https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/schuderer/mllaunchpad/tree/master/examples>`_).

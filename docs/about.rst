@@ -1,7 +1,7 @@
 .. highlight:: shell
 
 ==============================================================================
-ML Launchpad in Depth
+Description
 ==============================================================================
 
 
@@ -128,6 +128,8 @@ Besides through the command line, the main functionality is also made
 available through a Python convenience API.
 See :meth:`mllaunchpad.train_model`,
 :meth:`mllaunchpad.retest` and :meth:`mllaunchpad.predict`.
+
+.. _extending:
 
 Extensibility
 ------------------------------------------------------------------------------
