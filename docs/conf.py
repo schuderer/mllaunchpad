@@ -18,6 +18,7 @@
 # relative to the documentation root, use os.path.abspath to make it
 # absolute, like shown here.
 #
+from datetime import datetime
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
@@ -55,9 +56,9 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'ML Launchpad'
-copyright = u"2019, Andreas Schuderer"
-author = u"Andreas Schuderer"
+project = 'ML Launchpad'
+copyright = "{}, Andreas Schuderer".format(datetime.now().year)
+author = "Andreas Schuderer"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout

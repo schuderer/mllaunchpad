@@ -2,7 +2,7 @@
 Credits
 ==============================================================================
 
-Development Lead
+Maintainers
 ------------------------------------------------------------------------------
 
 * Andreas Schuderer <pypi@schuderer.net>
@@ -10,7 +10,7 @@ Development Lead
 Contributors
 ------------------------------------------------------------------------------
 
-None yet. Why not be the first?
+* Gosia Rorat <https://github.com/gosiarorat>
 
 
 Free software: GNU Lesser General Public License v3

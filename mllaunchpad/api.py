@@ -398,10 +398,29 @@ documentation:
       200:  # OK
         body:
           application/json:
+            # This schema is optional but should fit your example prediction result below:
+            schema: |
+              {{
+                "type": "object",
+                "$schema": "http://json-schema.org/draft-03/schema",
+                "id": "http://jsonschema.net",
+                "required": true,
+                "properties": {{
+                  "prediction": {{
+                    "type": "string",
+                    "required": true,
+                    "enum": ["Virginica", "Versicolor", "Setosa"]
+                  }},
+                  "probability": {{
+                    "type": "number",
+                    "required": false
+                  }}
+                }}
+              }}
             # Provide an example of your prediction result:
             example: |
               {{
-                "my prediction result": "Rainbows and Unicorns!"
+                "prediction": "Rainbows and Unicorns!"
               }}
   # /{{test_key}}: # This becomes relevant if you want the API user to provide e.g. ids for the model to look up data to predict for
   #   get:
