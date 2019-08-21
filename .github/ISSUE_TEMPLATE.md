@@ -1,4 +1,18 @@
-* ML Launchpad version: <!-- run `launchpad --version` to find out -->
+<!-- Thanks for helping the project by creating an issue!
+     
+     Below template is for reporting bugs.
+     If you have an improvement suggestion or other issue,
+     feel free to delete all this text, and describe it
+     in your own format.
+     
+     For improvement/feature suggestions,
+     please also provide a usage example where it
+     would be useful, as well as what the current
+     workaround/way to achieve it would be if
+     no improvement would be made.
+-->
+
+* ML Launchpad version: <!-- run `mllaunchpad --version` to find out -->
 * Model Type used: [R, Python, PySpark]
 * DataSource type(s) used:
 * Python version: <!-- run `python --version` to find out -->
