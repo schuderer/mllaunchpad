@@ -184,7 +184,11 @@ def _get_all_classes(config, the_type: Type[Union["DataSource", "DataSink"]]):
     for module in modules:
         __import__(module)
         # Handle one import after another so plugins can replace builtin types
-        imported_classes = [cls for cls in the_type.__subclasses__() if cls.__module__ == module]
+        imported_classes = [
+            cls
+            for cls in the_type.__subclasses__()
+            if cls.__module__ == module
+        ]
         for cls in imported_classes:
             if hasattr(cls, "serves") and hasattr(cls.serves, "__iter__"):
                 for k in cls.serves:
@@ -364,14 +368,10 @@ def get_user_pw(dbms_config):
     pw = os.environ.get(pw_var_name)
     if user is None:
         raise ValueError(
-            "User name environment variable {} not set".format(
-                user_var_name
-            )
+            "User name environment variable {} not set".format(user_var_name)
         )
     if pw is None:
-        logger.warning(
-            "Password environment variable %s not set", pw_var_name
-        )
+        logger.warning("Password environment variable %s not set", pw_var_name)
     return user, pw
 
 
