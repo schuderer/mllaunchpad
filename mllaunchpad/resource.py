@@ -177,12 +177,15 @@ def _get_all_classes(config, the_type: Type[Union["DataSource", "DataSink"]]):
     modules = [__name__]  # find built_in types using same mechanism
     if "plugins" in config:
         logger.info("Loading %s plugins", the_type)
+        # Append plugins so they can replace builtin types
         modules += config["plugins"]
 
     ds_cls = {}
     for module in modules:
         __import__(module)
-        for cls in the_type.__subclasses__():
+        # Handle one import after another so plugins can replace builtin types
+        imported_classes = [cls for cls in the_type.__subclasses__() if cls.__module__ == module]
+        for cls in imported_classes:
             if hasattr(cls, "serves") and hasattr(cls.serves, "__iter__"):
                 for k in cls.serves:
                     if k in ds_cls:
@@ -354,23 +357,28 @@ class DataSource:
         ...
 
 
-def get_oracle_connection(dbms_config):
-    import cx_Oracle  # Importing here avoids environment-specific dependencies
-
+def get_user_pw(dbms_config):
     user_var_name = dbms_config["user_var"]
     pw_var_name = dbms_config["password_var"]
     user = os.environ.get(user_var_name)
     pw = os.environ.get(pw_var_name)
     if user is None:
         raise ValueError(
-            "Oracle user name environment variable {} not set".format(
+            "User name environment variable {} not set".format(
                 user_var_name
             )
         )
     if pw is None:
         logger.warning(
-            "Oracle password environment variable %s not set", pw_var_name
+            "Password environment variable %s not set", pw_var_name
         )
+    return user, pw
+
+
+def get_oracle_connection(dbms_config):
+    import cx_Oracle  # Importing here avoids environment-specific dependencies
+
+    user, pw = get_user_pw(dbms_config)
     dsn_tns = cx_Oracle.makedsn(
         dbms_config["host"],
         dbms_config["port"],
@@ -407,7 +415,7 @@ class OracleDataSource(DataSource):
         Configure the DataSource's options dict to pass keyword arguments to panda's read_sql.
 
         Params:
-            argsDict: optional, parameters for SQL stored procedure
+            args_dict: optional, parameters for SQL stored procedure
             buffer: optional, currently not implemented
 
         Returns:
@@ -474,7 +482,7 @@ class FileDataSource(DataSource):
         Configure the DataSource's options dict to pass keyword arguments to panda's read_csv.
 
         Params:
-            argsDict: optional, currently not implemented
+            args_dict: optional, currently not implemented
             buffer: optional, currently not implemented
 
         Returns:
@@ -511,7 +519,7 @@ class FileDataSource(DataSource):
         """Get the FileDataSource's data as raw binary data.
 
         Params:
-            argsDict: optional, currently not implemented
+            args_dict: optional, currently not implemented
             buffer: optional, currently not implemented
 
         Returns:
@@ -606,7 +614,7 @@ class FileDataSink(DataSink):
 
         Params:
             dataframe: the pandas dataframe to save
-            argsDict: optional, currently not implemented
+            args_dict: optional, currently not implemented
             buffer: optional, currently not implemented
         """
         if buffer:
@@ -635,7 +643,7 @@ class FileDataSink(DataSink):
 
         Params:
             raw_data: the data to save (bytes for binary, string for text file)
-            argsDict: optional, currently not implemented
+            args_dict: optional, currently not implemented
             buffer: optional, currently not implemented
 
         Returns:
@@ -690,7 +698,7 @@ class OracleDataSink(DataSink):
 
         Params:
             dataframe: the pandas dataframe to store
-            argsDict: optional, currently not implemented
+            args_dict: optional, currently not implemented
             buffer: optional, currently not implemented
         """
         if buffer:
