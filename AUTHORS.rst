@@ -11,6 +11,7 @@ Contributors
 ------------------------------------------------------------------------------
 
 * Gosia Rorat <https://github.com/gosiarorat>
+* Bart Driessen <https://github.com/Bart92>
 
 
 Free software: GNU Lesser General Public License v3

@@ -38,6 +38,9 @@ Unreleased
 * |Enhancement| Improve contribution documentation,
   `issue #35 <https://github.com/schuderer/mllaunchpad/issues/35>`_,
   by `Gosia Rorat <https://github.com/gosiarorat>`_.
+* |Fixed| Correcting variable names in TEMPLATE_cfg.yml,
+  `issue #43 <https://github.com/schuderer/mllaunchpad/issues/43>`_,
+  by `Bart Driessen <https://github.com/Bart92>`_.
 
 
 0.0.5 (2019-07-20)
