@@ -22,12 +22,20 @@ you through the process.
 .. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
 
 
-From sources
+Development version
 ------------------------------------------------------------------------------
 
 The sources for ML Launchpad can be downloaded from the `Github repo`_.
 
-You can either clone the public repository:
+If you just want to *use* the latest development version, the easiest way
+is to use `pip`. The following fetches the code and installs the package:
+
+.. code-block:: console
+
+    $ pip install git+https://github.com/schuderer/mllaunchpad
+
+If you want to actually be able to look at the code, you can either
+clone the public repository:
 
 .. code-block:: console
 
