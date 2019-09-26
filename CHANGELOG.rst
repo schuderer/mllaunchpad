@@ -41,7 +41,8 @@ Unreleased
 * |Fixed| Correcting variable names in TEMPLATE_cfg.yml,
   `issue #43 <https://github.com/schuderer/mllaunchpad/issues/43>`_,
   by `Bart Driessen <https://github.com/Bart92>`_.
-
+* |Enhancement| Added file upload support (multipart/form-data, experimental),
+  `Andreas Schuderer <https://github.com/schuderer>`_.
 
 0.0.5 (2019-07-20)
 ------------------------------------------------------------------------------
