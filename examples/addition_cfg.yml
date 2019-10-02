@@ -15,3 +15,4 @@ api:
   version: '0.0.1'  # use semantic versioning (breaking.adding.fix), first segment will be used in url as .../vX
   raml: addition.raml
   preload_datasources: False  # Load datasources into memory before any predictions. Only makes sense with caching.
+  root_path: .  # (optional) set root directory in which Flasks looks for static, templates directories to serve.

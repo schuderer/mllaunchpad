@@ -35,7 +35,7 @@ tensorflow
 gunicorn; sys_platform == 'darwin'
 # Removed rpy2 due to incompatibility of its wheel on Windows:
 # The conda install of 2.9.4 on Windows works (you have to adapt some code)
-#rpy2 ==2.9.4; sys_platform == 'win32'
-#rpy2 ==3.0.4; sys_platform == 'darwin'
+#rpy2==2.9.4; sys_platform == 'win32'
+#rpy2==3.0.4; sys_platform == 'darwin'
 # tzlocal is no requirement of launchpad but of rpy2.python2pi:
 #tzlocal

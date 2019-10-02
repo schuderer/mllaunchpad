@@ -14,6 +14,7 @@ import re
 # from flask import Flask
 from flask_restful import Api, reqparse, Resource
 import ramlfications
+import werkzeug
 
 # Application imports
 from mllaunchpad import resource
@@ -75,7 +76,7 @@ def _create_request_parser(resource_obj):
     for p in all_params:
         if p.name in added_arguments and not p.repeat:
             raise ValueError(
-                "Cannot handle RAML multiple parameters with same name {}".format(
+                "Cannot handle RAML with multiple parameters sharing same name {}".format(
                     p.name
                 )
             )
@@ -101,6 +102,15 @@ def _create_request_parser(resource_obj):
             )
         )
 
+    if (
+        resource_obj.body
+        and resource_obj.body[0].mime_type == "multipart/form-data"
+    ):
+        # todo: how can we make sure the file mime type is correct?
+        parser.add_argument(
+            "file", type=werkzeug.FileStorage, location="files"
+        )
+
     return parser
 
 
@@ -108,30 +118,40 @@ def _get_resources(raml):
     """Gets relevant resources from RAML
     """
     # only dealing with "get" method resources for now
-    usable_methods = ["get"]
+    usable_methods = ["get", "post"]
     usable_rs = [
         r for r in raml.resources if r.method in usable_methods
     ]  # r.path == name and
-    rs_without_resource_id = [r for r in usable_rs if not r.uri_params]
+    rs_without_resource_id = [
+        r for r in usable_rs if not r.uri_params and not r.body
+    ]
     rs_with_resource_id = [r for r in usable_rs if r.uri_params]
+    rs_file_upload = [
+        r
+        for r in usable_rs
+        if r.body and r.body[0].mime_type == "multipart/form-data"
+    ]
     if (
         len(usable_rs) == 0
-        or len(usable_rs) > 2
+        or len(usable_rs) > 3
         or len(rs_without_resource_id) > 1
         or len(rs_with_resource_id) > 1
+        or len(rs_file_upload) > 1
     ):
         raise ValueError(
             (
-                'RAML must contain one or two resources with a method of "{}". '
-                + "At most one resource each with and without uri parameter (resource id)"
-                + "There are {} resources with matching methods. Resources in RAML: {}"
+                "RAML must contain one to three resources with a method of '{}'. "
+                "At most one resource each with and without uri parameter (resource id) "
+                "or one file upload resource.\n"
+                "There are {} resources with matching methods. Resources in RAML: {}"
             ).format(usable_methods, len(usable_rs), raml.resources)
         )
 
     res_normal = rs_without_resource_id[0] if rs_without_resource_id else None
     res_with_id = rs_with_resource_id[0] if rs_with_resource_id else None
+    res_file = rs_file_upload[0] if rs_file_upload else None
 
-    return res_normal, res_with_id
+    return res_normal, res_with_id, res_file
 
 
 class QueryResource(Resource):
@@ -166,6 +186,34 @@ class GetByIdResource(Resource):
             some_resource_id,
             args,
         )
+        return self.model_api.predict_using_model(args)
+
+
+class QueryOrFileUploadResource(Resource):
+    def __init__(self, model_api_obj, query_parser=None, file_parser=None):
+        self.model_api = model_api_obj
+        self.query_parser = query_parser
+        self.file_parser = file_parser
+
+    def get(self):
+        args = self.query_parser.parse_args(
+            strict=True
+        )  # treat query_params and form_params as interchangeable
+        logger.debug("Received GET request with arguments: %s", args)
+        return self.model_api.predict_using_model(args)
+
+    def post(self):
+        if self.file_parser:
+            args = self.file_parser.parse_args(strict=True)
+            file_storage_obj = args["file"]
+            logger.debug(
+                "Received POST request with file %s of mimetype %s",
+                file_storage_obj.filename,
+                file_storage_obj.mimetype,
+            )
+        else:  # treat query_params and form_params as interchangeable
+            args = self.query_parser.parse_args(strict=True)
+            logger.debug("Received POST request with arguments: %s", args)
         return self.model_api.predict_using_model(args)
 
 
@@ -219,26 +267,63 @@ class ModelApi:
         api_url = "/{}/{}".format(api_name, api_version)
 
         raml = _load_raml(config)
-        res_normal, res_with_id = _get_resources(raml)
+        res_normal, res_with_id, res_file = _get_resources(raml)
 
-        if res_normal:
-            logger.debug(
-                "Adding resource %s to api %s", res_normal.path, api_url
-            )
-            resource_url = api_url + res_normal.path
-            normal_parser = _create_request_parser(res_normal)
-            api.add_resource(
-                QueryResource,
-                resource_url,
-                resource_class_kwargs={
-                    "model_api_obj": self,
-                    "parser": normal_parser,
-                },
-            )
+        if res_file or res_normal:
+            resource_urls = {"query": None, "file": None}
+            parsers = {"query": None, "file": None}
+            if res_normal:
+                logger.debug(
+                    "Adding query resource %s to api %s",
+                    res_normal.path,
+                    api_url,
+                )
+                resource_urls["query"] = api_url + res_normal.path
+                parsers["query"] = _create_request_parser(res_normal)
+            if res_file:
+                logger.debug(
+                    "Adding file-based resource %s to api %s",
+                    res_file.path,
+                    api_url,
+                )
+                resource_urls["file"] = api_url + res_file.path
+                parsers["file"] = _create_request_parser(res_file)
+            if (
+                len(resource_urls) == 2
+                and resource_urls["query"] == resource_urls["file"]
+            ):
+                api.add_resource(
+                    QueryOrFileUploadResource,  # QueryResource,
+                    resource_urls["query"],
+                    resource_class_kwargs={
+                        "model_api_obj": self,
+                        "query_parser": parsers["query"],
+                        "file_parser": parsers["file"],
+                    },
+                )
+            else:
+                for k, res_url in resource_urls.items():
+                    if not res_url:
+                        continue
+                    api.add_resource(
+                        QueryOrFileUploadResource,  # QueryResource,
+                        res_url,
+                        resource_class_kwargs={
+                            "model_api_obj": self,
+                            "query_parser": parsers["query"]
+                            if k == "query"
+                            else None,
+                            "file_parser": parsers["file"]
+                            if k == "file"
+                            else None,
+                        },
+                    )
 
         if res_with_id:
             logger.debug(
-                "Adding resource %s to api %s", res_with_id.path, api_url
+                "Adding url-id resource %s to api %s",
+                res_with_id.path,
+                api_url,
             )
             uri_param_name = res_with_id.uri_params[-1].name
             resource_url = (
@@ -246,13 +331,13 @@ class ModelApi:
                 + res_with_id.parent.path
                 + "/<string:some_resource_id>"
             )
-            with_id_parser = _create_request_parser(res_with_id)
+            parser = _create_request_parser(res_with_id)
             api.add_resource(
                 GetByIdResource,
                 resource_url,
                 resource_class_kwargs={
                     "model_api_obj": self,
-                    "parser": with_id_parser,
+                    "parser": parser,
                     "id_name": uri_param_name,
                 },
             )

@@ -14,7 +14,7 @@ Contributors
 * Bart Driessen <https://github.com/Bart92>
 
 
-Free software: GNU Lesser General Public License v3
+Apache License 2.0
 
 Documentation: https://mllaunchpad.readthedocs.io.
 

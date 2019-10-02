@@ -101,7 +101,7 @@ def main():
             "'export LAUNCHPAD_CFG=addition_cfg.yml'"
             "'gunicorn -w 4 -b 127.0.0.1:5000 mllaunchpad.wsgi:application'"
         )
-        app = Flask(__name__)
+        app = Flask(__name__, root_path=conf["api"].get("root_path"))
         ModelApi(conf, app)
         app.run(debug=True)
     elif cmd == "genraml":

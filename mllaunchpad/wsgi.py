@@ -28,7 +28,7 @@ try:
 
     # if you change the name of the application variable, you need to
     # specify it explicitly for gunicorn: gunicorn ... launchpad.wsgi:appname
-    application = Flask(__name__)
+    application = Flask(__name__, root_path=conf["api"].get("root_path"))
 
     ModelApi(conf, application)
 except FileNotFoundError:
