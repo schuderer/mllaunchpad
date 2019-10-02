@@ -45,7 +45,7 @@ Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl  -OL https://github.com/schuderer/mllaunchpad/tarball/master
+    $ curl -L https://github.com/schuderer/mllaunchpad/tarball/master > mllaunchpad.tar.gz
 
 Once you have a copy of the source, you can install it with:
 
