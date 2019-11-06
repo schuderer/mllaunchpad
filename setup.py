@@ -8,7 +8,14 @@ from setuptools import setup, find_packages
 with open("README.rst", encoding="utf-8") as readme_file:
     readme = readme_file.read()
 
-requirements = ["flask", "flask-restful", "ramlfications", "dill", "pandas"]
+requirements = [
+    "flask",
+    "flask-restful",
+    "ramlfications",
+    "dill",
+    "pandas",
+    "pyyaml",
+]
 
 setup_requirements = ["pytest-runner"]
 
@@ -23,7 +30,7 @@ setup(
         "Operating System :: OS Independent",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved "
-        ":: GNU Lesser General Public License v3 (LGPLv3)",
+        ":: Apache License, Version 2.0 (Apache-2.0)",
         "Natural Language :: English",
         # "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
@@ -35,7 +42,7 @@ setup(
     entry_points={"console_scripts": ["mllaunchpad=mllaunchpad.cli:main"]},
     python_requires=">=3.6",
     install_requires=requirements,
-    license="GNU Lesser General Public License v3",
+    license="Apache License, Version 2.0",
     long_description=readme,  # + "\n\n" + history,
     long_description_content_type="text/x-rst",
     # long_description_content_type="text/markdown",
