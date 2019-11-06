@@ -31,3 +31,4 @@ flask-restful
 ramlfications
 dill
 pandas
+pyyaml

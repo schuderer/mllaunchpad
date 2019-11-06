@@ -11,6 +11,9 @@ import os
 # Third-party imports
 import yaml  # https://camel.readthedocs.io/en/latest/yamlref.html
 
+# Own project
+from mllaunchpad.yaml_loader import Loader
+
 logger = logging.getLogger(__name__)
 
 CONFIG_DEFAULT = "./mllaunchpad.yml"
@@ -39,7 +42,7 @@ def get_validated_config(filename=CONFIG_ENV):
     logger.info("Loading configuration file %s...", filename)
 
     with open(filename) as f:
-        y = yaml.safe_load(f)
+        y = yaml.load(f, Loader)
 
     req_props = ["model", "api"]
 
