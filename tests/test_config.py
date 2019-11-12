@@ -38,6 +38,7 @@ def test_get_config():
         assert cfg["api"]["name"] == "my_api"
         assert cfg["api"]["name"] == "my_api"
 
+
 def test_get_config_default_warning(caplog):
     """Test Config loading."""
     mo = mock.mock_open(read_data=test_file_valid)
@@ -67,8 +68,8 @@ def test_get_config_invalid():
     mo.return_value.name = "./foobar.yml"
     with mock.patch(
         "%s.open" % config.__name__,
-            mo,  # <-- use our mock variable here
-            create=True,
+        mo,  # <-- use our mock variable here
+        create=True,
     ):
         with pytest.raises(ValueError, match="does not contain"):
             _ = config.get_validated_config("lalala")
@@ -95,9 +96,13 @@ test_file_yaml = b"""
 @mock.patch('builtins.open', new_callable=mock.mock_open, read_data=test_file_yaml)
 def test_yaml_include(mo):
     """Test include sub config files."""
-    handlers = (mo.return_value, mock.mock_open(read_data=test).return_value,)
-    mo.side_effect = handlers
+
     mo.return_value.name = "./foobar.yml"
+    mo2 = mock.mock_open(read_data=test)
+    mo2.return_value.name = "test"
+    handlers = (mo.return_value, mo2.return_value)
+    mo.side_effect = handlers
+
     with mock.patch(
         "%s.open" % config.__name__,
         mo,  # <-- use our mock variable here
