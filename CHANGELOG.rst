@@ -43,6 +43,8 @@ Unreleased
   by `Bart Driessen <https://github.com/Bart92>`_.
 * |Enhancement| Added file upload support (multipart/form-data, experimental),
   `Andreas Schuderer <https://github.com/schuderer>`_.
+* |Enhancement| Added funcionality to include sub-config support,
+  `issue #28 <https://github.com/schuderer/mllaunchpad/issues/28>`_, by `Elisa Partodikromo <https://github.com/planeetjupyter>`_.
 
 0.0.5 (2019-07-20)
 ------------------------------------------------------------------------------

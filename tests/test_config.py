@@ -60,7 +60,7 @@ def test_get_config_invalid():
         - adfs
     nomodel:
         name: bla
-    
+
     api:
         name: bla
     """
@@ -76,10 +76,10 @@ def test_get_config_invalid():
 
 
 test = b"""
-       
+
      xob10:
         type: oracle
-        
+
      """
 test_file_yaml = b"""
 
@@ -87,13 +87,15 @@ test_file_yaml = b"""
 
     model:
         name: my_model
-    
+
     api:
         name: my_api
     """
 
 
-@mock.patch('builtins.open', new_callable=mock.mock_open, read_data=test_file_yaml)
+@mock.patch(
+    "builtins.open", new_callable=mock.mock_open, read_data=test_file_yaml
+)
 def test_yaml_include(mo):
     """Test include sub config files."""
 
@@ -109,4 +111,4 @@ def test_yaml_include(mo):
         create=True,
     ):
         cfg = config.get_validated_config("lalala")
-        assert cfg['dbms']["xob10"]["type"] == "oracle"
+        assert cfg["dbms"]["xob10"]["type"] == "oracle"

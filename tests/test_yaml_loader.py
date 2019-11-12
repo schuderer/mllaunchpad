@@ -5,7 +5,10 @@
 
 # Stdlib imports
 from unittest import mock
+
+# Third party
 import yaml
+
 # Application imports
 import mllaunchpad.yaml_loader as yloader
 
@@ -18,7 +21,9 @@ test = b"""
     """
 
 
-@mock.patch('builtins.open', new_callable=mock.mock_open, read_data=test_file_yaml)
+@mock.patch(
+    "builtins.open", new_callable=mock.mock_open, read_data=test_file_yaml
+)
 def test_yaml_include(mo):
     """Isolated test include sub config files."""
 
@@ -30,4 +35,4 @@ def test_yaml_include(mo):
 
     with open(test_file_yaml) as f:
         data = yaml.load(f, yloader.Loader)
-        assert data['dbms']['xob10']['type'] == 'oracle'
+        assert data["dbms"]["xob10"]["type"] == "oracle"
