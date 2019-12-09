@@ -15,7 +15,7 @@
 
 # Activate it using, on Windows:
 # $ .venv\Scripts\activate.bat
-# On maxOX/Unix:
+# On maxOS/Unix:
 # $ source .venv/bin/activate
 
 # THEN install these requirements using the command:
