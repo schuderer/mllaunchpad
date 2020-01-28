@@ -4,7 +4,7 @@
 
 __author__ = """Andreas Schuderer"""
 __email__ = "pypi@schuderer.net"
-__version__ = "0.0.5"
+__version__ = "0.0.6"
 
 from mllaunchpad.config import get_validated_config
 from mllaunchpad.model_actions import predict, retest, train_model
