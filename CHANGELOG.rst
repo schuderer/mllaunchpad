@@ -25,6 +25,12 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ------------------------------------------------------------------------------
 
+* Nothing here yet
+
+
+0.0.6 (2020-01-28)
+------------------------------------------------------------------------------
+
 * |Fixed| Fix examples which could not be run on Windows,
   `issue #34 <https://github.com/schuderer/mllaunchpad/issues/34>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
@@ -45,6 +51,9 @@ Unreleased
   `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Enhancement| Added funcionality to include sub-config support,
   `issue #28 <https://github.com/schuderer/mllaunchpad/issues/28>`_, by `Elisa Partodikromo <https://github.com/planeetjupyter>`_.
+* |Fixed| Changed config fallback file name to the more ugly ./LAUNCHPAD_CFG.yml,
+  (no issue), by `Andreas Schuderer <https://github.com/schuderer>`_.
+
 
 0.0.5 (2019-07-20)
 ------------------------------------------------------------------------------
@@ -58,4 +67,3 @@ Unreleased
 
 * |Feature| First release on PyPI,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
-

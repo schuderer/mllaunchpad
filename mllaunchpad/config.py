@@ -16,7 +16,7 @@ from mllaunchpad.yaml_loader import Loader
 
 logger = logging.getLogger(__name__)
 
-CONFIG_DEFAULT = "./mllaunchpad.yml"
+CONFIG_DEFAULT = "./LAUNCHPAD_CFG.yml"
 CONFIG_ENV = os.environ.get("LAUNCHPAD_CFG", CONFIG_DEFAULT)
 
 
@@ -28,7 +28,8 @@ def get_validated_config(filename=CONFIG_ENV):
 
     Params:
         - filename: path to configuration file
-                    (default: environment variable LAUNCHPAD_CFG)
+                    (default: environment variable LAUNCHPAD_CFG or
+                     file LAUNCHPAD_CFG.yml)
 
     Returns:
         dict with configuration
@@ -36,7 +37,7 @@ def get_validated_config(filename=CONFIG_ENV):
     if filename == CONFIG_DEFAULT:
         logger.warning(
             "Config filename environment variable LAUNCHPAD_CFG not set, "
-            "using default: %s",
+            "using default file: %s",
             repr(CONFIG_DEFAULT),
         )
     logger.info("Loading configuration file %s...", filename)

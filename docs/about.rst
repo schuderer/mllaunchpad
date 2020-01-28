@@ -101,7 +101,8 @@ Note: Feel free to use the command line or the ML Launchpad's
 Python convenience API functions. Instead of using the ``-c``
 parameter, the location of the configuration
 file can also provided by setting the ``LAUNCHPAD_CFG`` environment
-variable.
+variable (or implicitly by providing a file named ``LAUNCHPAD_CFG.yml``
+in the current working directory).
 
 To test, the developer runs a (debugging-only!) REST API for
 the model, using the command
@@ -122,7 +123,9 @@ or the Python API convenience functions::
 
 The location of the configuration file (as well as that of a logging file)
 can also be provided by setting the environment variables ``LAUNCHPAD_CFG``
-and ``LAUNCHPAD_LOG``, respectively.
+and ``LAUNCHPAD_LOG``, respectively. If neither a parameter nor an
+environment variable is available, ``mllaunchpad`` will look for a file
+named ``LAUNCHPAD_CFG.yml`` in the current working directory.
 
 Besides through the command line, the main functionality is also made
 available through a Python convenience API.
