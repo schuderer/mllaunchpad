@@ -10,9 +10,9 @@ Maintainers
 Contributors
 ------------------------------------------------------------------------------
 
+* Elisa Partodikromo <https://github.com/planeetjupyter>
 * Gosia Rorat <https://github.com/gosiarorat>
 * Bart Driessen <https://github.com/Bart92>
-* Elisa Partodikromo <https://github.com/planeetjupyter>
 
 Apache License 2.0
 

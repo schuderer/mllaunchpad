@@ -28,7 +28,7 @@ Unreleased
 * Nothing here yet
 
 
-0.0.6 (2020-01-28)
+0.0.7 (2020-01-28)
 ------------------------------------------------------------------------------
 
 * |Fixed| Fix examples which could not be run on Windows,

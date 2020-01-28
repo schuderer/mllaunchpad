@@ -29,8 +29,7 @@ setup(
         "Intended Audience :: Developers",
         "Operating System :: OS Independent",
         "Intended Audience :: Science/Research",
-        "License :: OSI Approved "
-        ":: Apache License, Version 2.0 (Apache-2.0)",
+        "License :: OSI Approved :: Apache Software License",
         "Natural Language :: English",
         # "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
