@@ -17,8 +17,13 @@ blabla:
     - asdf
     - adfs
 
+model_store:
+    location: asdfasdf
+
 model:
   name: my_model
+  version: '0.1.2'
+  module: my_model
 
 api:
   name: my_api
@@ -58,7 +63,8 @@ def test_get_config_invalid():
     blabla:
         - asdf
         - adfs
-    nomodel:
+
+    model:
         name: bla
 
     api:
@@ -71,7 +77,7 @@ def test_get_config_invalid():
         mo,  # <-- use our mock variable here
         create=True,
     ):
-        with pytest.raises(ValueError, match="does not contain"):
+        with pytest.raises(ValueError, match="Missing key"):
             _ = config.get_validated_config("lalala")
 
 
@@ -85,11 +91,14 @@ test_file_yaml = b"""
 
     dbms: !include test
 
+    model_store:
+        location: asdfasdf
+
     model:
         name: my_model
+        version: '0.1.2'
+        module: my_model
 
-    api:
-        name: my_api
     """
 
 
