@@ -25,8 +25,8 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ------------------------------------------------------------------------------
 
-* Nothing here yet
-
+* |Enhancement| Config file is now being checked for omitted required keys,
+  (no issue), by `Andreas Schuderer <https://github.com/schuderer>`_.
 
 0.0.7 (2020-01-28)
 ------------------------------------------------------------------------------
