@@ -14,7 +14,7 @@ import re
 # from flask import Flask
 from flask_restful import Api, reqparse, Resource
 import ramlfications
-import werkzeug
+from werkzeug.datastructures import FileStorage
 
 # Application imports
 from mllaunchpad import resource
@@ -107,9 +107,7 @@ def _create_request_parser(resource_obj):
         and resource_obj.body[0].mime_type == "multipart/form-data"
     ):
         # todo: how can we make sure the file mime type is correct?
-        parser.add_argument(
-            "file", type=werkzeug.FileStorage, location="files"
-        )
+        parser.add_argument("file", type=FileStorage, location="files")
 
     return parser
 
