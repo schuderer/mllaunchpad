@@ -26,27 +26,20 @@ logger = logging.getLogger(__name__)
 try:
     conf = config.get_validated_config()
 except FileNotFoundError:
-    logger.error(
-        "Config file could not be loaded. Starting the Flask application "
-        "will fail."
-    )
+    conf = None
 
     # if you change the name of the application variable, you need to
     # specify it explicitly for gunicorn: gunicorn ... launchpad.wsgi:appname
-try:
+if conf:
     application = Flask(__name__, root_path=conf["api"].get("root_path"))
     ModelApi(conf, application)
-except FileNotFoundError:
-    logger.error(
-        "Previous model could not be loaded during the the ModelApi initialization."
-    )
 
-if __name__ == "__main__":
-    logger.warning(
-        "Starting Flask debug server.\nIn production, please use a WSGI server, "
-        + "e.g. 'gunicorn -w 4 -b 127.0.0.1:5000 mllaunchpad.wsgi:application'"
-    )
-    application.run(debug=True)
+    if __name__ == "__main__":
+        logger.warning(
+            "Starting Flask debug server.\nIn production, please use a WSGI server, "
+            + "e.g. 'gunicorn -w 4 -b 127.0.0.1:5000 mllaunchpad.wsgi:application'"
+        )
+        application.run(debug=True)
 
 # To start an instance of production server with 4 workers:
 #  1. Set environment variables if required
