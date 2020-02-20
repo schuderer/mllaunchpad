@@ -25,16 +25,20 @@ logger = logging.getLogger(__name__)
 # necessary to wrap the preparatory code in a try:except: statement.
 try:
     conf = config.get_validated_config()
-
-    # if you change the name of the application variable, you need to
-    # specify it explicitly for gunicorn: gunicorn ... launchpad.wsgi:appname
-    application = Flask(__name__, root_path=conf["api"].get("root_path"))
-
-    ModelApi(conf, application)
 except FileNotFoundError:
     logger.error(
         "Config file could not be loaded. Starting the Flask application "
         "will fail."
+    )
+
+    # if you change the name of the application variable, you need to
+    # specify it explicitly for gunicorn: gunicorn ... launchpad.wsgi:appname
+try:
+    application = Flask(__name__, root_path=conf["api"].get("root_path"))
+    ModelApi(conf, application)
+except FileNotFoundError:
+    logger.error(
+        "Previous model could not be loaded during the the ModelApi initialization."
     )
 
 if __name__ == "__main__":
