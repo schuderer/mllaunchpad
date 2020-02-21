@@ -13,6 +13,7 @@ Contributors
 * Elisa Partodikromo <https://github.com/planeetjupyter>
 * Gosia Rorat <https://github.com/gosiarorat>
 * Bart Driessen <https://github.com/Bart92>
+* Bob Platte <https://github.com/bobplatte>
 
 Apache License 2.0
 
