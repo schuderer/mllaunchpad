@@ -31,9 +31,12 @@ Unreleased
   `issue #63 <https://github.com/schuderer/mllaunchpad/issues/63>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
 
-0.0.7 (2020-01-28)
+0.0.7 (2020-02-21)
 ------------------------------------------------------------------------------
 
+* |Fixed| Fix misleading error message "mllaunchpad/wsgi.py",
+  `issue #61 <https://github.com/schuderer/mllaunchpad/issues/61>`_,
+  by `Bob Platte <https://github.com/bobplatte>`_.
 * |Fixed| Fix examples which could not be run on Windows,
   `issue #34 <https://github.com/schuderer/mllaunchpad/issues/34>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
