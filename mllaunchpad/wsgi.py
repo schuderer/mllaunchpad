@@ -26,6 +26,10 @@ logger = logging.getLogger(__name__)
 try:
     conf = config.get_validated_config()
 except FileNotFoundError:
+    logger.error(
+        "Config file could not be loaded. Starting the Flask application "
+        "will fail."
+    )
     conf = None
 
     # if you change the name of the application variable, you need to
