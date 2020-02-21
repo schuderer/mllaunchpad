@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Tests for `mllaunchpad.config` module."""
+"""Tests for `mllaunchpad.api` module."""
 
 # Stdlib imports
 from tempfile import NamedTemporaryFile
