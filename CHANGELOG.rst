@@ -25,6 +25,10 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ------------------------------------------------------------------------------
 
+* |Deprecated| 'api:version:' to be removed from  configuration ('model:version:'
+  will be the only location to specify both the model and the API version),
+  `issue #66 <https://github.com/schuderer/mllaunchpad/issues/66>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Fixed| Fix misleading error message at WSGI entry point if model could
   not be loaded,
   `issue #61 <https://github.com/schuderer/mllaunchpad/issues/61>`_,
