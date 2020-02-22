@@ -95,7 +95,7 @@ def retest(complete_conf, cache=True):
         complete_conf, tags="test", cache=cache
     )
 
-    model_wrapper, metadata = _get_model(complete_conf, cache=cache)
+    model_wrapper, _ = _get_model(complete_conf, cache=cache)
     inner_model = model_wrapper.contents
 
     model_conf = complete_conf["model"]
