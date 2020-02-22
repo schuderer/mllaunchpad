@@ -42,7 +42,7 @@ def train_model(complete_conf, cache=True):
 
     try:
         logger.debug("Trying to load old model...")
-        old_model_wrapper, meta = _get_model(complete_conf, cache=cache)
+        old_model_wrapper, _ = _get_model(complete_conf, cache=cache)
         old_inner_model = old_model_wrapper.contents
         # logger.info('Loaded old model %s %s', meta['name'], meta['version'])
     except FileNotFoundError:
@@ -133,7 +133,7 @@ def predict(complete_conf, arg_dict=None, cache=True):
         complete_conf, tags="predict", cache=cache
     )
 
-    model_wrapper, metadata = _get_model(complete_conf, cache=cache)
+    model_wrapper, _ = _get_model(complete_conf, cache=cache)
     inner_model = model_wrapper.contents
 
     model_conf = complete_conf["model"]

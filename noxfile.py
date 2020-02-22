@@ -15,8 +15,8 @@ max_line_length = "79"
 min_coverage = "3"  # TODO: get to >= 90%
 
 
-@nox.session(python=my_py_ver)
-def format(session):
+@nox.session(name="format", python=my_py_ver)
+def code_formatting(session):
     """Run code reformatter"""
     session.install("black")
     session.run("black", "-l", max_line_length, *autoformat)

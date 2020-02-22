@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Stdlib imports
+import abc
 from datetime import datetime
 import getpass
 import glob
@@ -14,7 +15,9 @@ import typing
 from typing import Dict, Tuple, Type, TypeVar, Union
 
 # Third-party imports
-import dill as pickle
+# We are only unpickling files which are completely under the
+# control of the model developer, not influenced by end user data.
+import dill as pickle  # nosec
 import numpy as np
 import pandas as pd
 
@@ -141,7 +144,9 @@ class ModelStore:
 
         pkl_name = base_name + ".pkl"
         with open(pkl_name, "rb") as f:
-            model = pickle.load(f)
+            # We are only unpickling files which are completely under the
+            # control of the model developer, not influenced by end user data.
+            model = pickle.load(f)  # nosec
 
         meta = self._load_metadata(base_name)
 
@@ -159,11 +164,11 @@ class ModelStore:
 
 def _tags_match(tags, other_tags) -> bool:
     tags = tags or []
-    if type(tags) is str:
+    if isinstance(tags, str):
         tags = [tags]
 
     other_tags = other_tags or []
-    if type(other_tags) is str:
+    if isinstance(other_tags, str):
         other_tags = [other_tags]
 
     tags_required = bool(tags)
@@ -224,7 +229,7 @@ def _create_data_sources_or_sinks(
     ds_cls = _get_all_classes(config, the_type)
     logger.debug("ds_cls=%s", ds_cls)
 
-    if config_key not in config or type(config[config_key]) is not dict:
+    if config_key not in config or not isinstance(config[config_key], dict):
         logger.info("No %s defined in configuration", config_key)
         return ds_objects
 
@@ -309,9 +314,11 @@ class DataSource:
         self._cached_raw = None
         self._cached_raw_time = 0
 
+    @abc.abstractmethod
     def get_dataframe(self, arg_dict=None, buffer=False) -> pd.DataFrame:
         ...
 
+    @abc.abstractmethod
     def get_raw(self, arg_dict=None, buffer=False) -> bytes:
         ...
 
@@ -571,11 +578,13 @@ class DataSink:
         self.config = datasink_config
         self.options = self.config.get("options", {})
 
+    @abc.abstractmethod
     def put_dataframe(
         self, dataframe: pd.DataFrame, arg_dict=None, buffer=False
     ):
         ...
 
+    @abc.abstractmethod
     def put_raw(
         self, raw_data: Union[bytes, str], arg_dict=None, buffer=False
     ):
@@ -655,7 +664,7 @@ class FileDataSink(DataSink):
         kw_options = self.options
 
         logger.debug(
-            "Writing raw binary file {} with options {}...".format(
+            "Writing raw {} file {} with options {}...".format(
                 self.type, self.path, kw_options
             )
         )
@@ -729,21 +738,23 @@ class OracleDataSink(DataSink):
 
 
 def to_plain_python_obj(possible_ndarray):
-    if type(possible_ndarray) is dict:
+    if isinstance(possible_ndarray, dict):
         return {
             key: to_plain_python_obj(val)
             for key, val in possible_ndarray.items()
         }
-    if type(possible_ndarray) is np.int64:
+    if isinstance(possible_ndarray, np.int64):
         return int(possible_ndarray)
-    if type(possible_ndarray) is np.float32:
+    if isinstance(possible_ndarray, np.float32):
         return float(possible_ndarray)
-    elif type(possible_ndarray) is list or type(possible_ndarray) is tuple:
+    elif isinstance(possible_ndarray, list) or isinstance(
+        possible_ndarray, tuple
+    ):
         return [to_plain_python_obj(val) for val in possible_ndarray]
-    elif type(possible_ndarray) is np.ndarray:
+    elif isinstance(possible_ndarray, np.ndarray):
         logger.debug("Automatically converting ndarray to plain python list")
         return possible_ndarray.tolist()
-    elif type(possible_ndarray) is pd.DataFrame:
+    elif isinstance(possible_ndarray, pd.DataFrame):
         logger.debug("Automatically converting DataFrame to plain python dict")
         return possible_ndarray.to_dict()
     else:

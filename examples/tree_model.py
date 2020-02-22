@@ -87,7 +87,7 @@ class MyExampleModel(ModelInterface):
             'sepal.width': [args_dict['sepal.width']],
             'petal.length': [args_dict['petal.length']],
             'petal.width': [args_dict['petal.width']]
-            })
+        })
 
         my_tree = model
         y = my_tree.predict(X)[0]

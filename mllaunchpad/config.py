@@ -67,7 +67,9 @@ def get_validated_config(filename=CONFIG_ENV):
     logger.info("Loading configuration file %s...", filename)
 
     with open(filename) as f:
-        y = yaml.load(f, Loader)
+        # Normally, one should use safe_load(), but our Loader
+        # is a subclass of yaml.SafeLoader
+        y = yaml.load(f, Loader)  # nosec
 
     validate_config(y, required_config)
 
