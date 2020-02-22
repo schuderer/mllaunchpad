@@ -25,11 +25,11 @@ logger = logging.getLogger(__name__)
 
 
 def _get_major_api_version(config):
-    match = re.match(r"\d+", config["api"]["version"])
+    match = re.match(r"\d+", config["model"]["version"])
     if match is None:
         raise ValueError(
-            "API version in configuration is malformed. Expected x.y.z, got {}".format(
-                config["api"]["version"]
+            "Model version in configuration is malformed. Expected x.y.z, got {}".format(
+                config["model"]["version"]
             )
         )
     return "v{}".format(match.group(0))

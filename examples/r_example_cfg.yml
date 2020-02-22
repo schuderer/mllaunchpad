@@ -17,7 +17,7 @@ model_store:
 
 model:
   name: RExampleModel
-  version: '0.0.1'  # use semantic versioning (<breaking>.<adding>.<fix>)
+  version: '0.0.1'  # use semantic versioning (<breaking>.<adding>.<fix>), first segment will be used in url as e.g. .../v1/...
   module: r_model  # TODO: more flexible plugin support for this kind of thing
   r_file: r_example.R
   r_dependencies: [rpart]
@@ -26,7 +26,6 @@ model:
 
 api:
   name: some  # name of the service api
-  version: '0.0.1'  # use semantic versioning (breaking.adding.fix), first segment will be used in url as e.g. .../v1/...
   raml: r_example.raml
   preload_datasources: False  # Load datasources into memory before any predictions. Only makes sense with caching.
   root_path: .  # (optional) set root directory in which Flasks looks for static, templates directories to serve.
