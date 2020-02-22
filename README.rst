@@ -2,6 +2,10 @@
 Quick Start
 ==============================================================================
 
+.. image:: https://api.codacy.com/project/badge/Grade/6feb5459864448a49b43bf3bef4468bd
+   :alt: Codacy Badge
+   :target: https://app.codacy.com/manual/schuderer/mllaunchpad?utm_source=github.com&utm_medium=referral&utm_content=schuderer/mllaunchpad&utm_campaign=Badge_Grade_Dashboard
+
 
 .. image:: https://img.shields.io/pypi/v/mllaunchpad.svg?color=blue
         :target: https://pypi.python.org/pypi/mllaunchpad
