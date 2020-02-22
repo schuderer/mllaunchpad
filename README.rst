@@ -5,23 +5,30 @@ Quick Start
 
 .. image:: https://img.shields.io/pypi/v/mllaunchpad.svg?color=blue
         :target: https://pypi.python.org/pypi/mllaunchpad
+        :alt: ML Launchpad on PyPI
 
 .. image:: https://img.shields.io/pypi/pyversions/mllaunchpad.svg?color=blue
         :target: https://pypi.python.org/pypi/mllaunchpad
-
+        :alt: Compatible Python Versions
 .. image:: https://img.shields.io/github/license/schuderer/mllaunchpad.svg?color=blue
      :target: https://github.com/schuderer/mllaunchpad/blob/master/LICENSE
-     :alt: LGPLv3 License
+     :alt: Apache 2.0 License
 
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
-     :target: https://github.com/python/black
-     :alt: Code Style Black
+.. .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+..      :target: https://github.com/python/black
+..      :alt: Code Style Black
 
+.. image:: https://api.codacy.com/project/badge/Grade/6feb5459864448a49b43bf3bef4468bd
+   :target: https://app.codacy.com/manual/schuderer/mllaunchpad?utm_source=github.com&utm_medium=referral&utm_content=schuderer/mllaunchpad&utm_campaign=Badge_Grade_Dashboard
+   :alt: Codacy Badge
+   
 .. image:: https://img.shields.io/travis/schuderer/mllaunchpad.svg
        :target: https://travis-ci.org/schuderer/mllaunchpad
+       :alt: Build CI
 
 .. image:: https://coveralls.io/repos/github/schuderer/mllaunchpad/badge.svg?branch=master
      :target: https://coveralls.io/github/schuderer/mllaunchpad?branch=master
+     :alt: Unit Test Coverage
 
 .. .. image:: https://pyup.io/repos/github/schuderer/mllaunchpad/shield.svg
 ..     :target: https://pyup.io/repos/github/schuderer/mllaunchpad/
@@ -36,7 +43,7 @@ ML Launchpad lets you easily make Machine Learning models available as
 REST API. It also offers lightweight model life cycle
 management functionality.
 
-What this means is that it creates a separation between machine learning
+It creates a separation between machine learning
 models and their environment. This way, you can run your model with
 different data sources and on different environments, by just swapping
 out the configuration, no code changes required. ML Launchpad makes your
