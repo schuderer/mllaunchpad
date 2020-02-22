@@ -86,7 +86,7 @@ def main():
     logger = logger or logutil.init_logging()
     conf = conf or lp.get_validated_config()
     if cmd == "train":
-        model, _ = lp.train_model(conf)
+        _, _ = lp.train_model(conf)
     elif cmd == "retest":
         _ = lp.retest(conf)
     elif cmd == "predict":

@@ -12,11 +12,11 @@
      no improvement would be made.
 -->
 
-  * ML Launchpad version: <!-- run `mllaunchpad --version` to find out -->
-  * Model Type used: \[R, Python, PySpark\]
-  * DataSource type(s) used:
-  * Python version: <!-- run `python --version` to find out -->
-  * Operating System:
+*  ML Launchpad version: <!-- run `mllaunchpad --version` to find out -->
+*  Model Type used: \[R, Python, PySpark\]
+*  DataSource type(s) used:
+*  Python version: <!-- run `python --version` to find out -->
+*  Operating System:
 
 ### Description
 
