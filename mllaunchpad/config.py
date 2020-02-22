@@ -7,11 +7,13 @@
 # Stdlib imports
 import logging
 import os
+from warnings import warn
 
 # Third-party imports
 import yaml  # https://camel.readthedocs.io/en/latest/yamlref.html
 
 # Own project
+from mllaunchpad import __version__ as mllp_version
 from mllaunchpad.yaml_loader import Loader
 
 logger = logging.getLogger(__name__)
@@ -44,6 +46,24 @@ def validate_config(config_dict, required, path=""):
         validate_config(config_dict[item], required[item], path_start + item)
 
 
+def check_semantics(config_dict):
+    if "api" in config_dict and "version" in config_dict["api"]:
+        if mllp_version < "1.0.0":
+            warn(
+                "Specifying 'version' in the config's 'api' section is "
+                "deprecated and will lead to an error in mllaunchpad>=1.0.0. "
+                "Specify 'version' in the 'model' section instead. "
+                "Your 'api:version' value will be ignored.",
+                DeprecationWarning,
+            )
+            del config_dict["api"]["version"]
+        else:
+            raise ValueError(
+                "'api:version:' is not allowed in the config, "
+                "only 'model:version:'."
+            )
+
+
 def get_validated_config(filename=CONFIG_ENV):
     """Read the configuration from file and return it as a dict object.
 
@@ -72,6 +92,7 @@ def get_validated_config(filename=CONFIG_ENV):
         y = yaml.load(f, Loader)  # nosec
 
     validate_config(y, required_config)
+    check_semantics(y)
 
     logger.debug("Configuration loaded and validated: %s", y)
 

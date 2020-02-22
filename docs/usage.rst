@@ -252,14 +252,13 @@ Contents of ``tree_cfg.yml``:
 
     model:
       name: TreeModel
-      version: '0.0.1'  # use semantic versioning (<breaking>.<adding>.<fix>)
+      version: '0.0.1'  # use semantic versioning (<breaking>.<adding>.<fix>), first segment will be used in API url as e.g. .../v1/...
       module: tree_model  # same as file name without .py
       train_options: {}
       predict_options: {}
 
     api:
       name: iris  # name of the service api
-      version: '0.0.1'  # use semantic versioning (breaking.adding.fix), first segment will be used in url as e.g. .../v1/...
       raml: tree.raml
       preload_datasources: False  # Load datasources into memory before any predictions. Only makes sense with caching.
 

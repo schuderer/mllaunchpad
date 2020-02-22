@@ -10,6 +10,7 @@ from unittest import mock
 import pytest
 
 # Application imports
+from mllaunchpad import __version__ as mllp_version
 import mllaunchpad.config as config
 
 test_file_valid = b"""
@@ -121,3 +122,36 @@ def test_yaml_include(mo):
     ):
         cfg = config.get_validated_config("lalala")
         assert cfg["dbms"]["xob10"]["type"] == "oracle"
+
+
+def test_config_api_version_deprecation():
+    test_file_deprecated = b"""
+    blabla:
+        - asdf
+        - adfs
+
+    model_store:
+        location: asdfasdf
+
+    model:
+        name: bla
+        version: 0.1.1
+        module: asoeutnh
+
+    api:
+        name: bla
+        version: 0.1.1  # deprecated; and for mllp>=1.0.0 exception
+    """
+    mo = mock.mock_open(read_data=test_file_deprecated)
+    mo.return_value.name = "./foobar.yml"
+    with mock.patch(
+        "%s.open" % config.__name__,
+        mo,  # <-- use our mock variable here
+        create=True,
+    ):
+        if mllp_version < "1.0.0":
+            with pytest.warns(DeprecationWarning):
+                _ = config.get_validated_config("lalala")
+        else:
+            with pytest.raises(ValueError, match="not allowed"):
+                _ = config.get_validated_config("lalala")

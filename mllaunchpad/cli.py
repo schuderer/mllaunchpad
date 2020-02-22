@@ -52,14 +52,14 @@ def main():
         sys.exit(2)
     # evaluate given options
     cmd = None
-    conf = None
-    logger = None
+    conffile = None
+    logfile = None
     raml_ds = None
     for currentArgument, currentValue in arguments:
-        if currentArgument in ("-c", "--config"):
-            conf = lp.get_validated_config(currentValue)
-        elif currentArgument in ("-l", "--logconfig"):
-            logger = logutil.init_logging(currentValue)
+        if currentArgument in ("-l", "--logconfig"):
+            logfile = currentValue
+        elif currentArgument in ("-c", "--config"):
+            conffile = currentValue
         elif currentArgument in ("-t", "--train"):
             cmd = "train"
         elif currentArgument in ("-r", "--retest"):
@@ -83,8 +83,15 @@ def main():
         print(HELP_STRING, file=sys.stderr)
         exit(1)
 
-    logger = logger or logutil.init_logging()
-    conf = conf or lp.get_validated_config()
+    # Initialize logging before any other library code so that we can log stuff
+    logger = (
+        logutil.init_logging(logfile) if logfile else logutil.init_logging()
+    )
+    conf = (
+        lp.get_validated_config(conffile)
+        if conffile
+        else lp.get_validated_config()
+    )
     if cmd == "train":
         _, _ = lp.train_model(conf)
     elif cmd == "retest":
