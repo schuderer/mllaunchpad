@@ -15,6 +15,7 @@ requirements = [
     "dill",
     "pandas",
     "pyyaml",
+    "click",
 ]
 
 setup_requirements = ["pytest-runner"]

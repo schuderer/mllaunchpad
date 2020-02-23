@@ -19,11 +19,11 @@ def test_command_line_interface(capsys):
     with pytest.raises(SystemExit) as e:
         cli.main()
     out, err = capsys.readouterr()
-    assert e.value.code == 1
+    assert e.value.code == 2
 
     sys.argv = [sys.argv[0], "--help"]
     with pytest.raises(SystemExit) as e:
         cli.main()
     out, err = capsys.readouterr()
     assert e.value.code == 0
-    assert "Print this help" in err
+    assert "Show this message" in out
