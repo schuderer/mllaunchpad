@@ -35,6 +35,7 @@ watchdog
 nox
 #flake8
 #black
+#bandit
 sphinx
 #sphinx-autobuild
 -e .

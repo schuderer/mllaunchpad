@@ -3,7 +3,7 @@ Thanks for contributing a pull request! Please ensure you have taken a look at
 the contribution guidelines: https://github.com/schuderer/mllaunchpad/blob/master/CONTRIBUTING.rst
 -->
 
-#### Reference Issues/PRs
+#### Reference issues/PRs
 <!--
 Example: Fixes #1234. See also #3456.
 Please use keywords (e.g., Fixes) to create link to the issues or pull requests
@@ -11,12 +11,13 @@ you resolved, so that they will automatically be closed when your pull request
 is merged. See https://github.com/blog/1506-closing-issues-via-pull-requests
 -->
 
+#### What this implements/fixes
 
-#### What does this implement/fix? Explain your changes.
+<!-- What does this implement/fix? Explain your changes. -->
 
+#### Other comments
 
-#### Any other comments?
-
+<!-- Any other comments? -->
 
 <!--
 Please be aware that we are a loose team of volunteers so patience is

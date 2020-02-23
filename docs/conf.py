@@ -57,7 +57,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'ML Launchpad'
-copyright = "{}, Andreas Schuderer".format(datetime.now().year)
+copyright = "{}, Andreas Schuderer".format(datetime.now().year)  # pylint: disable=redefined-builtin
 author = "Andreas Schuderer"
 
 # The version info for the project you're documenting, acts as replacement

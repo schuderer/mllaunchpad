@@ -45,9 +45,7 @@ def main():
         "generateraml=",
     ]
     try:
-        arguments, values = getopt.getopt(
-            argumentList, unixOptions, gnuOptions
-        )
+        arguments, _ = getopt.getopt(argumentList, unixOptions, gnuOptions)
     except getopt.error as err:
         # output error, and return with an error code
         print(str(err), file=sys.stderr)
@@ -95,7 +93,7 @@ def main():
         else lp.get_validated_config()
     )
     if cmd == "train":
-        model, metrics = lp.train_model(conf)
+        _, _ = lp.train_model(conf)
     elif cmd == "retest":
         _ = lp.retest(conf)
     elif cmd == "predict":
@@ -110,7 +108,9 @@ def main():
         )
         app = Flask(__name__, root_path=conf["api"].get("root_path"))
         ModelApi(conf, app)
-        app.run(debug=True)
+        # Flask apps must not be run in debug mode in production, because this allows for arbitrary code execution.
+        # We know that and advise the user that this is only for debugging, so this is not a security issue (marked nosec):
+        app.run(debug=True)  # nosec
     elif cmd == "genraml":
         print(generate_raml(conf, data_source_name=raml_ds))
 

@@ -416,7 +416,7 @@ def generate_raml(
     from urllib.parse import quote_plus
 
     if data_source_name is not None:
-        dso, dsi = _get_data_sources_and_sinks(
+        dso, _ = _get_data_sources_and_sinks(
             complete_conf, tags="", cache=True
         )
         df = dso[data_source_name].get_dataframe()
