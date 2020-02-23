@@ -25,10 +25,19 @@ sys.argv[0] = "mllaunchpad"
 
 # TODO: Migrate to @dataclass when dropping support for Python 3.6
 class Settings:
-    def __init__(self, verbose=False, config=False, logger=False):
-        self.verbose: bool = verbose
-        self.config: dict = config
-        self.logger: Logger = logger
+    def __init__(self):
+        self.verbose: bool = False
+        self.logger: Logger = None
+        self.conf_file: str = None
+
+    @property
+    def config(self):
+        if not hasattr(self, "_config"):
+            if self.conf_file:
+                self._config = lp.get_validated_config(self.conf_file)
+            else:
+                self._config = lp.get_validated_config()
+        return self._config
 
 
 pass_settings = click.make_pass_decorator(Settings, ensure=True)
@@ -36,44 +45,37 @@ pass_settings = click.make_pass_decorator(Settings, ensure=True)
 
 @click.group()
 @click.version_option(prog_name="ML Launchpad")
-@click.option("--verbose", "-v", is_flag=True)
+@click.option("--verbose", "-v", is_flag=True, help="Print debug messages.")
 @click.option(
     "--config",
     "-c",
     type=click.Path(exists=True),
-    help="Config file to use",
+    help="Use this configuration file.",
     show_default="Environment variable LAUNCHPAD_CFG, or, if empty, ./LAUNCHPAD_CFG.yml",
 )
 @click.option(
     "--log-config",
     "-l",
     type=click.Path(exists=True),
-    help="Log config file to use",
+    help="Use this log configuration file.",
     show_default="Environment variable LAUNCHPAD_LOG, or, if empty, ./LAUNCHPAD_LOG.yml",
 )
 @pass_settings
 def main(settings, log_config, config, verbose):
     """Train, test or run a config file's model."""
     # Initialize logging before any library code so that mllp can log stuff
-    logger = (
-        logutil.init_logging(log_config, verbose=verbose)
-        if log_config
-        else logutil.init_logging(verbose=verbose)
-    )
-    conf_dict = (
-        lp.get_validated_config(config)
-        if config
-        else lp.get_validated_config()
-    )
+    if log_config:
+        settings.logger = logutil.init_logging(log_config, verbose=verbose)
+    else:
+        settings.logger = logutil.init_logging(verbose=verbose)
     settings.verbose = verbose
-    settings.logger = logger
-    settings.config = conf_dict
+    settings.conf_file = config
 
 
 @main.command()
 @pass_settings
 def train(settings):
-    """Run training, store model and metrics"""
+    """Run training, store created model and metrics."""
     _, metrics = lp.train_model(settings.config)
     print(metrics)
 
@@ -81,7 +83,7 @@ def train(settings):
 @main.command()
 @pass_settings
 def retest(settings):
-    """Retest model, update metrics"""
+    """Retest existing model, update metrics."""
     metrics = lp.retest(settings.config)
     print(metrics)
 
@@ -89,7 +91,7 @@ def retest(settings):
 @main.command()
 @pass_settings
 def api(settings):
-    """Run API server in unsafe debug mode"""
+    """Run API server in unsafe debug mode."""
     settings.logger.warning(
         "Starting Flask debug server. In production, please "
         "use a WSGI server, e.g.\n"
@@ -107,11 +109,11 @@ def api(settings):
 @click.argument("json-file", type=click.File("r"))
 @pass_settings
 def predict(settings, json_file):
-    """Run prediction on features from JSON file ( - for stdin)
+    """Run prediction on features from JSON file ( - for stdin).
 
-    Example JSON:
-        `{ "petal.width": 1.4, "petal.length": 2.0,
-           "sepal.width": 1.8, "sepal.length": 4.0 }`
+    \b
+    Example JSON: { "petal.width": 1.4, "petal.length": 2.0,
+                    "sepal.width": 1.8, "sepal.length": 4.0 }
     """
     arg_dict = json.load(json_file)
     output = lp.predict(settings.config, arg_dict=arg_dict)
@@ -122,7 +124,11 @@ def predict(settings, json_file):
 @click.argument("datasource-name", type=str, required=True)
 @pass_settings
 def cli_generate_raml(settings, datasource_name):
-    """Generate and print RAML template from data source name"""
+    """Generate and print RAML template from DATASOURCE_NAME.
+
+    The datasource named DATASOURCE_NAME in the config will be used
+    to create the API's query parameters (from columns), types, and examples.
+    """
     print(generate_raml(settings.config, data_source_name=datasource_name))
 
 
