@@ -39,7 +39,12 @@ setup(
         "Programming Language :: Python :: 3.7",
     ],
     description="Deploy Machine Learning Solutions with Ease",
-    entry_points={"console_scripts": ["mllaunchpad=mllaunchpad.cli:main"]},
+    entry_points={
+        "console_scripts": [
+            "mllaunchpad=mllaunchpad.cli:main",
+            "mllp=mllaunchpad.cli:main",
+        ]
+    },
     python_requires=">=3.6",
     install_requires=requirements,
     license="Apache License, Version 2.0",

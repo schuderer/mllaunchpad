@@ -23,6 +23,29 @@ from mllaunchpad.api import ModelApi
 sys.argv[0] = "mllaunchpad"
 
 
+# Adapted from https://click.palletsprojects.com/en/7.x/advanced/
+class AliasedGroup(click.Group):
+    """Commands can be abbreviated, e.g. t or tr for train, a for api, etc."""
+
+    def get_command(self, ctx, cmd_name):
+        rv = click.Group.get_command(self, ctx, cmd_name)
+        if rv is not None:
+            return rv
+        matches = [
+            x for x in self.list_commands(ctx) if x.startswith(cmd_name)
+        ]
+        if not matches:
+            return None
+        elif len(matches) == 1:
+            click.echo("Command {} matches {}".format(cmd_name, matches[0]))
+            return click.Group.get_command(self, ctx, matches[0])
+        ctx.fail(
+            "Command {} is ambiguous: {}".format(
+                cmd_name, ", ".join(sorted(matches))
+            )
+        )
+
+
 # TODO: Migrate to @dataclass when dropping support for Python 3.6
 class Settings:
     def __init__(self):
@@ -43,7 +66,9 @@ class Settings:
 pass_settings = click.make_pass_decorator(Settings, ensure=True)
 
 
-@click.group()
+@click.group(
+    cls=AliasedGroup, context_settings=dict(help_option_names=["-h", "--help"])
+)
 @click.version_option(prog_name="ML Launchpad")
 @click.option("--verbose", "-v", is_flag=True, help="Print debug messages.")
 @click.option(
