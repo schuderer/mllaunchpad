@@ -23,9 +23,6 @@
 # A guide to venv is available here:
 # https://docs.python.org/3/tutorial/venv.html
 
-
--r prod.txt
-
 # Test dependencies
 pytest
 pytest-runner
