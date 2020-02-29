@@ -21,7 +21,7 @@ Quick Start
 .. image:: https://api.codacy.com/project/badge/Grade/6feb5459864448a49b43bf3bef4468bd
    :target: https://app.codacy.com/manual/schuderer/mllaunchpad?utm_source=github.com&utm_medium=referral&utm_content=schuderer/mllaunchpad&utm_campaign=Badge_Grade_Dashboard
    :alt: Codacy Badge
-   
+
 .. image:: https://img.shields.io/travis/schuderer/mllaunchpad.svg
        :target: https://travis-ci.org/schuderer/mllaunchpad
        :alt: Build CI
@@ -103,8 +103,8 @@ in gunicorn behind nginx.
 Try Out the Examples
 ------------------------------------------------------------------------------
 
-In the following, it is assumed that the examples are located in the
-current directory.
+In the following, it is assumed that ``mllaunchpad`` is `installed <https://mllaunchpad.readthedocs.io/en/latest/installation.html>`_ and
+the examples are located in the current directory.
 
 To train a very, *very* simple example model whose job it is to add two
 numbers, use the command:

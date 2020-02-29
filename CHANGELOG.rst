@@ -58,9 +58,9 @@ Unreleased
 * |Fixed| Correcting variable names in TEMPLATE_cfg.yml,
   `issue #43 <https://github.com/schuderer/mllaunchpad/issues/43>`_,
   by `Bart Driessen <https://github.com/Bart92>`_.
-* |Enhancement| Added file upload support (multipart/form-data, experimental),
-  `Andreas Schuderer <https://github.com/schuderer>`_.
-* |Enhancement| Added funcionality to include sub-config support,
+* |Feature| Added file upload support (multipart/form-data, experimental),
+  (no issue), by `Andreas Schuderer <https://github.com/schuderer>`_.
+* |Feature| Added funcionality to include sub-config support,
   `issue #28 <https://github.com/schuderer/mllaunchpad/issues/28>`_, by `Elisa Partodikromo <https://github.com/planeetjupyter>`_.
 * |Fixed| Changed config fallback file name to the more ugly ./LAUNCHPAD_CFG.yml,
   (no issue), by `Andreas Schuderer <https://github.com/schuderer>`_.

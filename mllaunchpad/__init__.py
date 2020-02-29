@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-
 """Top-level package for ML Launchpad."""
 
-__author__ = """Andreas Schuderer"""
-__email__ = "pypi@schuderer.net"
-__version__ = "0.0.7"
+import pkg_resources
+
+__version__ = pkg_resources.get_distribution("mllaunchpad").version
 
 from mllaunchpad.config import get_validated_config
 from mllaunchpad.model_actions import predict, retest, train_model

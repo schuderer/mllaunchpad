@@ -13,9 +13,6 @@ include CHANGELOG.rst
 include LICENSE
 include README.rst
 
-# recursive-exclude model_store *
-# recursive-exclude private *
-
 recursive-include examples *
 recursive-exclude examples/model_store *
 
