@@ -4,8 +4,12 @@
 Contributing
 ==============================================================================
 
-Contributions are welcome, and they are greatly appreciated! Every little bit
-helps, and credit will always be given.
+Contributions are what keeps ML Launchpad growing and useful,
+and they are greatly appreciated!
+Every little bit helps, and credit will always be given.
+
+Everyone is welcome to contribute, just be nice:
+`Code of Conduct <https://mllaunchpad.readthedocs.io/en/latest/conduct.html>`_.
 
 You can contribute in many ways:
 
