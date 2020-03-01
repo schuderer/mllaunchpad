@@ -34,7 +34,8 @@ Unreleased
   `issue #61 <https://github.com/schuderer/mllaunchpad/issues/61>`_,
   by `Bob Platte <https://github.com/bobplatte>`_.
 * |Enhancement| Config file is now being checked for omitted required keys,
-  (no issue), by `Andreas Schuderer <https://github.com/schuderer>`_.
+  `PR #65 <https://github.com/schuderer/mllaunchpad/pull/65>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Fixed| Use correct reference to werkzeug's FileStorage,
   `issue #63 <https://github.com/schuderer/mllaunchpad/issues/63>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
@@ -58,12 +59,15 @@ Unreleased
 * |Fixed| Correcting variable names in TEMPLATE_cfg.yml,
   `issue #43 <https://github.com/schuderer/mllaunchpad/issues/43>`_,
   by `Bart Driessen <https://github.com/Bart92>`_.
-* |Enhancement| Added file upload support (multipart/form-data, experimental),
-  `Andreas Schuderer <https://github.com/schuderer>`_.
-* |Enhancement| Added funcionality to include sub-config support,
-  `issue #28 <https://github.com/schuderer/mllaunchpad/issues/28>`_, by `Elisa Partodikromo <https://github.com/planeetjupyter>`_.
+* |Feature| Added file upload support (multipart/form-data, experimental),
+  `PR #47 <https://github.com/schuderer/mllaunchpad/pull/47>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
+* |Feature| Added funcionality to include sub-config support,
+  `issue #28 <https://github.com/schuderer/mllaunchpad/issues/28>`_,
+  by `Elisa Partodikromo <https://github.com/planeetjupyter>`_.
 * |Fixed| Changed config fallback file name to the more ugly ./LAUNCHPAD_CFG.yml,
-  (no issue), by `Andreas Schuderer <https://github.com/schuderer>`_.
+  `direct commit <https://github.com/schuderer/mllaunchpad/commit/c012ee6a27f2da0cd9a7b57ab5aebf3257a71ffa>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
 
 
 0.0.5 (2019-07-20)
