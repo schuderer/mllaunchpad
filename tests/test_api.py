@@ -43,7 +43,7 @@ def parsed_raml(string):
 
 
 minimal_config = {
-    "model_store": {"location": "asdfasdf"},
+    "model_store": {"location": "model_store"},
     "model": {"name": "my_model", "version": "1.2.3", "module": "my_module"},
     "api": {"name": "my_api", "version": "1.2.3", "raml": "bla.raml"},
 }
