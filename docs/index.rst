@@ -14,6 +14,7 @@ It separates the Machine Learning side (how to train, test and to predict) from 
    usage
    mllaunchpad
    contributing
+   Code of Conduct <conduct>
    authors
    changelog
 
