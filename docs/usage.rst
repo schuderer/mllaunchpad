@@ -318,7 +318,8 @@ Our model is done! Let's try it out.
 
     $ mllaunchpad --config=tree_cfg.yml --train
 
-Now we have a trained model in our ``model_store``. Let's run the Web API:
+Now we have a trained model in our ``model_store``. Let's run a test Web API
+(only for debug purposes, :doc:`see here <about>` for running production APIs):
 
 .. code-block:: console
 
@@ -349,37 +350,57 @@ available to an end user:
 
 .. code-block:: html
 
-    <!DOCTYPE html>
-    <html><body>
-        <h2>Iris Tree Demo</h2>
-        <div>
-            Sepal Width: <input id="sl" type="range" min="0.1" max="7" step="0.1"><br>
-            Sepal Length: <input id="sw" type="range" min="0.1" max="7" step="0.1"><br>
-            Petal Length: <input id="pl" type="range" min="0.1" max="7" step="0.1"><br>
-            Petal Width: <input id="pw" type="range" min="0.1" max="7" step="0.1"><br>
-        </div>
-        <div id="output"></div>
-        <script>
-            function predict() {
-                let sl = document.querySelector('#sl').value;
-                let sw = document.querySelector('#sw').value;
-                let pl = document.querySelector('#pl').value;
-                let pw = document.querySelector('#pw').value;
-                fetch(`http://127.0.0.1:5000/iris/v0/mythings?sepal.length=${sl}&sepal.width=${sw}&petal.length=${pl}&petal.width=${pw}`)
-                .then(function(response) {
-                    document.querySelector('#output').innerHTML = response.json();
-                })
-                .then(function(myJson) {
-                    console.log(JSON.stringify(myJson));
-                });
-            }
-            let inputs = document.querySelectorAll('input');
-            for (let input of inputs) {
-                input.addEventListener('change', predict, false);
-            }
-        </script>
-    </body></html>
+  <!DOCTYPE html>
+  <html><body>
+      <h2>Iris Tree Demo</h2>
+      <p>
+          Sepal Width: <input id="sl" type="range" min="0.1" max="7" step="0.1"><br>
+          Sepal Length: <input id="sw" type="range" min="0.1" max="7" step="0.1"><br>
+          Petal Length: <input id="pl" type="range" min="0.1" max="7" step="0.1"><br>
+          Petal Width: <input id="pw" type="range" min="0.1" max="7" step="0.1"><br>
+      </p>
+      <p id="output"></p>
+      <script>
+          function predict() {
+              let sl = document.querySelector('#sl').value;
+              let sw = document.querySelector('#sw').value;
+              let pl = document.querySelector('#pl').value;
+              let pw = document.querySelector('#pw').value;
+              fetch(`http://127.0.0.1:5000/iris/v0/mythings?sepal.length=${sl}&sepal.width=${sw}&petal.length=${pl}&petal.width=${pw}`)
+              .then(function(response) {
+                  console.log(response);
+                  return response.json();
+              })
+              .then(function(myJson) {
+                  console.log(myJson);
+                  document.querySelector('#output').innerHTML =
+                    `This is an example of the ${myJson.iris_variety} variety`;
+              });
+          }
+          let inputs = document.querySelectorAll('input');
+          for (let input of inputs) {
+              input.addEventListener('change', predict, false);
+          }
+      </script>
+  </body></html>
 
+If you put prototype HTML interfaces like this in a ``static`` subfolder, then
+they will be accessible at e.g. http://127.0.0.1:5000/static/tree.html.
+Keep in mind that this is only for demo/debug usage, not for production. The
+position of the ``static`` subfolder is governed by the ``api:root_path`` key
+(with a default value of ``.``) in your config file.
+
+You can find this and other examples `here <https://github.com/schuderer/mllaunchpad/>`_
+(`download <https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/schuderer/mllaunchpad/tree/master/examples>`_).
+To run the ``tree`` example from this tutorial:
+
+.. code-block:: console
+
+    $ cd examples
+    $ mllaunchpad --config=tree_cfg.yml --train
+    $ mllaunchpad --config=tree_cfg.yml --api
+
+Then open http://127.0.0.1:5000/static/tree.html in your browser.
 
 To learn more, have a look at the examples provided in `mllaunchpad's GitHub repository <https://github.com/schuderer/mllaunchpad/>`_
 (`examples as zip file <https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/schuderer/mllaunchpad/tree/master/examples>`_).
