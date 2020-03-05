@@ -1,8 +1,9 @@
-from mllaunchpad import ModelInterface, ModelMakerInterface
-from sklearn.metrics import accuracy_score, confusion_matrix
-from sklearn import tree
-import pandas as pd
 import logging
+
+from mllaunchpad import ModelInterface, ModelMakerInterface
+# from sklearn import tree
+# from sklearn.metrics import accuracy_score, confusion_matrix
+
 
 logger = logging.getLogger(__name__)
 
@@ -20,15 +21,19 @@ class MyExampleModelMaker(ModelMakerInterface):
     """Creates a model
     """
 
-    def create_trained_model(self, model_conf, data_sources, data_sinks, old_model=None):
-        df = data_sources['petals'].get_dataframe()
+    def create_trained_model(
+        self, model_conf, data_sources, data_sinks, old_model=None
+    ):
+        # df = data_sources["petals"].get_dataframe()
 
         ...
+        model = ...
 
         return model
 
     def test_trained_model(self, model_conf, data_sources, data_sinks, model):
         ...
+        metrics = ...
 
         return metrics
 
@@ -39,5 +44,6 @@ class MyExampleModel(ModelInterface):
 
     def predict(self, model_conf, data_sources, data_sinks, model, args_dict):
         ...
+        output = ...
 
         return output

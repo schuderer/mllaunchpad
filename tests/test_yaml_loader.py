@@ -1,16 +1,14 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """Tests for `mllaunchpad.yaml_loader module."""
 
 # Stdlib imports
 from unittest import mock
 
-# Third party
+# Third-party imports
 import yaml
 
-# Application imports
+# Project imports
 import mllaunchpad.yaml_loader as yloader
+
 
 test_file_yaml = b"""
     dbms: !include test

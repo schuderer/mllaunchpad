@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
-
+# Stdlib imports
 import abc
 import logging
+
 
 logger = logging.getLogger(__name__)
 

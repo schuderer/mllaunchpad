@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """This module provides the command line interface for ML Launchpad"""
 
 # Stdlib imports
@@ -9,11 +7,11 @@ import sys
 # Third-party imports
 from flask import Flask
 
-# Application imports
+# Project imports
 import mllaunchpad as lp
 from mllaunchpad import logutil
-from mllaunchpad.api import generate_raml
-from mllaunchpad.api import ModelApi
+from mllaunchpad.api import ModelApi, generate_raml
+
 
 HELP_STRING = """
 Parameters:

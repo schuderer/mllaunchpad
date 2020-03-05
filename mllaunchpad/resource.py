@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
-
 # Stdlib imports
 import abc
-from datetime import datetime
 import getpass
 import glob
 import json
@@ -10,8 +7,9 @@ import logging
 import os
 import shutil
 import sys
-from time import time
 import typing
+from datetime import datetime
+from time import time
 from typing import Dict, Tuple, Type, TypeVar, Union
 
 # Third-party imports
@@ -20,6 +18,7 @@ from typing import Dict, Tuple, Type, TypeVar, Union
 import dill as pickle  # nosec
 import numpy as np
 import pandas as pd
+
 
 DS = TypeVar("DS", "DataSource", "DataSink")
 

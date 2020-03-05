@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """This module contains functionality for generic creation
    and handling of RESTful APIs for Machine Learning Models.
    Among others, it handles parsing the RAML definition,
@@ -11,13 +9,13 @@ import logging
 import re
 
 # Third-party imports
-# from flask import Flask
-from flask_restful import Api, reqparse, Resource
 import ramlfications
+from flask_restful import Api, Resource, reqparse
 from werkzeug.datastructures import FileStorage
 
-# Application imports
+# Project imports
 from mllaunchpad import resource
+
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,11 @@
+# Stdlib imports
 import os
 from sys import platform
+
+# Third-party imports
+# Application imports
 import nox
+
 
 # Intro to Nox: https://www.youtube.com/watch?v=P3dY3uDmnkU
 # Example (also used with Travis CI):
@@ -10,8 +15,8 @@ ON_TRAVIS_CI = os.environ.get("TRAVIS")
 
 package_name = "mllaunchpad"
 my_py_ver = "3.7"
-autoformat = [package_name, "tests", "noxfile.py", "setup.py"]
-max_line_length = "79"
+files_to_format = [package_name, "tests", "noxfile.py", "setup.py"]
+max_line_length = "79"  # I don't want a pyproject.toml just for 'black'...
 min_coverage = "30"  # TODO: get to >= 90%
 
 # Skip "tests-3.7" by default as they are included in "coverage"
@@ -37,19 +42,31 @@ nox.options.sessions = ["format", "lint", "tests-3.6", "coverage", "docs"]
 @nox.session(name="format", python=my_py_ver)
 def format_code(session):
     """Run code reformatter"""
-    session.install("black")
-    session.run("black", "-l", max_line_length, *autoformat)
+    # session.install("-e", ".[lint]")
+    session.install("isort", "seed-isort-config", "black")
+    session.run("seed-isort-config", success_codes=[0, 1])
+    session.run("isort", "-rc", *files_to_format)
+    session.run("black", "-l", max_line_length, *files_to_format)
 
 
 @nox.session(python=my_py_ver)
 def lint(session):
     """Run code style and vulnerability checkers"""
-    session.install("flake8", "flake8-import-order", "black", "bandit")
-    session.run("black", "-l", max_line_length, "--check", *autoformat)
-    session.run(
-        "flake8", "--max-line-length=" + max_line_length, package_name, "tests"
+    # session.install("-e", ".[lint]")  # so isort can detect everything automatically, but heavy install
+    session.install(
+        "isort",
+        "seed-isort-config",
+        "black",
+        "flake8",
+        "flake8-isort",
+        "bandit",
     )
-    session.run("bandit", "-qr", "mllaunchpad", "noxfile.py", "setup.py")
+    session.run("seed-isort-config", success_codes=[0, 1])
+    session.run("black", "-l", max_line_length, "--check", *files_to_format)
+    session.run(
+        "flake8", "--max-line-length=" + max_line_length, *files_to_format
+    )
+    session.run("bandit", "-qr", *[f for f in files_to_format if f != "tests"])
 
 
 # In Travis-CI: session selected via env vars
