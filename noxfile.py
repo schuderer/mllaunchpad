@@ -70,7 +70,7 @@ def lint(session):
 
 
 # In Travis-CI: session selected via env vars
-@nox.session(python=["3.6", my_py_ver])
+@nox.session(python=["3.6", my_py_ver, "3.8"])
 def tests(session):
     """Run the unit test suite"""
     session.install("-e", ".[test]")
