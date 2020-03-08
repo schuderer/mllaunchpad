@@ -54,6 +54,7 @@ def lint(session):
     """Run code style and vulnerability checkers"""
     # session.install("-e", ".[lint]")  # so isort can detect everything automatically, but heavy install
     session.install(
+        "mypy",
         "isort",
         "seed-isort-config",
         "black",
@@ -61,6 +62,7 @@ def lint(session):
         "flake8-isort",
         "bandit",
     )
+    session.run("mypy", package_name)
     session.run("seed-isort-config", success_codes=[0, 1])
     session.run("black", "-l", max_line_length, "--check", *files_to_format)
     session.run(

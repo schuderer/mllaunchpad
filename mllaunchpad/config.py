@@ -5,6 +5,7 @@
 # Stdlib imports
 import logging
 import os
+from typing import Dict
 from warnings import warn
 
 # Third-party imports
@@ -19,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 CONFIG_DEFAULT = "./LAUNCHPAD_CFG.yml"
 CONFIG_ENV = os.environ.get("LAUNCHPAD_CFG", CONFIG_DEFAULT)
-required_config = {
+required_config: Dict[str, Dict] = {
     # datasources and datasinks are optional
     "model_store": {"location": {}},
     "model": {

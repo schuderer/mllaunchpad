@@ -7,10 +7,9 @@ import logging
 import os
 import shutil
 import sys
-import typing
 from datetime import datetime
 from time import time
-from typing import Dict, Tuple, Type, TypeVar, Union
+from typing import Dict, Iterable, List, Optional, Tuple, Type, TypeVar, Union
 
 # Third-party imports
 # We are only unpickling files which are completely under the
@@ -21,6 +20,7 @@ import pandas as pd
 
 
 DS = TypeVar("DS", "DataSource", "DataSink")
+
 
 logger = logging.getLogger(__name__)
 
@@ -176,14 +176,14 @@ def _tags_match(tags, other_tags) -> bool:
     return not tags_required or not tags_provided or tags_matching
 
 
-def _get_all_classes(config, the_type: Type[Union["DataSource", "DataSink"]]):
+def _get_all_classes(config, the_type: Type[DS]) -> Dict[str, Type[DS]]:
     modules = [__name__]  # find built_in types using same mechanism
     if "plugins" in config:
         logger.info("Loading %s plugins", the_type)
         # Append plugins so they can replace builtin types
         modules += config["plugins"]
 
-    ds_cls = {}
+    ds_cls: Dict[str, Type[DS]] = {}
     for module in modules:
         __import__(module)
         # Handle one import after another so plugins can replace builtin types
@@ -212,19 +212,22 @@ def _get_all_classes(config, the_type: Type[Union["DataSource", "DataSink"]]):
 
 
 def _create_data_sources_or_sinks(
-    config, the_type: Type[Union["DataSource", "DataSink"]], tags=None
-) -> Dict[str, Union["DataSource", "DataSink"]]:
+    config: Dict, the_type: Type[DS], tags: Iterable[str] = []
+) -> Dict[str, DS]:
     # Implementation note: no generator used because we want to fail early
-    ds_objects: Dict[DS] = {}
-
     if the_type == DataSource:
         what = "datasource"
         config_key = "datasources"
-    else:  # datasource_or_datasink == DataSink:
+    elif the_type == DataSink:
         what = "datasink"
         config_key = "datasinks"
+    else:
+        raise TypeError(
+            "`the_type` parameter must be `DataSource` or `DataSink`"
+        )
+    ds_objects: Dict[str, DS] = {}
 
-    ds_cls = _get_all_classes(config, the_type)
+    ds_cls: Dict[str, Type[DS]] = _get_all_classes(config, the_type)
     logger.debug("ds_cls=%s", ds_cls)
 
     if config_key not in config or not isinstance(config[config_key], dict):
@@ -261,14 +264,14 @@ def _create_data_sources_or_sinks(
                 ds_id, ds_config, ds_subtype_config
             )
 
-        logger.debug("Datasource %s initialized", ds_id)
+        logger.debug("%s %s initialized", what.capitalize(), ds_id)
 
-    typing.cast(Dict[str, the_type], ds_objects)
+    # typing.cast(Dict[str, DS], ds_objects)
     return ds_objects
 
 
 def create_data_sources_and_sinks(
-    config, tags=None
+    config: Dict, tags: Iterable[str] = []
 ) -> Tuple[Dict[str, "DataSource"], Dict[str, "DataSink"]]:
     """Creates the data sources as defined in the configuration dict.
     Filters them by tag.
@@ -281,11 +284,14 @@ def create_data_sources_and_sinks(
         dict with keys=datasource names, values=initialized DataSource objects
     """
 
+    # mypy is unfortunately only accepting instantiable classes here (no ABCs),
+    # which is a know issue: https://github.com/python/mypy/issues/5374
+    # Ignoring check for now, hoping for a solution/workaround soon.
     sources: Dict[str, DataSource] = _create_data_sources_or_sinks(
-        config, the_type=DataSource, tags=tags
+        config, the_type=DataSource, tags=tags  # type: ignore
     )
     sinks: Dict[str, DataSink] = _create_data_sources_or_sinks(
-        config, the_type=DataSink, tags=tags
+        config, the_type=DataSink, tags=tags  # type: ignore
     )
 
     return sources, sinks
@@ -296,9 +302,14 @@ class DataSource:
     Concrete DataSources (for files, data bases, etc.) need to inherit from this class.
     """
 
-    serves = []
+    serves: List[str] = []
 
-    def __init__(self, identifier, datasource_config):
+    def __init__(
+        self,
+        identifier: str,
+        datasource_config: Dict,
+        sub_config: Optional[Dict] = None,
+    ):
         """Please call super().__init(...) when overwriting this method
         """
         self.id = identifier
@@ -567,9 +578,14 @@ class DataSink:
     Concrete DataSinks (for files, data bases, etc.) need to inherit from this class.
     """
 
-    serves = []
+    serves: List[str] = []
 
-    def __init__(self, identifier, datasink_config):
+    def __init__(
+        self,
+        identifier: str,
+        datasink_config: Dict,
+        sub_config: Optional[Dict] = None,
+    ):
         """Please call super().__init(...) when overwriting this method
         """
         self.id = identifier
