@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """Tests for `mllaunchpad.api` module."""
 
 # Stdlib imports
@@ -11,7 +8,7 @@ from unittest.mock import patch
 import pytest
 import ramlfications
 
-# Application imports
+# Project imports
 import mllaunchpad.api as api
 from mllaunchpad.model_interface import ModelInterface
 

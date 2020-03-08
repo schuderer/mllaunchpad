@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
-
 """Convenience functions for executing training, testing and prediction"""
 
 # Stdlib imports
 import logging
 import sys
 
-# Application imports
+# Project imports
 from mllaunchpad import resource
 from mllaunchpad.model_interface import ModelInterface, ModelMakerInterface
+
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Stdlib imports
 import logging
 import logging.config
