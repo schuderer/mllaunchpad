@@ -1,9 +1,9 @@
 # Stdlib imports
 import os
 from sys import platform
+from zipfile import ZipFile
 
 # Third-party imports
-# Application imports
 import nox
 
 
@@ -102,24 +102,37 @@ def coverage(session):
 
 @nox.session(python=my_py_ver)
 def docs(session):
+    zip_file = os.path.join("docs", "_static", "examples.zip")
+    api_rst_file = os.path.join("docs", "{}.rst".format(package_name))
     if platform == "win32" or platform == "cygwin":
         cmdc = ["cmd", "/c"]  # Needed for calling builtin commands
         session.run(*cmdc, "DEL", "/S", "/Q", "docs\\_build", external=True)
         session.run(*cmdc, "DEL", "/S", "/Q", "docs\\generated", external=True)
         session.run(*cmdc, "DEL", "/Q", "docs\\modules.rst", external=True)
-        session.run(
-            *cmdc, "DEL", "/Q", "docs\\" + package_name + ".rst", external=True
-        )
+        session.run(*cmdc, "DEL", "/Q", zip_file, external=True)
+        session.run(*cmdc, "DEL", "/Q", api_rst_file, external=True)
     else:  # darwin, linux, linux2
         session.run("rm", "-rf", "docs/_build", external=True)
         session.run("rm", "-rf", "docs/generated", external=True)
         session.run("rm", "-f", "docs/modules.rst", external=True)
-        session.run("rm", "-f", "docs/" + package_name + ".rst", external=True)
+        session.run("rm", "-f", zip_file, external=True)
+        session.run("rm", "-f", api_rst_file, external=True)
     # These two installs would suffice did we not have to create API-docs.
     # Then we also wouldn't have to use pip-installs here at all.
     # session.install("sphinx")
     # session.install(".")
     session.install("-e", ".[docs]")
+
+    with ZipFile(zip_file, "w") as z:
+        base_path = "examples/"
+        exclude = set(("model_store", "__pycache__", ".DS_Store"))
+        len_base = len(base_path)
+        for file_dir, dirs, files in os.walk(base_path):
+            dirs[:] = [d for d in dirs if d not in exclude]
+            for file in files:
+                file_path = os.path.join(file_dir, file)
+                if not any([e in file_path for e in exclude]):
+                    z.write(file_path, file_path[len_base:])
 
     session.run(
         "sphinx-apidoc",
