@@ -129,7 +129,7 @@ The file ``tree_model.py`` looks like this at first:
 
 
 You can find a template like this in ML Launchpad's examples
-(`download the examples <https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/schuderer/mllaunchpad/tree/master/examples>`_,
+(`download the examples <https://mllaunchpad.readthedocs.io/en/latest/_static/examples.zip>`_,
 or copy-paste from ``TEMPLATE_model.py`` on `GitHub <https://github.com/schuderer/mllaunchpad/blob/master/examples/TEMPLATE_model.py>`_).
 
 The three methods
@@ -391,7 +391,7 @@ position of the ``static`` subfolder is governed by the ``api:root_path`` key
 (with a default value of ``.``) in your config file.
 
 You can find this and other examples `here <https://github.com/schuderer/mllaunchpad/>`_
-(`download <https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/schuderer/mllaunchpad/tree/master/examples>`_).
+(`download <https://mllaunchpad.readthedocs.io/en/latest/_static/examples.zip>`_).
 To run the ``tree`` example from this tutorial:
 
 .. code-block:: console
@@ -403,4 +403,4 @@ To run the ``tree`` example from this tutorial:
 Then open http://127.0.0.1:5000/static/tree.html in your browser.
 
 To learn more, have a look at the examples provided in `mllaunchpad's GitHub repository <https://github.com/schuderer/mllaunchpad/>`_
-(`examples as zip file <https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/schuderer/mllaunchpad/tree/master/examples>`_).
+(`examples as zip file <https://mllaunchpad.readthedocs.io/en/latest/_static/examples.zip>`_).
