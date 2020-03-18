@@ -242,7 +242,7 @@ class ModelApi:
             import tensorflow as tf
 
             graph = tf.get_default_graph()
-            self.model_wrapper.graph = graph
+            self.model_wrapper.__graph = graph
         except Exception as e:
             logger.debug(
                 'Optional tensorflow/flask workaround for "<tensor> is not an element of this graph" problem'
@@ -349,8 +349,8 @@ class ModelApi:
             inner_model,
             args_dict,
         ]
-        if hasattr(self.model_wrapper, "graph"):
-            with self.model_wrapper.graph.as_default():
+        if hasattr(self.model_wrapper, "__graph"):
+            with self.model_wrapper.__graph.as_default():
                 logger.info("Restored tensorflow model's graph")
                 raw_output = self.model_wrapper.predict(*predict_args)
         else:
