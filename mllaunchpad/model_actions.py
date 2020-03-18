@@ -53,6 +53,8 @@ def train_model(complete_conf, cache=True):
     )
     m_cls = _get_model_class(complete_conf, cache=cache)
     model_wrapper: ModelInterface = m_cls(contents=inner_model)
+    if resource._order_columns_called:
+        model_wrapper.__ordered_columns = True
 
     if not isinstance(model_wrapper, ModelInterface):
         logger.warning(
@@ -62,6 +64,7 @@ def train_model(complete_conf, cache=True):
 
     logger.debug("Testing trained model...")
     metrics = user_mm.test_trained_model(model_conf, dso, dsi, inner_model)
+    _check_ordered_columns(model_wrapper, "testing code", times=2)
 
     model_store = _get_model_store(complete_conf, cache=cache)
     model_store.dump_trained_model(complete_conf, model_wrapper, metrics)
@@ -101,6 +104,7 @@ def retest(complete_conf, cache=True):
     test_metrics = user_mm.test_trained_model(
         model_conf, dso, dsi, inner_model
     )
+    _check_ordered_columns(model_wrapper, "retesting code")
 
     model_store = _get_model_store(complete_conf, cache=cache)
     model_store.update_model_metrics(model_conf, test_metrics)
@@ -139,6 +143,8 @@ def predict(complete_conf, arg_dict=None, cache=True):
     output = model_wrapper.predict(
         model_conf, dso, dsi, inner_model, arg_dict or {}
     )
+    _check_ordered_columns(model_wrapper, "prediction code")
+
     output = resource.to_plain_python_obj(output)
 
     return output
@@ -321,3 +327,12 @@ def _get_data_sources_and_sinks(complete_conf, tags=None, cache=True):
             _cached_data_source_sink_tuples[key] = ds_tuple
 
     return ds_tuple
+
+
+def _check_ordered_columns(model_wrapper, what: str, times=1):
+    if hasattr(model_wrapper, "__ordered_columns"):
+        if resource._order_columns_called < times:
+            logger.warning(
+                "Model has been trained on ordered columns, but "
+                "{} does not call function order_columns.".format(what)
+            )

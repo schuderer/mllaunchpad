@@ -7,6 +7,7 @@ import logging
 import os
 import shutil
 import sys
+from collections import OrderedDict
 from datetime import datetime
 from time import time
 from typing import Dict, Iterable, List, Optional, Tuple, Type, TypeVar, Union
@@ -773,3 +774,35 @@ def to_plain_python_obj(possible_ndarray):
         return possible_ndarray.to_dict()
     else:
         return possible_ndarray
+
+
+_order_columns_called = 0
+
+
+def order_columns(obj: Union[pd.DataFrame, np.ndarray, Dict]):
+    # Implementation note: not using singledispatch due to necessary checks for all calls regardless of type.
+    # try:
+    #     caller = sys._getframe().f_back.f_code.co_name
+    # except AttributeError:
+    #     caller = None
+    global _order_columns_called
+    _order_columns_called += 1
+
+    if isinstance(obj, pd.DataFrame):
+        cols_sorted = sorted(obj.columns.tolist())
+        return obj[cols_sorted]
+    elif isinstance(obj, np.ndarray):
+        if obj.dtype.names:
+            cols_sorted = sorted(obj.dtype.names)
+            return obj[cols_sorted]
+        else:
+            raise TypeError(
+                "Non-structured numpy array does not have column names that can be ordered."
+            )
+    elif isinstance(obj, dict):
+        ordered = OrderedDict(sorted(obj.items()))
+        return ordered
+    else:
+        raise TypeError(
+            "`order_columns` called on unsupported type: {}".format(type(obj))
+        )

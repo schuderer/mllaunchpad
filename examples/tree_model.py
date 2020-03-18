@@ -1,7 +1,7 @@
 import logging
 
 # Third-party imports
-from mllaunchpad import ModelInterface, ModelMakerInterface
+from mllaunchpad import ModelInterface, ModelMakerInterface, order_columns
 import pandas as pd
 from sklearn import tree
 from sklearn.metrics import accuracy_score, confusion_matrix
@@ -37,14 +37,16 @@ class MyExampleModelMaker(ModelMakerInterface):
         X = df.drop("variety", axis=1)
         y = df["variety"]
 
+        X_ordered = order_columns(X)
+
         my_tree = tree.DecisionTreeClassifier()
-        my_tree.fit(X, y)
+        my_tree.fit(X_ordered, y)
 
         return my_tree
 
     def test_trained_model(self, model_conf, data_sources, data_sinks, model):
         df = data_sources["petals_test"].get_dataframe()
-        X_test = df.drop("variety", axis=1)
+        X_test = order_columns(df.drop("variety", axis=1))
         y_test = df["variety"]
 
         my_tree = model
@@ -74,14 +76,14 @@ class MyExampleModel(ModelInterface):
             )
             df = data_sources["batch_input"].get_dataframe()
             df["myid"] = df["myid"].apply(str)
-            X = df.loc[df["myid"] == key]
+            X = order_columns(df.loc[df["myid"] == key])
             my_tree = model
             y = my_tree.predict(X.drop("myid", axis=1))[0]
             return {"iris_variety": y}
         elif "sepal.length" not in args_dict or args_dict["sepal.length"] is None:
             # Batch prediction example
             logger.info("Doing batch prediction")
-            X = data_sources["batch_input"].get_dataframe()
+            X = order_columns(data_sources["batch_input"].get_dataframe())
             my_tree = model
             y = my_tree.predict(X.drop("myid", axis=1))
             X["pred"] = y
@@ -90,14 +92,7 @@ class MyExampleModel(ModelInterface):
 
         # "Normal" prediction example
         logger.info('Doing "normal" prediction')
-        X = pd.DataFrame(
-            {
-                "sepal.length": [args_dict["sepal.length"]],
-                "sepal.width": [args_dict["sepal.width"]],
-                "petal.length": [args_dict["petal.length"]],
-                "petal.width": [args_dict["petal.width"]],
-            }
-        )
+        X = order_columns(pd.DataFrame(args_dict, index=[0]))
 
         my_tree = model
         y = my_tree.predict(X)[0]

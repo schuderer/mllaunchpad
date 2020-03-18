@@ -7,6 +7,7 @@
 # Stdlib imports
 import logging
 import re
+from collections import OrderedDict
 
 # Third-party imports
 import ramlfications
@@ -341,13 +342,14 @@ class ModelApi:
     def predict_using_model(self, args_dict):
         logger.debug("Prediction input %s", dict(args_dict))
         logger.info("Starting prediction")
+        args_ordered_dict = OrderedDict(sorted(args_dict.items()))
         inner_model = self.model_wrapper.contents
         predict_args = [
             self.model_config,
             self.datasources,
             self.datasinks,
             inner_model,
-            args_dict,
+            args_ordered_dict,
         ]
         if hasattr(self.model_wrapper, "__graph"):
             with self.model_wrapper.__graph.as_default():
@@ -355,6 +357,16 @@ class ModelApi:
                 raw_output = self.model_wrapper.predict(*predict_args)
         else:
             raw_output = self.model_wrapper.predict(*predict_args)
+
+        if (
+            hasattr(self.model_wrapper, "__ordered_columns")
+            and not resource._order_columns_called
+        ):
+            logger.warning(
+                "Model has been trained on ordered columns, but "
+                "prediction does not call function order_columns."
+            )
+
         output = resource.to_plain_python_obj(raw_output)
         logger.debug("Prediction output %s", output)
         return output
