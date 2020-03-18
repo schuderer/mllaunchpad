@@ -25,6 +25,10 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ------------------------------------------------------------------------------
 
+* |Enhancement| Add utility user function ``order_columns`` for enforcing equal
+  data column order between data sources and API parameters,
+  `issue #37 <https://github.com/schuderer/mllaunchpad/issues/37>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Deprecated| 'api:version:' to be removed from  configuration ('model:version:'
   will be the only location to specify both the model and the API version),
   `issue #66 <https://github.com/schuderer/mllaunchpad/issues/66>`_,
