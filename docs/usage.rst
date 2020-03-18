@@ -47,7 +47,9 @@ Contents of ``tree_script.py``:
 
 
     def predict(model, args_dict):
-        # Create DF explicitly. No guarantee that dict keys are in correct order
+        # Create DF explicitly. No guarantee that dict keys are in correct order,
+        # so we have to make sure *manually* that they match the column order we used
+        # when training the model:
         X = pd.DataFrame({
             'sepal.length': [args_dict['sepal.length']],
             'sepal.width': [args_dict['sepal.width']],
@@ -143,7 +145,7 @@ ML Launchpad.
 
 Here, we'll make use of the method arguments ``data_sources`` and ``model``.
 See :mod:`~mllaunchpad.model_interface` for details on all available
-parameters.
+arguments.
 
 If we call our training :class:`~mllaunchpad.resource.DataSource` ``petals`` and our test
 DataSource ``petals_test``, our completed ``tree_model.py`` looks
@@ -151,7 +153,7 @@ like this (we highlight changed code with ``#comments``):
 
 .. code-block:: python
 
-    from mllaunchpad import ModelInterface, ModelMakerInterface
+    from mllaunchpad import ModelInterface, ModelMakerInterface, order_columns
     from sklearn.metrics import accuracy_score, confusion_matrix
     from sklearn import tree
     import pandas as pd
@@ -164,7 +166,8 @@ like this (we highlight changed code with ``#comments``):
 
         def create_trained_model(self, model_conf, data_sources, data_sinks, old_model=None):
             # use data_source instead of reading CSV ourselves:
-            df = data_sources['petals'].get_dataframe()
+            df_unordered = data_sources['petals'].get_dataframe()
+            df = order_columns(df_unordered)  # make col order reproducible for API use
             X = df.drop('variety', axis=1)
             y = df['variety']
             model = tree.DecisionTreeClassifier()
@@ -173,7 +176,8 @@ like this (we highlight changed code with ``#comments``):
 
         def test_trained_model(self, model_conf, data_sources, data_sinks, model):
             # use data_source instead of reading CSV ourselves:
-            df = data_sources['petals_test'].get_dataframe()
+            df_unordered = data_sources['petals_test'].get_dataframe()
+            df = order_columns(df_unordered)  # make col order reproducible for API use
             X_test = df.drop('variety', axis=1)
             y_test = df['variety']
             y_predict = model.predict(X_test)
@@ -187,13 +191,16 @@ like this (we highlight changed code with ``#comments``):
         """Uses the created Iris prediction model"""
 
         def predict(self, model_conf, data_sources, data_sinks, model, args_dict):
-            # No changes required
-            X = pd.DataFrame({
-                'sepal.length': [args_dict['sepal.length']],
-                'sepal.width': [args_dict['sepal.width']],
-                'petal.length': [args_dict['petal.length']],
-                'petal.width': [args_dict['petal.width']]
-                })
+            # No changes required, but instead of this clumsy construct here...
+            # X = pd.DataFrame({
+            #     'sepal.length': [args_dict['sepal.length']],
+            #     'sepal.width': [args_dict['sepal.width']],
+            #     'petal.length': [args_dict['petal.length']],
+            #     'petal.width': [args_dict['petal.width']]
+            #     })
+            # ... we can use this much shorter method thanks to using
+            # order_columns earlier, guaranteeing deterministic column ordering:
+            X = order_columns(pd.DataFrame(args_dict, index=[0]))
             y = model.predict(X)[0]
             return {'prediction': y}
 

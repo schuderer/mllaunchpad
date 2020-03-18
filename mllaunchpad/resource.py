@@ -780,6 +780,21 @@ _order_columns_called = 0
 
 
 def order_columns(obj: Union[pd.DataFrame, np.ndarray, Dict]):
+    """Order the columns of a DataFrame, a dict, or a Numpy structured array.
+    Use this on your training data right before passing it into the model.
+    This will guarantee that the model is trained with a reproducible column order.
+
+    Same in your test code.
+
+    Most importantly, use this also in your `predict` method, as the incoming
+    `args_dict` does not have a deterministic order.
+
+    Params:
+        obj: a DataFrame, a dict, or a Numpy structured array
+
+    Returns:
+        The `obj` with columns ordered lexicographically
+    """
     # Implementation note: not using singledispatch due to necessary checks for all calls regardless of type.
     # try:
     #     caller = sys._getframe().f_back.f_code.co_name
