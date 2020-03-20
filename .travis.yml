@@ -21,20 +21,15 @@ language: python
 
 matrix:
   include:
-    # - python: '3.5'
-    #   env: NOXSESSIONS="tests-3.5"
     - python: '3.6'
       env: NOXSESSIONS="tests-3.6"
-    - python: '3.7'  # Also test docs with latest supported python version
+    - python: '3.8'  # Also test docs with latest supported python version
+      dist: xenial
+      env: NOXSESSIONS="tests-3.8"
+    - python: '3.7'
       dist: xenial  # required for Python >= 3.7
       env: NOXSESSIONS="coverage-3.7 lint docs"
-    # - python: '3.6'
-    #   env: NOXSESSIONS="tests-2.7"
-  # allow_failures:
-  #   - python: '3.6'
-  #     env: NOXSESSIONS="tests-2.7"
-  #   - python: '3.5'
-  #     env: NOXSESSIONS="tests-3.5"
+
 
 cache: pip
 

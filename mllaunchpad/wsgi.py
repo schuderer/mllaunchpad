@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """This module contains the WSGI app to start using a WSGI server like
    e.g. gunicorn or Apache with mod_wsgi.
 
@@ -13,10 +11,10 @@ import logging
 # Third-party imports
 from flask import Flask
 
-# Application imports
-from mllaunchpad import config
-from mllaunchpad import logutil
+# Project imports
+from mllaunchpad import config, logutil
 from mllaunchpad.api import ModelApi
+
 
 logutil.init_logging()
 logger = logging.getLogger(__name__)

@@ -87,6 +87,8 @@ like ``<my_model_name>.py``, a configuration file like
 ``<my_model>_cfg.yml`` and a REST API definition file like
 ``<my_model>.raml``.
 
+**Note**: For a step-by-step guide on this part, see the :ref:`tutorial` section.
+
 (To help with getting the RAML file started, the command
 ``mllaunchpad -g my_source`` is used.)
 
@@ -265,7 +267,7 @@ deployment of one model in a low to medium load setting:
   management or load balancing, we outsource this to tools which are
   better at this, like ``nginx`` (which needs its own configuration
   file, of which you can find an example in the
-  `examples download <https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/schuderer/mllaunchpad/tree/master/examples>`_)::
+  `examples download <https://mllaunchpad.readthedocs.io/en/latest/_static/examples.zip>`_)::
 
     $ nginx -c /home/my_user/example/nginx.conf -p /home/my_user/example/nginx
 

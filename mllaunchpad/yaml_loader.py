@@ -1,6 +1,7 @@
+# Stdlib imports
 import os
 
-# Third party import
+# Third-party imports
 import yaml
 
 
