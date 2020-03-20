@@ -2,6 +2,80 @@
 Usage
 ==============================================================================
 
+.. contents:: :local:
+
+.. _cli:
+
+Command Line Interface
+------------------------------------------------------------------------------
+
+ML Launchpad's command line interface us usually only used when developing and
+preparing a machine learning application. When actually
+running the API in production, a WSGI server (e.g. Gunicorn
+or Waitress) is used to run ``mllaunchpad.wsgi:application`` instead
+(the config file is then provided via an environment variable).
+
+Usage:
+
+.. code-block:: console
+
+    $ mllaunchpad [OPTIONS]
+
+.. program:: mllaunchpad
+
+Options:
+
+.. option:: -c <config_file>, --config <config_file>
+
+    (Optional) Load configuration from <config_file>
+
+.. option:: -t, --train
+
+    Train, test and then store a new model (with test results).
+
+.. option:: -r, --retest
+
+    Retest an existing model and add test results to metadata.
+
+.. option:: -p, --predict
+
+    Run prediction on an existing model (with empty input).
+
+.. option:: -a, --api
+
+    Run API server (in debug mode, UNSAFE).
+
+.. option:: -g <data_source>, --generateraml  <data_source>
+
+    Generate and print RAML template based on data source <data_source>.
+
+.. option:: -h, --help
+
+    Print help.
+
+.. option:: -v, --version
+
+    Print the version.
+
+Environment variables:
+
+.. envvar:: LAUNCHPAD_CFG
+
+    (Optional) path to :doc:`configuration file <config>`
+
+.. envvar:: LAUNCHPAD_LOG
+
+    (Optional) path to `logging configuration file <https://docs.python.org/3.8/library/logging.config.html>`_
+
+
+Configuration
+------------------------------------------------------------------------------
+
+See separate page :doc:`config`.
+
+
+.. _tutorial:
+
 Tutorial
 ------------------------------------------------------------------------------
 
@@ -131,7 +205,7 @@ The file ``tree_model.py`` looks like this at first:
 
 
 You can find a template like this in ML Launchpad's examples
-(`download the examples <https://mllaunchpad.readthedocs.io/en/latest/_static/examples.zip>`_,
+(:download:`download the examples <_static/examples.zip>`,
 or copy-paste from ``TEMPLATE_model.py`` on `GitHub <https://github.com/schuderer/mllaunchpad/blob/master/examples/TEMPLATE_model.py>`_).
 
 The three methods
@@ -398,7 +472,7 @@ position of the ``static`` subfolder is governed by the ``api:root_path`` key
 (with a default value of ``.``) in your config file.
 
 You can find this and other examples `here <https://github.com/schuderer/mllaunchpad/>`_
-(`download <https://mllaunchpad.readthedocs.io/en/latest/_static/examples.zip>`_).
+(`download <_static/examples.zip>`_).
 To run the ``tree`` example from this tutorial:
 
 .. code-block:: console
@@ -410,4 +484,4 @@ To run the ``tree`` example from this tutorial:
 Then open http://127.0.0.1:5000/static/tree.html in your browser.
 
 To learn more, have a look at the examples provided in `mllaunchpad's GitHub repository <https://github.com/schuderer/mllaunchpad/>`_
-(`examples as zip file <https://mllaunchpad.readthedocs.io/en/latest/_static/examples.zip>`_).
+(`examples as zip file <_static/examples.zip>`_).
