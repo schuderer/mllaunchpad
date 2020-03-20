@@ -805,7 +805,7 @@ def order_columns(obj: Union[pd.DataFrame, np.ndarray, Dict]):
 
     if isinstance(obj, pd.DataFrame):
         cols_sorted = sorted(obj.columns.tolist())
-        return obj[cols_sorted]
+        return obj.loc[:, cols_sorted]
     elif isinstance(obj, np.ndarray):
         if obj.dtype.names:
             cols_sorted = sorted(obj.dtype.names)

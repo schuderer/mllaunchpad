@@ -18,6 +18,11 @@ _cached_data_source_sink_tuples = {}
 _cached_model_makers = {}
 _cached_model_classes = {}
 
+suppress_order_columns_not_used_warning = (
+    "To adjust this warning, set model config's `order_columns_not_used_warning` "
+    "to `always` (default), `test_and_predict` or `never`."
+)
+
 
 def train_model(complete_conf, cache=True):
     """Train and test a model as specified in the configuration and persist
@@ -53,8 +58,17 @@ def train_model(complete_conf, cache=True):
     )
     m_cls = _get_model_class(complete_conf, cache=cache)
     model_wrapper: ModelInterface = m_cls(contents=inner_model)
+
     if resource._order_columns_called:
         model_wrapper.__ordered_columns = True
+    elif (
+        "order_columns_not_used_warning" not in model_conf
+        or model_conf["order_columns_not_used_warning"] == "always"
+    ):
+        logger.warning(
+            "Training code does not call function order_columns. "
+            + suppress_order_columns_not_used_warning
+        )
 
     if not isinstance(model_wrapper, ModelInterface):
         logger.warning(
@@ -64,7 +78,9 @@ def train_model(complete_conf, cache=True):
 
     logger.debug("Testing trained model...")
     metrics = user_mm.test_trained_model(model_conf, dso, dsi, inner_model)
-    _check_ordered_columns(model_wrapper, "testing code", times=2)
+    _check_ordered_columns(
+        complete_conf, model_wrapper, "testing code", times=2
+    )
 
     model_store = _get_model_store(complete_conf, cache=cache)
     model_store.dump_trained_model(complete_conf, model_wrapper, metrics)
@@ -104,7 +120,7 @@ def retest(complete_conf, cache=True):
     test_metrics = user_mm.test_trained_model(
         model_conf, dso, dsi, inner_model
     )
-    _check_ordered_columns(model_wrapper, "retesting code")
+    _check_ordered_columns(complete_conf, model_wrapper, "retesting code")
 
     model_store = _get_model_store(complete_conf, cache=cache)
     model_store.update_model_metrics(model_conf, test_metrics)
@@ -143,7 +159,7 @@ def predict(complete_conf, arg_dict=None, cache=True):
     output = model_wrapper.predict(
         model_conf, dso, dsi, inner_model, arg_dict or {}
     )
-    _check_ordered_columns(model_wrapper, "prediction code")
+    _check_ordered_columns(complete_conf, model_wrapper, "prediction code")
 
     output = resource.to_plain_python_obj(output)
 
@@ -329,10 +345,17 @@ def _get_data_sources_and_sinks(complete_conf, tags=None, cache=True):
     return ds_tuple
 
 
-def _check_ordered_columns(model_wrapper, what: str, times=1):
+def _check_ordered_columns(complete_conf, model_wrapper, what: str, times=1):
+    if (
+        "order_columns_not_used_warning" in complete_conf["model"]
+        and complete_conf["model"]["order_columns_not_used_warning"] == "never"
+    ):
+        return
     if hasattr(model_wrapper, "__ordered_columns"):
         if resource._order_columns_called < times:
             logger.warning(
                 "Model has been trained on ordered columns, but "
-                "{} does not call function order_columns.".format(what)
+                "{} does not call function order_columns. {}".format(
+                    what, suppress_order_columns_not_used_warning
+                )
             )
