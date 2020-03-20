@@ -2,6 +2,80 @@
 Usage
 ==============================================================================
 
+.. contents:: :local:
+
+.. _cli:
+
+Command Line Interface
+------------------------------------------------------------------------------
+
+ML Launchpad's command line interface us usually only used when developing and
+preparing a machine learning application. When actually
+running the API in production, a WSGI server (e.g. Gunicorn
+or Waitress) is used to run ``mllaunchpad.wsgi:application`` instead
+(the config file is then provided via an environment variable).
+
+Usage:
+
+.. code-block:: console
+
+    $ mllaunchpad [OPTIONS]
+
+.. program:: mllaunchpad
+
+Options:
+
+.. option:: -c <config_file>, --config <config_file>
+
+    (Optional) Load configuration from <config_file>
+
+.. option:: -t, --train
+
+    Train, test and then store a new model (with test results).
+
+.. option:: -r, --retest
+
+    Retest an existing model and add test results to metadata.
+
+.. option:: -p, --predict
+
+    Run prediction on an existing model (with empty input).
+
+.. option:: -a, --api
+
+    Run API server (in debug mode, UNSAFE).
+
+.. option:: -g <data_source>, --generateraml  <data_source>
+
+    Generate and print RAML template based on data source <data_source>.
+
+.. option:: -h, --help
+
+    Print help.
+
+.. option:: -v, --version
+
+    Print the version.
+
+Environment variables:
+
+.. envvar:: LAUNCHPAD_CFG
+
+    (Optional) path to :doc:`configuration file <config>`
+
+.. envvar:: LAUNCHPAD_LOG
+
+    (Optional) path to `logging configuration file <https://docs.python.org/3.8/library/logging.config.html>`_
+
+
+Configuration
+------------------------------------------------------------------------------
+
+See separate page :doc:`config`.
+
+
+.. _tutorial:
+
 Tutorial
 ------------------------------------------------------------------------------
 
@@ -47,7 +121,9 @@ Contents of ``tree_script.py``:
 
 
     def predict(model, args_dict):
-        # Create DF explicitly. No guarantee that dict keys are in correct order
+        # Create DF explicitly. No guarantee that dict keys are in correct order,
+        # so we have to make sure *manually* that they match the column order we used
+        # when training the model:
         X = pd.DataFrame({
             'sepal.length': [args_dict['sepal.length']],
             'sepal.width': [args_dict['sepal.width']],
@@ -129,7 +205,7 @@ The file ``tree_model.py`` looks like this at first:
 
 
 You can find a template like this in ML Launchpad's examples
-(`download the examples <https://mllaunchpad.readthedocs.io/en/latest/_static/examples.zip>`_,
+(:download:`download the examples <_static/examples.zip>`,
 or copy-paste from ``TEMPLATE_model.py`` on `GitHub <https://github.com/schuderer/mllaunchpad/blob/master/examples/TEMPLATE_model.py>`_).
 
 The three methods
@@ -143,7 +219,7 @@ ML Launchpad.
 
 Here, we'll make use of the method arguments ``data_sources`` and ``model``.
 See :mod:`~mllaunchpad.model_interface` for details on all available
-parameters.
+arguments.
 
 If we call our training :class:`~mllaunchpad.resource.DataSource` ``petals`` and our test
 DataSource ``petals_test``, our completed ``tree_model.py`` looks
@@ -151,7 +227,7 @@ like this (we highlight changed code with ``#comments``):
 
 .. code-block:: python
 
-    from mllaunchpad import ModelInterface, ModelMakerInterface
+    from mllaunchpad import ModelInterface, ModelMakerInterface, order_columns
     from sklearn.metrics import accuracy_score, confusion_matrix
     from sklearn import tree
     import pandas as pd
@@ -164,7 +240,8 @@ like this (we highlight changed code with ``#comments``):
 
         def create_trained_model(self, model_conf, data_sources, data_sinks, old_model=None):
             # use data_source instead of reading CSV ourselves:
-            df = data_sources['petals'].get_dataframe()
+            df_unordered = data_sources['petals'].get_dataframe()
+            df = order_columns(df_unordered)  # make col order reproducible for API use
             X = df.drop('variety', axis=1)
             y = df['variety']
             model = tree.DecisionTreeClassifier()
@@ -173,7 +250,8 @@ like this (we highlight changed code with ``#comments``):
 
         def test_trained_model(self, model_conf, data_sources, data_sinks, model):
             # use data_source instead of reading CSV ourselves:
-            df = data_sources['petals_test'].get_dataframe()
+            df_unordered = data_sources['petals_test'].get_dataframe()
+            df = order_columns(df_unordered)  # make col order reproducible for API use
             X_test = df.drop('variety', axis=1)
             y_test = df['variety']
             y_predict = model.predict(X_test)
@@ -187,13 +265,16 @@ like this (we highlight changed code with ``#comments``):
         """Uses the created Iris prediction model"""
 
         def predict(self, model_conf, data_sources, data_sinks, model, args_dict):
-            # No changes required
-            X = pd.DataFrame({
-                'sepal.length': [args_dict['sepal.length']],
-                'sepal.width': [args_dict['sepal.width']],
-                'petal.length': [args_dict['petal.length']],
-                'petal.width': [args_dict['petal.width']]
-                })
+            # No changes required, but instead of this clumsy construct here...
+            # X = pd.DataFrame({
+            #     'sepal.length': [args_dict['sepal.length']],
+            #     'sepal.width': [args_dict['sepal.width']],
+            #     'petal.length': [args_dict['petal.length']],
+            #     'petal.width': [args_dict['petal.width']]
+            #     })
+            # ... we can use this much shorter method thanks to using
+            # order_columns earlier, guaranteeing deterministic column ordering:
+            X = order_columns(pd.DataFrame(args_dict, index=[0]))
             y = model.predict(X)[0]
             return {'prediction': y}
 
@@ -391,7 +472,7 @@ position of the ``static`` subfolder is governed by the ``api:root_path`` key
 (with a default value of ``.``) in your config file.
 
 You can find this and other examples `here <https://github.com/schuderer/mllaunchpad/>`_
-(`download <https://mllaunchpad.readthedocs.io/en/latest/_static/examples.zip>`_).
+(`download <_static/examples.zip>`_).
 To run the ``tree`` example from this tutorial:
 
 .. code-block:: console
@@ -403,4 +484,4 @@ To run the ``tree`` example from this tutorial:
 Then open http://127.0.0.1:5000/static/tree.html in your browser.
 
 To learn more, have a look at the examples provided in `mllaunchpad's GitHub repository <https://github.com/schuderer/mllaunchpad/>`_
-(`examples as zip file <https://mllaunchpad.readthedocs.io/en/latest/_static/examples.zip>`_).
+(`examples as zip file <_static/examples.zip>`_).

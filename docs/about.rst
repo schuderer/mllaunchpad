@@ -87,6 +87,8 @@ like ``<my_model_name>.py``, a configuration file like
 ``<my_model>_cfg.yml`` and a REST API definition file like
 ``<my_model>.raml``.
 
+**Note**: For a step-by-step guide on this part, see the :ref:`tutorial` section.
+
 (To help with getting the RAML file started, the command
 ``mllaunchpad -g my_source`` is used.)
 

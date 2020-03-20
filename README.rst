@@ -149,7 +149,7 @@ What next?
 
 Have a look at the ``addition`` example’s python code (and comments),
 its yml config, then look at the other examples. First, we suggest the
-``iris`` example for intermediate complexity (although its prediction
+``tree`` example for intermediate complexity (although its prediction
 code does quite some complex stuff to be compatible with three different
 kinds of prediction usage, which is not really that realistic).
 
