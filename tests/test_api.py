@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """Tests for `mllaunchpad.api` module."""
 
 # Stdlib imports
@@ -11,7 +8,7 @@ from unittest.mock import patch
 import pytest
 import ramlfications
 
-# Application imports
+# Project imports
 import mllaunchpad.api as api
 from mllaunchpad.model_interface import ModelInterface
 
@@ -43,7 +40,7 @@ def parsed_raml(string):
 
 
 minimal_config = {
-    "model_store": {"location": "asdfasdf"},
+    "model_store": {"location": "model_store"},
     "model": {"name": "my_model", "version": "1.2.3", "module": "my_module"},
     "api": {"name": "my_api", "version": "1.2.3", "raml": "bla.raml"},
 }

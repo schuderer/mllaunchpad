@@ -1,21 +1,18 @@
-# -*- coding: utf-8 -*-
-
 """This module provides the command line interface for ML Launchpad"""
 
 # Stdlib imports
 import json
-from logging import Logger
 import sys
+from logging import Logger
 
 # Third-party imports
 import click
 from flask import Flask
 
-# Application imports
+# Project imports
 import mllaunchpad as lp
 from mllaunchpad import logutil
-from mllaunchpad.api import generate_raml
-from mllaunchpad.api import ModelApi
+from mllaunchpad.api import ModelApi, generate_raml
 
 
 # Fix for click using the wrong name if run using `python -m mllaunchpad`

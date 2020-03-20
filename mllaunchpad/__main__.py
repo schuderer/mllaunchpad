@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 # Stdlib imports
 import sys
 
-# Application imports
+# Project imports
 import mllaunchpad.cli as cli
 
 

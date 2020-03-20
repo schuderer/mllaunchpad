@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """This module contains functionality for reading and validating the
    configuration.
 """
@@ -7,20 +5,22 @@
 # Stdlib imports
 import logging
 import os
+from typing import Dict
 from warnings import warn
 
 # Third-party imports
 import yaml  # https://camel.readthedocs.io/en/latest/yamlref.html
 
-# Own project
-from mllaunchpad import __version__ as mllp_version
+# Project imports
+import mllaunchpad
 from mllaunchpad.yaml_loader import Loader
+
 
 logger = logging.getLogger(__name__)
 
 CONFIG_DEFAULT = "./LAUNCHPAD_CFG.yml"
 CONFIG_ENV = os.environ.get("LAUNCHPAD_CFG", CONFIG_DEFAULT)
-required_config = {
+required_config: Dict[str, Dict] = {
     # datasources and datasinks are optional
     "model_store": {"location": {}},
     "model": {
@@ -48,7 +48,7 @@ def validate_config(config_dict, required, path=""):
 
 def check_semantics(config_dict):
     if "api" in config_dict and "version" in config_dict["api"]:
-        if mllp_version < "1.0.0":
+        if mllaunchpad.__version__ < "1.0.0":
             warn(
                 "Specifying 'version' in the config's 'api' section is "
                 "deprecated and will lead to an error in mllaunchpad>=1.0.0. "

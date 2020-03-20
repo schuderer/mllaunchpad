@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """Tests for `mllaunchpad.config` module."""
 
 # Stdlib imports
@@ -9,9 +6,10 @@ from unittest import mock
 # Third-party imports
 import pytest
 
-# Application imports
-from mllaunchpad import __version__ as mllp_version
+# Project imports
+import mllaunchpad
 import mllaunchpad.config as config
+
 
 test_file_valid = b"""
 blabla:
@@ -149,7 +147,7 @@ def test_config_api_version_deprecation():
         mo,  # <-- use our mock variable here
         create=True,
     ):
-        if mllp_version < "1.0.0":
+        if mllaunchpad.__version__ < "1.0.0":
             with pytest.warns(DeprecationWarning):
                 _ = config.get_validated_config("lalala")
         else:

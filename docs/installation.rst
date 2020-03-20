@@ -2,6 +2,8 @@
 Installation
 ==============================================================================
 
+This page covers installation for users. If you want to contribute to
+ML Launchpad, please see :doc:`Contributing <contributing>`.
 
 Stable release
 ------------------------------------------------------------------------------
@@ -22,7 +24,7 @@ you through the process.
 .. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
 
 
-Development version
+From latest source
 ------------------------------------------------------------------------------
 
 The sources for ML Launchpad can be downloaded from the `Github repo`_.
@@ -52,7 +54,8 @@ Once you have a copy of the source, you can install it with:
 .. code-block:: console
 
     $ python setup.py install
-
+    $ # or alternatively:
+    $ pip install .
 
 .. _Github repo: https://github.com/schuderer/mllaunchpad
 .. _tarball: https://github.com/schuderer/mllaunchpad/tarball/master

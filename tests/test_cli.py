@@ -1,16 +1,12 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """Tests for `mllaunchpad.cli` module."""
 
 # Stdlib imports
 import sys
 
 # Third-party imports
-# from click.testing import CliRunner
 import pytest
 
-# Application imports
+# Project imports
 import mllaunchpad.cli as cli
 
 

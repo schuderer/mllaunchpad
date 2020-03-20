@@ -9,7 +9,7 @@ REM NOTE: Does NOT replace python launcher for other purposes!
 
 REM Check for presence of py.exe, so that this batch file
 REM does not break a working python launcher in the path.
-where py.exe 2>NUL
+where DISABLEDpy.exe 2>NUL
 if %errorlevel%==0 (
   py.exe %*
 ) else (
