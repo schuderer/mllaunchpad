@@ -5,23 +5,30 @@ Quick Start
 
 .. image:: https://img.shields.io/pypi/v/mllaunchpad.svg?color=blue
         :target: https://pypi.python.org/pypi/mllaunchpad
+        :alt: ML Launchpad on PyPI
 
 .. image:: https://img.shields.io/pypi/pyversions/mllaunchpad.svg?color=blue
         :target: https://pypi.python.org/pypi/mllaunchpad
-
+        :alt: Compatible Python Versions
 .. image:: https://img.shields.io/github/license/schuderer/mllaunchpad.svg?color=blue
      :target: https://github.com/schuderer/mllaunchpad/blob/master/LICENSE
-     :alt: LGPLv3 License
+     :alt: Apache 2.0 License
 
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
-     :target: https://github.com/python/black
-     :alt: Code Style Black
+.. .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+..      :target: https://github.com/python/black
+..      :alt: Code Style Black
+
+.. image:: https://api.codacy.com/project/badge/Grade/6feb5459864448a49b43bf3bef4468bd
+   :target: https://app.codacy.com/manual/schuderer/mllaunchpad?utm_source=github.com&utm_medium=referral&utm_content=schuderer/mllaunchpad&utm_campaign=Badge_Grade_Dashboard
+   :alt: Codacy Badge
 
 .. image:: https://img.shields.io/travis/schuderer/mllaunchpad.svg
        :target: https://travis-ci.org/schuderer/mllaunchpad
+       :alt: Build CI
 
 .. image:: https://coveralls.io/repos/github/schuderer/mllaunchpad/badge.svg?branch=master
      :target: https://coveralls.io/github/schuderer/mllaunchpad?branch=master
+     :alt: Unit Test Coverage
 
 .. .. image:: https://pyup.io/repos/github/schuderer/mllaunchpad/shield.svg
 ..     :target: https://pyup.io/repos/github/schuderer/mllaunchpad/
@@ -36,7 +43,7 @@ ML Launchpad lets you easily make Machine Learning models available as
 REST API. It also offers lightweight model life cycle
 management functionality.
 
-What this means is that it creates a separation between machine learning
+It creates a separation between machine learning
 models and their environment. This way, you can run your model with
 different data sources and on different environments, by just swapping
 out the configuration, no code changes required. ML Launchpad makes your
@@ -60,7 +67,7 @@ Getting started
 
   $ pip install mllaunchpad
 
-Download the `example files <https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/schuderer/mllaunchpad/tree/master/examples>`_
+Download the `example files <https://mllaunchpad.readthedocs.io/en/latest/_static/examples.zip>`_
 from the ML Launchpad GitHub repo. Some of them might require the installations
 of some extra packages (e.g. scikit-learn), depending on what they demonstrate.
 
@@ -72,7 +79,7 @@ If you want to work on ML Launchpad itself, see `Contributing <https://mllaunchp
 What's in the box?
 ------------------------------------------------------------------------------
 
-If you installed from source, you see several subfolders, where ``mllaunchpad``
+If you downloaded the source, you see several subfolders, where ``mllaunchpad``
 is the actual ML Launchpad package and the rest are examples and
 development tools. You can safely ignore anything except the examples.
 
@@ -96,8 +103,8 @@ in gunicorn behind nginx.
 Try Out the Examples
 ------------------------------------------------------------------------------
 
-In the following, it is assumed that the examples are located in the
-current directory.
+In the following, it is assumed that ``mllaunchpad`` is `installed <https://mllaunchpad.readthedocs.io/en/latest/installation.html>`_ and
+the `examples <https://mllaunchpad.readthedocs.io/en/latest/_static/examples.zip>`_ are located in the current directory.
 
 To train a very, *very* simple example model whose job it is to add two
 numbers, use the command:
@@ -142,7 +149,7 @@ What next?
 
 Have a look at the ``addition`` example’s python code (and comments),
 its yml config, then look at the other examples. First, we suggest the
-``iris`` example for intermediate complexity (although its prediction
+``tree`` example for intermediate complexity (although its prediction
 code does quite some complex stuff to be compatible with three different
 kinds of prediction usage, which is not really that realistic).
 

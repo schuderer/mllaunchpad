@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """This module provides the command line interface for ML Launchpad"""
 
 # Stdlib imports
@@ -9,11 +7,11 @@ import sys
 # Third-party imports
 from flask import Flask
 
-# Application imports
+# Project imports
 import mllaunchpad as lp
 from mllaunchpad import logutil
-from mllaunchpad.api import generate_raml
-from mllaunchpad.api import ModelApi
+from mllaunchpad.api import ModelApi, generate_raml
+
 
 HELP_STRING = """
 Parameters:
@@ -45,23 +43,21 @@ def main():
         "generateraml=",
     ]
     try:
-        arguments, values = getopt.getopt(
-            argumentList, unixOptions, gnuOptions
-        )
+        arguments, _ = getopt.getopt(argumentList, unixOptions, gnuOptions)
     except getopt.error as err:
         # output error, and return with an error code
         print(str(err), file=sys.stderr)
         sys.exit(2)
     # evaluate given options
     cmd = None
-    conf = None
-    logger = None
+    conffile = None
+    logfile = None
     raml_ds = None
     for currentArgument, currentValue in arguments:
-        if currentArgument in ("-c", "--config"):
-            conf = lp.get_validated_config(currentValue)
-        elif currentArgument in ("-l", "--logconfig"):
-            logger = logutil.init_logging(currentValue)
+        if currentArgument in ("-l", "--logconfig"):
+            logfile = currentValue
+        elif currentArgument in ("-c", "--config"):
+            conffile = currentValue
         elif currentArgument in ("-t", "--train"):
             cmd = "train"
         elif currentArgument in ("-r", "--retest"):
@@ -85,10 +81,17 @@ def main():
         print(HELP_STRING, file=sys.stderr)
         exit(1)
 
-    logger = logger or logutil.init_logging()
-    conf = conf or lp.get_validated_config()
+    # Initialize logging before any other library code so that we can log stuff
+    logger = (
+        logutil.init_logging(logfile) if logfile else logutil.init_logging()
+    )
+    conf = (
+        lp.get_validated_config(conffile)
+        if conffile
+        else lp.get_validated_config()
+    )
     if cmd == "train":
-        model, metrics = lp.train_model(conf)
+        _, _ = lp.train_model(conf)
     elif cmd == "retest":
         _ = lp.retest(conf)
     elif cmd == "predict":
@@ -103,7 +106,9 @@ def main():
         )
         app = Flask(__name__, root_path=conf["api"].get("root_path"))
         ModelApi(conf, app)
-        app.run(debug=True)
+        # Flask apps must not be run in debug mode in production, because this allows for arbitrary code execution.
+        # We know that and advise the user that this is only for debugging, so this is not a security issue (marked nosec):
+        app.run(debug=True)  # nosec
     elif cmd == "genraml":
         print(generate_raml(conf, data_source_name=raml_ds))
 

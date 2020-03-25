@@ -87,6 +87,8 @@ like ``<my_model_name>.py``, a configuration file like
 ``<my_model>_cfg.yml`` and a REST API definition file like
 ``<my_model>.raml``.
 
+**Note**: For a step-by-step guide on this part, see the :ref:`tutorial` section.
+
 (To help with getting the RAML file started, the command
 ``mllaunchpad -g my_source`` is used.)
 
@@ -101,7 +103,8 @@ Note: Feel free to use the command line or the ML Launchpad's
 Python convenience API functions. Instead of using the ``-c``
 parameter, the location of the configuration
 file can also provided by setting the ``LAUNCHPAD_CFG`` environment
-variable.
+variable (or implicitly by providing a file named ``LAUNCHPAD_CFG.yml``
+in the current working directory).
 
 To test, the developer runs a (debugging-only!) REST API for
 the model, using the command
@@ -122,7 +125,9 @@ or the Python API convenience functions::
 
 The location of the configuration file (as well as that of a logging file)
 can also be provided by setting the environment variables ``LAUNCHPAD_CFG``
-and ``LAUNCHPAD_LOG``, respectively.
+and ``LAUNCHPAD_LOG``, respectively. If neither a parameter nor an
+environment variable is available, ``mllaunchpad`` will look for a file
+named ``LAUNCHPAD_CFG.yml`` in the current working directory.
 
 Besides through the command line, the main functionality is also made
 available through a Python convenience API.
@@ -262,7 +267,7 @@ deployment of one model in a low to medium load setting:
   management or load balancing, we outsource this to tools which are
   better at this, like ``nginx`` (which needs its own configuration
   file, of which you can find an example in the
-  `examples download <https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/schuderer/mllaunchpad/tree/master/examples>`_)::
+  `examples download <https://mllaunchpad.readthedocs.io/en/latest/_static/examples.zip>`_)::
 
     $ nginx -c /home/my_user/example/nginx.conf -p /home/my_user/example/nginx
 

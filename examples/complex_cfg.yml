@@ -67,14 +67,13 @@ model_store:
 
 model:
   name: AwesomeModel
-  version: '0.1.0'  # use semantic versioning (<breaking>.<adding>.<fix>)
+  version: '0.1.0'  # use semantic versioning (<breaking>.<adding>.<fix>), first segment will be used in url as e.g. .../v1/...
   module: complex_model  # same as file name without .py
   train_options: {magic_number: 13, num_ora_rows: 10}
   predict_options: {}
 
 api:
   name: guessiris  # name of the service api, also what comes in the URL after the first /
-  version: '0.0.1'  # use semantic versioning (breaking.adding.fix), first segment will be used in url as .../vX
   raml: complex.raml
   preload_datasources: False  # Load datasources into memory before any predictions. Only makes sense with caching.
   root_path: .  # (optional) set root directory in which Flasks looks for static, templates directories to serve.

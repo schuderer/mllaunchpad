@@ -65,3 +65,11 @@ mllaunchpad.resource module
    :undoc-members:
    :show-inheritance:
 
+mllaunchpad.yaml\_loader module
+-------------------------------
+
+.. automodule:: mllaunchpad.yaml_loader
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

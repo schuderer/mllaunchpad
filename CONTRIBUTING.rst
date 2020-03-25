@@ -4,8 +4,12 @@
 Contributing
 ==============================================================================
 
-Contributions are welcome, and they are greatly appreciated! Every little bit
-helps, and credit will always be given.
+Contributions are what keeps ML Launchpad growing and useful,
+and they are greatly appreciated!
+Every little bit helps, and credit will always be given.
+
+Everyone is welcome to contribute, just be nice:
+`Code of Conduct <https://mllaunchpad.readthedocs.io/en/latest/conduct.html>`_.
 
 You can contribute in many ways:
 
@@ -78,10 +82,10 @@ Ready to contribute? Here's how to set up ``mllaunchpad`` for local development.
 
    (On Windows, use the command ``.venv\Scripts\activate.bat``.)
 
-   Install the development requirements (this also installs
-   the package in editable mode)::
+   Install the mllaunchpad package in editable mode. This includes its
+   development requirements::
 
-   $ pip install -r requirements/dev.txt
+   $ pip install -e .[dev]
 
 4. Create a branch for local development::
 
@@ -89,7 +93,7 @@ Ready to contribute? Here's how to set up ``mllaunchpad`` for local development.
 
    Now you can make your changes locally. Don't forget to create tests for
    your code.
-   Recommended style is Google style, particularly `docstrings <https://google.github.io/styleguide/pyguide.html#381-docstrings>`_.
+   We use Google style, particularly `docstrings <https://google.github.io/styleguide/pyguide.html#381-docstrings>`_.
 
    Add the upstream remote. This saves a reference to the main mllaunchpad
    repository, which you can use to keep your repository synchronized
@@ -113,7 +117,8 @@ Ready to contribute? Here's how to set up ``mllaunchpad`` for local development.
     $ nox
 
    For more fine-grained control, you can ``nox -s a_session_name`` to
-   only perform specific tests or checks. Run ``nox -l`` for a list of sessions.
+   only perform specific tests or checks. Run ``nox -l`` for a list of
+   available sessions.
 
 6. Commit your changes and push your branch to GitHub::
 
@@ -149,7 +154,7 @@ Before you submit a pull request, check that it meets these guidelines:
 
 Tips and Troubleshooting
 ------------------------------------------------------------------------------
-If installing the development requirements (``pip install -r requirements/dev.txt``)
+If installing the development requirements (``pip install -e .[dev]``)
 fails, try to run the command again.
 
 To run a subset of tests::
@@ -173,11 +178,11 @@ Deploying
 ------------------------------------------------------------------------------
 
 A reminder for the maintainers on how to deploy.
-Make sure all your changes are committed (including an entry in ``HISTORY.rst``).
+Make sure all your changes are committed (including an entry in ``CHANGELOG.rst``).
 Then run::
 
 $ bumpversion patch # possible: major / minor / patch
 $ git push
 $ git push --tags
 
-Travis will then deploy to PyPI if tests pass.
+Travis-CI will then deploy to PyPI if tests pass.
