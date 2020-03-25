@@ -1,20 +1,30 @@
 import pandas as pd
 from mllaunchpad.resource import DataSource
 import logging
+from impala.dbapi import connect
 
 logger = logging.getLogger(__name__)
 
 
-class ImapalaDataSource(DataSource):
-    """DataSource for creating nonsense
+class ImpalaDataSource(DataSource):
+    """DataSource for fetching data from Impala tables
     """
-    serves = ['impala']
+    serves = ['dbms.impala']
 
-    def __init__(self, identifier, datasource_config):
-        super().__init__(identifier, datasource_config)
+    def __init__(self, identifier, datasink_config, dbms_config):
+        super().__init__(identifier, datasink_config)
+
+        self.dbms_config = dbms_config
+
+        logger.info(
+            "Establishing Oracle database connection for datasource {}...".format(
+                self.id
+            )
+        )
 
     def get_dataframe(self, arg_dict=None, buffer=False):
-        """Get some pandas dataframe.
+        """Get the ImpalaDataSource's data as pandas dataframe.
+              Configure the DataSource's options dict to pass keyword arguments to impala's connection string.
 
         Params:
             argsDict: optional, currently not implemented
@@ -32,10 +42,28 @@ class ImapalaDataSource(DataSource):
 
         kw_options = self.options
 
+        # Fetch query
+        query = self.config["query"]
+        params = arg_dict or {}
+        logger.debug(
+            "Fetching query {} with params {} and options {}...".format(
+                query, params, kw_options
+            )
+        )
 
-        # impala code hier
-        # open, ophalen, sluiten
-        return pd.DataFrame({'a': [3,4,5], 'b':[6,7,8]})
+        # Open connection
+        conn_args = {k: v for k, v in self.dbms_config.items() if k not in ["type", "options"]}
+        conn = connect(**conn_args)
+
+        df = pd.read_sql(
+            query, con=conn, params=params, **kw_options
+        )
+
+        # Close connection
+        conn.close()
+        self._cache_df_if_required(df)
+
+        return df
 
     def get_raw(self, arg_dict=None, buffer=False):
         """Not implemented.
@@ -47,37 +75,10 @@ class ImapalaDataSource(DataSource):
         Returns:
             Nothing, throws NotImplementedError
         """
-        raise NotImplementedError('Raw bogus not supported yet') # waarom get_raw?
+        raise NotImplementedError('Raw bogus not supported yet')
 
 
-"""
-Alvast heel kort: Het idee is dat het datasource-object met de desbetreffende config geinitieerd wordt waarin bijvoorbeeld een HIVE-query staat.
- eze query is wat opgehaald moet worden als de gebruikerscode de get_dataframe() methode aanroept. 
-Het cachen is optioneel (ook via config aangegeven).
- Basisfunctionaliteit is het ophalen van de data die je op dit moment krijgt als je de query draait."""
-
-#import impala
-import os
-import getpass
-from impala.dbapi import connect
-conn = connect(host='bda1node04.office01.internalcorp.net', port=8888,kerberos_service_name='hive',auth_mechanism='GSSAPI')
-
-cursor = conn.cursor()
-cursor.execute('SELECT * FROM mytable LIMIT 100')
-print cursor.description  # prints the result set's schema # impala-shell -i bda1node04 --ssl
-
-results = cursor.fetchall()
-#bda1node04.office01.internalcorp.net:8888
-
-#host=os.environ['IP_IMPALA'], port=21050, user=os.environ['USER'], password=os.environ['PASSWORD'], auth_mechanism='PLAIN'
-
-'''
-impyla==0.15.0
-sasl==0.2.1
-thrift_sasl==0.2.1
-thriftpy==0.3.9
-thriftpy2==0.4.0
 
 
-sudo apt-get install libsasl2-dev libsasl2-2 libsasl2-modules-gssapi-mit
-'''
+
+
