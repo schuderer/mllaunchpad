@@ -7,7 +7,7 @@ Configuration
 The configuration file is the glue that holds your ML-Launchpad-based application
 together. It links the things on the "inside", that is, your model's
 implementation, to the things on the "outside", such as the data connection
-(``DataSource``, ``DataSink``), as well as the API configuration.
+(:doc:`datasources`), as well as the API configuration.
 
 **Sidenote**: You can use this to your advantage when developing and testing your machine learning
 algorithm by using different configuration files for different purposes of your
@@ -37,6 +37,8 @@ in code                                 when using ``mllaunchpad`` functionality
 **Note**: Besides ``LAUNCHPAD_CFG``, there is also the ``LAUNCHPAD_LOG`` environment
 variable, which, if provided, will be used as the `logging configuration file <https://docs.python.org/3.8/library/logging.config.html>`_.
 
+.. _config_file:
+
 Config File
 ------------------------------------------------------------------------------
 
@@ -46,6 +48,10 @@ a Python ``dict``).
 Here's an example configuration with comments:
 
 .. code-block:: yaml
+
+    plugins:  # Optionally specify any additional imports (only external DataSources/-Sinks for now, cf. ``DataSources``)
+      - bogusdatasource
+      - records_datasource
 
     datasources:  # This section is optional. Places to get data from, and how.
       petals:  # Name by which you want to refer to the datasource, e.g. using ``data_sources["petals"]``/
@@ -93,8 +99,23 @@ Here's an example configuration with comments:
 
 
 Details on how to configure specific types of ``DataSources`` and ``DataSinks`` can be found
-in their respective documentation (which still needs to be written, contributions welcome! For now please see the
-`examples <https://github.com/schuderer/mllaunchpad/tree/master/examples>`_ [:download:`download <_static/examples.zip>`]).
+on the page :doc:`datasources`.
+
+.. _plugins:
+
+Plugins
+------------------------------------------------------------------------------
+
+In your :ref:`config_file`, you can optionally use a top-level ``plugins:`` key to
+specify (a list of) modules that should be imported by ML Launchpad (currently only used
+while initializing the :doc:`datasources`). If any of these plugins are in conflict
+with other plugins or built-ins, the last-imported one has precedence over
+the previous ones.
+
+For example, if several :doc:`DataSource <datasources>` plugins offer to serve the
+same type (e.g. ``csv``), the last one in the ``plugins:`` list will be chosen as the
+designated ``csv`` handler, overruling both the built-in :class:`~mllaunchpad.resource.FileDataSource`
+as well as any other ``csv``-serving DataSources listed before the one in question.
 
 RAML API Definition
 ------------------------------------------------------------------------------

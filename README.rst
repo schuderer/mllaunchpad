@@ -45,7 +45,7 @@ management functionality.
 
 It creates a separation between machine learning
 models and their environment. This way, you can run your model with
-different data sources and on different environments, by just swapping
+different :doc:`data sources <datasources>` and on different environments, by just swapping
 out the configuration, no code changes required. ML Launchpad makes your
 model available as a business-facing *RESTful API*
 without extra coding.
@@ -94,7 +94,7 @@ consists of at least three files:
 * ``<examplename>.raml``: example’s RESTful API specification.
   Used, among others, to parse and validate parameters.
 
-* There are also some extra files, like CSV files to use, or datasource
+* There are also some extra files, like CSV files to use, or :doc:`datasource <datasources>`
   extensions.
 
 The subfolder ``testserver`` contains an example for running a REST API
