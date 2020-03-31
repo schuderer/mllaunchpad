@@ -405,7 +405,7 @@ def get_user_pw(dbms_config: Dict) -> Tuple[str, Optional[str]]:
     return user, pw
 
 
-def get_oracle_connection(dbms_config: Dict):
+def _get_oracle_connection(dbms_config: Dict):
     import cx_Oracle  # Importing here avoids environment-specific dependencies
 
     user, pw = get_user_pw(dbms_config)
@@ -464,7 +464,7 @@ class OracleDataSource(DataSource):
                 self.id
             )
         )
-        self.connection = get_oracle_connection(dbms_config)
+        self.connection = _get_oracle_connection(dbms_config)
 
     def get_dataframe(
         self, arg_dict: Dict = None, buffer: bool = False
@@ -513,7 +513,8 @@ class OracleDataSource(DataSource):
         :raises TypeError: Raw/blob format currently not supported.
         """
         raise TypeError(
-            "OracleDataSource currently does not not support raw format/blobs"
+            "OracleDataSource currently does not not support raw format/blobs. "
+            'Use method "get_dataframe" for dataframes'
         )
 
     def __del__(self):
@@ -551,7 +552,7 @@ class FileDataSource(DataSource):
 
         ds_type = datasource_config["type"]
         if ds_type not in SUPPORTED_FILE_TYPES:
-            raise ValueError(
+            raise TypeError(
                 "{} is not a datasource file type (in datasource {}).".format(
                     repr(ds_type), repr(identifier)
                 )
@@ -595,7 +596,7 @@ class FileDataSource(DataSource):
         elif self.type == "euro_csv":
             df = pd.read_csv(self.path, sep=";", decimal=",", **kw_options)
         else:
-            raise ValueError(
+            raise TypeError(
                 'Can only read csv files as dataframes. Use method "get_raw" for raw data'
             )
 
@@ -641,9 +642,9 @@ class FileDataSource(DataSource):
             with open(self.path, "rb") as bin_file:
                 raw = bin_file.read(**kw_options)
         else:
-            raise ValueError(
+            raise TypeError(
                 "Can only read binary data or text strings as raw file. "
-                + 'Use method "get_dataframe" for dataframes'
+                'Use method "get_dataframe" for dataframes'
             )
 
         self._cache_raw_if_required(raw)
@@ -713,7 +714,7 @@ class FileDataSink(DataSink):
 
         ds_type = datasink_config["type"]
         if ds_type not in SUPPORTED_FILE_TYPES:
-            raise ValueError(
+            raise TypeError(
                 "{} is not a datasink file type (in datasink {}).".format(
                     repr(ds_type), repr(identifier)
                 )
@@ -760,7 +761,7 @@ class FileDataSink(DataSink):
         elif self.type == "euro_csv":
             dataframe.to_csv(self.path, sep=";", decimal=",", **kw_options)
         else:
-            raise ValueError(
+            raise TypeError(
                 'Can only write dataframes to csv file. Use method "put_raw" for raw data'
             )
 
@@ -799,9 +800,9 @@ class FileDataSink(DataSink):
                 raw_bytes: bytes = cast(bytes, raw_data)
                 bin_file.write(raw_bytes)
         else:
-            raise ValueError(
+            raise TypeError(
                 "Can only write binary data or text strings as raw file. "
-                + 'Use method "get_dataframe" for dataframes'
+                + 'Use method "put_dataframe" for dataframes'
             )
 
 
@@ -847,7 +848,7 @@ class OracleDataSink(DataSink):
             )
         )
 
-        self.connection = get_oracle_connection(dbms_config)
+        self.connection = _get_oracle_connection(dbms_config)
 
     def put_dataframe(
         self,
@@ -894,7 +895,8 @@ class OracleDataSink(DataSink):
         :raises TypeError: Raw/blob format currently not supported.
         """
         raise TypeError(
-            "OracleDataSink currently does not not support raw format/blobs"
+            "OracleDataSink currently does not not support raw format/blobs. "
+            'Use method "put_dataframe" for raw data'
         )
 
     def __del__(self):
