@@ -138,7 +138,12 @@ To be able to use them:
 
 Their documentation follows hereunder.
 
-.. autoclass:: examples.records_datasource.RecordsDbDataSource
+.. autoclass:: examples.impala_datasource.ImpalaDataSource
    :members:
+   :inherited-members:
    :undoc-members:
 
+.. autoclass:: examples.records_datasource.RecordsDbDataSource
+   :members:
+   :inherited-members:
+   :undoc-members:

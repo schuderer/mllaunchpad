@@ -40,8 +40,8 @@ class RecordsDbDataSource(DataSource):
           my_datasource:
             type: dbms.my_connection
             query: SELECT * FROM users.my_table where id = :id  # fill `:params` by calling `get_dataframe` with a `dict`
-            expires: 0    # generic parameter, see documentation on DataSources
-            tags: train   # generic parameter, see documentation on DataSources and DataSinks
+            expires: 0     # generic parameter, see documentation on DataSources
+            tags: [train]  # generic parameter, see documentation on DataSources and DataSinks
     """
 
     serves = [
