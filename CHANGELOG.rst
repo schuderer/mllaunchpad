@@ -25,6 +25,9 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ------------------------------------------------------------------------------
 
+* |Enhancement| Document DataSources and DataSinks,
+  `issue #88 <https://github.com/schuderer/mllaunchpad/issues/88>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Enhancement| Document configuration,
   `issue #67 <https://github.com/schuderer/mllaunchpad/issues/67>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.

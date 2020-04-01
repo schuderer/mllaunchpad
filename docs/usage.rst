@@ -221,8 +221,8 @@ Here, we'll make use of the method arguments ``data_sources`` and ``model``.
 See :mod:`~mllaunchpad.model_interface` for details on all available
 arguments.
 
-If we call our training :class:`~mllaunchpad.resource.DataSource` ``petals`` and our test
-DataSource ``petals_test``, our completed ``tree_model.py`` looks
+If we call our training :doc:`DataSource <datasources>` ``petals`` and our test
+:doc:`DataSource <datasources>` ``petals_test``, our completed ``tree_model.py`` looks
 like this (we highlight changed code with ``#comments``):
 
 .. code-block:: python
@@ -298,7 +298,7 @@ The three methods return the same things as our own functions:
 
 Next, we will configure some extra info about our model,
 as well as tell ML Launchpad where to find
-the ``petal`` and ``petal_test`` :class:`~mllaunchpad.resource.DataSource` s.
+the ``petal`` and ``petal_test`` :doc:`DataSources <datasources>`.
 
 Create a file called ``tree_cfg.yml``::
 
@@ -348,7 +348,7 @@ Here, we define our ``datasources`` so ML Launchpad knows where to find the
 data we refer to from our model. Besides ``csv`` files,
 other types of DataSources are supported, and
 :ref:`extending DataSources <extending>` is also possible.
-(see module :class:`~mllaunchpad.resource` for more information on supported
+(see :doc:`datasources` for more information on supported
 builtin :class:`~mllaunchpad.resource.DataSources`).
 
 The ``model_store`` is just a directory where all trained models will
