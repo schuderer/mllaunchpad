@@ -124,17 +124,18 @@ class ModelStore:
             pickle.dump(model, f)
 
         # Save metadata
-        api_conf = complete_conf["api"]
         meta = {
             "name": model_conf["name"],
             "version": model_conf["version"],
-            "api_name": api_conf["name"],
             "created": datetime.now().strftime(DATE_FORMAT),
             "created_by": getpass.getuser(),
             "metrics": metrics,
             "metrics_history": {datetime.now().strftime(DATE_FORMAT): metrics},
             "config_snapshot": model_conf,
         }
+        if "api" in complete_conf:  # API is optional
+            meta["api_name"] = complete_conf["api"]["name"]
+
         self._dump_metadata(base_name, meta)
 
     def load_trained_model(self, model_conf):

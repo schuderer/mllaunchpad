@@ -17,6 +17,103 @@ import pytest
 from mllaunchpad import resource as r
 
 
+# Test ModelStore
+
+# fmt: off
+@pytest.fixture()
+def modelstore_config():
+    return {
+        "model_store": {
+            "location": "./model_store",
+        },
+        "model": {
+            "name": "IrisModel",
+            "version": '0.0.2',
+            "module": "tree_model",
+            "train_options": {},
+            "predict_options": {},
+        },
+    }
+# fmt: on
+
+
+@mock.patch("{}.os.path.exists".format(r.__name__), return_value=False)
+@mock.patch("{}.os.makedirs".format(r.__name__))
+def test_modelstore_create(makedirs, path_exists, modelstore_config):
+    _ = r.ModelStore(modelstore_config)
+    makedirs.assert_called_once_with(
+        modelstore_config["model_store"]["location"]
+    )
+
+    path_exists.reset_mock()
+    makedirs.reset_mock()
+    path_exists.return_value = True
+    _ = r.ModelStore(modelstore_config)
+    assert not makedirs.called
+
+
+@mock.patch("{}.os.path.exists".format(r.__name__), return_value=False)
+@mock.patch("{}.os.makedirs".format(r.__name__))
+@mock.patch("{}.shutil.copy".format(r.__name__))
+def test_modelstore_dump(copy, makedirs, path_exists, modelstore_config):
+    with mock.patch(
+        "{}.open".format(r.__name__), mock.mock_open(), create=True
+    ) as mo:
+        ms = r.ModelStore(modelstore_config)
+        ms.dump_trained_model(modelstore_config, {"hi": 1}, {"there": 2})
+
+    model_conf = modelstore_config["model"]
+    base_name = os.path.join(
+        modelstore_config["model_store"]["location"],
+        "{}_{}".format(model_conf["name"], model_conf["version"]),
+    )
+    calls = [
+        mock.call("{}.pkl".format(base_name), "wb"),
+        mock.call("{}.json".format(base_name), "w"),
+    ]
+    mo.assert_has_calls(calls, any_order=True)
+
+
+@mock.patch("{}.pickle.load".format(r.__name__), return_value="pickle")
+@mock.patch("{}.json.load".format(r.__name__), return_value={"json": 0})
+def test_modelstore_load(json, pkl, modelstore_config):
+    with mock.patch(
+        "{}.open".format(r.__name__), mock.mock_open(), create=True
+    ) as mo:
+        ms = r.ModelStore(modelstore_config)
+        ms.load_trained_model(modelstore_config["model"])
+
+    model_conf = modelstore_config["model"]
+    base_name = os.path.join(
+        modelstore_config["model_store"]["location"],
+        "{}_{}".format(model_conf["name"], model_conf["version"]),
+    )
+    calls = [
+        mock.call("{}.pkl".format(base_name), "rb"),
+        mock.call("{}.json".format(base_name), "r"),
+    ]
+    mo.assert_has_calls(calls, any_order=True)
+
+
+@mock.patch(
+    "{}.ModelStore._load_metadata".format(r.__name__),
+    return_value={"metrics": {"a": 0}, "metrics_history": {"0123": {"a": 0}}},
+)
+@mock.patch("{}.ModelStore._dump_metadata".format(r.__name__))
+def test_modelstore_update_model_metrics(dump, load, modelstore_config):
+    new_metrics = {"a": 1}
+    ms = r.ModelStore(modelstore_config)
+    ms.update_model_metrics(modelstore_config["model"], new_metrics)
+    load.assert_called_once()
+    dump.assert_called_once()
+    name, contents = dump.call_args[0]
+    assert contents["metrics"] == new_metrics
+    hist = contents["metrics_history"]
+    assert len(hist) == 2
+    del hist["0123"]
+    assert hist.popitem()[1] == new_metrics
+
+
 # Test DataSource caching
 
 # fmt: off
