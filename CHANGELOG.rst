@@ -25,6 +25,11 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ------------------------------------------------------------------------------
 
+* Nothing here yet. Be the first to :doc:`contribute <contributing>` to the next release! :)
+
+0.1.0 (2020-04-02)
+------------------------------------------------------------------------------
+
 * |Enhancement| Add Impala DataSource (in examples),
   `issue #4 <https://github.com/schuderer/mllaunchpad/issues/4>`_,
   by `Elisa Partodikromo <https://github.com/planeetjupyter>`_.
