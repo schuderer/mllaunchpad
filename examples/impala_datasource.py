@@ -1,4 +1,5 @@
 import logging
+import os
 
 import pandas as pd
 
@@ -30,6 +31,11 @@ class ImpalaDataSource(DataSource):
             #       You can specify other options here, and they will be used for creating
             #       the connection. For a full list, refer to the documentation of
             #       `impyla.dbapi.connect`: https://pydoc.net/impyla/0.14.0/impala.dbapi/
+            # NOTE 2: For user and password parameters, you can provide the parameter with
+            #         the suffix "_var". For example, if you configure `ldap_password_var: MY_PW`,
+            #         ML Launchpad will get the value of the environment variable `MY_PW` and pass
+            #         it to `impyla.dbapi.connect`s `ldap_password` parameter. This is to avoid
+            #         having to add passwords to the configuration file.
             host: host.example.com
             port: 21050
             database: my_db
@@ -44,6 +50,7 @@ class ImpalaDataSource(DataSource):
             query: SELECT * FROM my_table where id = :id  # fill `:params` by calling `get_dataframe` with a `dict`
             expires: 0     # generic parameter, see documentation on DataSources
             tags: [train]  # generic parameter, see documentation on DataSources and DataSinks
+            options: {}    # (optional) any other kwargs to pass to `pd.read_sql`
 
     Note: In order to access a kerberized cluster, you need the correct packages.
     We found the following packages to work reliably::
@@ -55,6 +62,20 @@ class ImpalaDataSource(DataSource):
 
     def __init__(self, identifier, datasink_config, dbms_config):
         super().__init__(identifier, datasink_config)
+
+        # Fill "_var"-suffixed configuration items from environment variables
+        key: str
+        for key, value in dbms_config.items():
+            if key.endswith("_var"):
+                new_value = os.environ.get(value)
+                if new_value is None:
+                    logger.warning("Environment variable '%s' not set (from config key '%s')", value, key)
+                else:
+                    del dbms_config[key]
+                    new_key = key[:-4]
+                    dbms_config[new_key] = new_value
+                    logger.debug("Replaced Impala connection parameter '%s' specifying environment"
+                                 "variable '%s' with parameter '%s'", key, value, new_key)
 
         self.dbms_config = dbms_config
 
@@ -86,23 +107,20 @@ class ImpalaDataSource(DataSource):
             )
         )
         conn_args = {k: v for k, v in self.dbms_config.items() if k not in ["type"]}
-        conn = connect(**conn_args)
-
-        # Fetch query
-        query = self.config["query"]
-        params = arg_dict or {}
-        kw_options = self.config.get("options", {})
-        logger.debug(
-            "Fetching query {} with params {} and options {}...".format(
-                query, params, kw_options
+        with connect(**conn_args) as conn:
+            # Fetch query
+            query = self.config["query"]
+            params = arg_dict or {}
+            kw_options = self.config.get("options", {})
+            logger.debug(
+                "Fetching query {} with params {} and options {}...".format(
+                    query, params, kw_options
+                )
             )
-        )
-        df = pd.read_sql(
-            query, con=conn, params=params, **kw_options
-        )
+            df = pd.read_sql(
+                query, con=conn, params=params, **kw_options
+            )
 
-        # Close connection
-        conn.close()
         self._cache_df_if_required(df)
 
         return df
@@ -119,7 +137,10 @@ class ImpalaDataSource(DataSource):
 
         :return: Nothing, always raises NotImplementedError
         """
-        raise NotImplementedError('Raw data not supported.')
+        raise NotImplementedError(
+            "ImpalaDataSource currently does not not support raw format/blobs. "
+            'Use method "get_dataframe" for dataframes'
+        )
 
 
 
