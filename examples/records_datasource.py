@@ -40,8 +40,8 @@ class RecordsDbDataSource(DataSource):
           my_datasource:
             type: dbms.my_connection
             query: SELECT * FROM users.my_table where id = :id  # fill `:params` by calling `get_dataframe` with a `dict`
-            expires: 0    # generic parameter, see documentation on DataSources
-            tags: train   # generic parameter, see documentation on DataSources and DataSinks
+            expires: 0     # generic parameter, see documentation on DataSources
+            tags: [train]  # generic parameter, see documentation on DataSources and DataSinks
     """
 
     serves = [
@@ -66,7 +66,7 @@ class RecordsDbDataSource(DataSource):
         # if "connect" not in dbms_config:
         #     raise ValueError(f'No connection string (property "connect") in datasource {self.id} config')
         dbtype = dbms_config["type"]
-        user, pw = get_user_pw(dbms_config)
+        user, pw = get_user_pw(dbms_config["user_var"], dbms_config["password_var"])
         host = dbms_config["host"]
         port = ":" + str(dbms_config["port"]) if "port" in dbms_config else ""
         service_name = (

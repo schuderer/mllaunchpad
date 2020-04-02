@@ -377,17 +377,17 @@ def test_get_user_pw(caplog):
         "password_var": "PW",
     }
     with mock.patch.dict(os.environ, env):
-        user, pw = r.get_user_pw(conf)
+        user, pw = r.get_user_pw(conf["user_var"], conf["password_var"])
         assert user == env["USR"]
         assert pw == env["PW"]
 
     with mock.patch.dict(os.environ, {}):
         with pytest.raises(ValueError):
-            r.get_user_pw(conf)
+            r.get_user_pw(conf["user_var"], conf["password_var"])
 
     env2 = {"USR": "my_user"}
     with mock.patch.dict(os.environ, env2):
-        user, pw = r.get_user_pw(conf)
+        user, pw = r.get_user_pw(conf["user_var"], conf["password_var"])
         assert user == env["USR"]
         assert pw is None
         assert "not set" in caplog.text.lower()
@@ -420,10 +420,10 @@ def oracledatasource_cfg_and_data():
 @mock.patch("{}.pd.read_sql".format(r.__name__))
 @mock.patch("{}.get_user_pw".format(r.__name__), return_value=("foo", "bar"))
 def test_oracledatasource_df(user_pw, pd_read, oracledatasource_cfg_and_data):
+    """OracleDataSource should connect, read dataframe and return it unaltered."""
     cfg, dbms_cfg, data = oracledatasource_cfg_and_data()
     ora_mock = mock.MagicMock()
     sys.modules["cx_Oracle"] = ora_mock
-    ora_mock.connect.return_value = mock.Mock()
     pd_read.return_value = data
 
     ds = r.OracleDataSource("bla", cfg, dbms_cfg)
@@ -447,7 +447,7 @@ def test_oracledatasource_notimplemented(
     ds = r.OracleDataSource("bla", cfg, dbms_cfg)
     with pytest.raises(NotImplementedError):
         ds.get_dataframe(buffer=True)
-    with pytest.raises(TypeError, match="get_dataframe"):
+    with pytest.raises(NotImplementedError, match="get_dataframe"):
         ds.get_raw()
 
     del sys.modules["cx_Oracle"]
@@ -461,7 +461,6 @@ def test_oracledatasink_df(user_pw, df_write, oracledatasource_cfg_and_data):
     cfg["table"] = "blabla"
     ora_mock = mock.MagicMock()
     sys.modules["cx_Oracle"] = ora_mock
-    ora_mock.connect.return_value = mock.Mock()
     df_write.return_value = data
 
     ds = r.OracleDataSink("bla", cfg, dbms_cfg)
@@ -484,7 +483,7 @@ def test_oracledatasink_notimplemented(user_pw, oracledatasource_cfg_and_data):
     ds = r.OracleDataSink("bla", cfg, dbms_cfg)
     with pytest.raises(NotImplementedError):
         ds.put_dataframe(data, buffer=True)
-    with pytest.raises(TypeError, match="put_dataframe"):
+    with pytest.raises(NotImplementedError, match="put_dataframe"):
         ds.put_raw(data)
 
     del sys.modules["cx_Oracle"]
