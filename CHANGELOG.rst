@@ -27,6 +27,12 @@ Unreleased
 
 * Nothing here yet. Be the first to :doc:`contribute <contributing>` to the next release! :)
 
+0.1.1 (2020-04-02)
+------------------------------------------------------------------------------
+
+* |Fixed| Fix missing classifiers on PyPI,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
+
 0.1.0 (2020-04-02)
 ------------------------------------------------------------------------------
 
