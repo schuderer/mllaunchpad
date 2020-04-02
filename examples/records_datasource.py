@@ -66,7 +66,7 @@ class RecordsDbDataSource(DataSource):
         # if "connect" not in dbms_config:
         #     raise ValueError(f'No connection string (property "connect") in datasource {self.id} config')
         dbtype = dbms_config["type"]
-        user, pw = get_user_pw(dbms_config)
+        user, pw = get_user_pw(dbms_config["user_var"], dbms_config["password_var"])
         host = dbms_config["host"]
         port = ":" + str(dbms_config["port"]) if "port" in dbms_config else ""
         service_name = (

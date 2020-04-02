@@ -392,24 +392,26 @@ class DataSource:
         ...
 
 
-def get_user_pw(dbms_config: Dict) -> Tuple[str, Optional[str]]:
-    user_var_name = dbms_config["user_var"]
-    pw_var_name = dbms_config["password_var"]
-    user = os.environ.get(user_var_name)
-    pw = os.environ.get(pw_var_name)
+def get_user_pw(user_var: str, password_var: str) -> Tuple[str, Optional[str]]:
+    user = os.environ.get(user_var)
+    pw = os.environ.get(password_var)
     if user is None:
         raise ValueError(
-            "User name environment variable {} not set".format(user_var_name)
+            "User name environment variable {} not set".format(user_var)
         )
     if pw is None:
-        logger.warning("Password environment variable %s not set", pw_var_name)
+        logger.warning(
+            "Password environment variable %s not set", password_var
+        )
     return user, pw
 
 
 def _get_oracle_connection(dbms_config: Dict):
     import cx_Oracle  # Importing here avoids environment-specific dependencies
 
-    user, pw = get_user_pw(dbms_config)
+    user, pw = get_user_pw(
+        dbms_config["user_var"], dbms_config["password_var"]
+    )
     dsn_tns = cx_Oracle.makedsn(
         dbms_config["host"],
         dbms_config["port"],
@@ -511,9 +513,9 @@ class OracleDataSource(DataSource):
     def get_raw(self, arg_dict: Dict = None, buffer: bool = False) -> Raw:
         """Not implemented.
 
-        :raises TypeError: Raw/blob format currently not supported.
+        :raises NotImplementedError: Raw/blob format currently not supported.
         """
-        raise TypeError(
+        raise NotImplementedError(
             "OracleDataSource currently does not not support raw format/blobs. "
             'Use method "get_dataframe" for dataframes'
         )
@@ -893,9 +895,9 @@ class OracleDataSink(DataSink):
     ) -> None:
         """Not implemented.
 
-        :raises TypeError: Raw/blob format currently not supported.
+        :raises NotImplementedError: Raw/blob format currently not supported.
         """
-        raise TypeError(
+        raise NotImplementedError(
             "OracleDataSink currently does not not support raw format/blobs. "
             'Use method "put_dataframe" for raw data'
         )
