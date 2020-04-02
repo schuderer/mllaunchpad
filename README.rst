@@ -45,7 +45,8 @@ management functionality.
 
 It creates a separation between machine learning
 models and their environment. This way, you can run your model with
-different :doc:`data sources <datasources>` and on different environments, by just swapping
+different `data sources <https://mllaunchpad.readthedocs.io/en/latest/datasources.html>`_.
+and on different environments, by just swapping
 out the configuration, no code changes required. ML Launchpad makes your
 model available as a business-facing *RESTful API*
 without extra coding.
@@ -58,7 +59,7 @@ re-training. Previous models are backed up.
 The full documentation is available at https://mllaunchpad.readthedocs.io.
 
 To learn more about the rationale and structure of ML Launchpad,
-see section `In Depth <https://mllaunchpad.readthedocs.io/en/latest/about.html>`_.
+see `Description <https://mllaunchpad.readthedocs.io/en/latest/about.html>`_.
 
 Getting started
 ------------------------------------------------------------------------------
@@ -94,7 +95,8 @@ consists of at least three files:
 * ``<examplename>.raml``: example’s RESTful API specification.
   Used, among others, to parse and validate parameters.
 
-* There are also some extra files, like CSV files to use, or :doc:`datasource <datasources>`
+* There are also some extra files, like CSV files to use, or
+  `datasource <https://mllaunchpad.readthedocs.io/en/latest/datasources.html>`_.
   extensions.
 
 The subfolder ``testserver`` contains an example for running a REST API
