@@ -178,11 +178,22 @@ Deploying
 ------------------------------------------------------------------------------
 
 A reminder for the maintainers on how to deploy.
-Make sure all your changes are committed (including an entry in ``CHANGELOG.rst``).
-Then run::
+Make sure all your changes are committed and do the following:
 
-$ bumpversion patch # possible: major / minor / patch
-$ git push
-$ git push --tags
+1. Decide on the new version number (e.g. 2.1.23, using semantic versioning).
+2. Create a new branch to contain the release-related changes.
+3. Make sure ``CHANGELOG.rst`` is complete and move all unreleased changes under a new header for this version.
+4. Change the line ``version = ...`` in ``setup.cfg`` to the new version number.
+5. Commit and push the changes.
+6. On GitHub, create a draft release, using the branch you just pushed.
+7. Modify/correct things in the draft release to your heart's content.
+8. Release from the GitHub user interface.
 
-Travis-CI will then deploy to PyPI if tests pass.
+Alternatively, you can also release ``mllaunchpad`` with these commands
+(assuming you have already committed your version and changelog changes)::
+
+  $ git tag -a v2.1.23 -m "Bump version to v2.1.23"
+  $ git push
+  $ git push --tags
+
+In either case, Travis-CI will then deploy to PyPI if tests pass.
