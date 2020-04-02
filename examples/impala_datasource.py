@@ -64,20 +64,23 @@ class ImpalaDataSource(DataSource):
         super().__init__(identifier, datasink_config)
 
         # Fill "_var"-suffixed configuration items from environment variables
+        new_dbms_config = {}
         key: str
         for key, value in dbms_config.items():
             if key.endswith("_var"):
                 new_value = os.environ.get(value)
-                if new_value is None:
-                    logger.warning("Environment variable '%s' not set (from config key '%s')", value, key)
-                else:
-                    del dbms_config[key]
+                if new_value is not None:
                     new_key = key[:-4]
-                    dbms_config[new_key] = new_value
+                    new_dbms_config[new_key] = new_value
                     logger.debug("Replaced Impala connection parameter '%s' specifying environment"
                                  "variable '%s' with parameter '%s'", key, value, new_key)
+                else:
+                    logger.warning("Environment variable '%s' not set (from config key '%s')", value, key)
+                    new_dbms_config[key] = value
+            else:
+                new_dbms_config[key] = value
 
-        self.dbms_config = dbms_config
+        self.dbms_config = new_dbms_config
 
     def get_dataframe(self, arg_dict=None, buffer=False):
         """Get data as a pandas dataframe.
