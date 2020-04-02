@@ -20,7 +20,14 @@ max_line_length = "79"  # I don't want a pyproject.toml just for 'black'...
 min_coverage = "30"  # TODO: get to >= 90%
 
 # Skip "tests-3.7" by default as they are included in "coverage"
-nox.options.sessions = ["format", "lint", "tests-3.6", "coverage", "docs"]
+nox.options.sessions = [
+    "format",
+    "lint",
+    "tests-3.6",
+    "tests-3.8",
+    "coverage",
+    "docs",
+]
 
 # TODO: Auto-parametrize dependencies from setup.py (regular mega-dep-check):
 # 1. loop over setup.cfg's "install_requires":
