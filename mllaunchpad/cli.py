@@ -4,20 +4,21 @@
 import json
 import sys
 from logging import Logger
+from typing import Dict
 
 # Third-party imports
 import click
 from flask import Flask
 
 # Project imports
-import mllaunchpad as lp
+import mllaunchpad as mllp
 from mllaunchpad import logutil
 from mllaunchpad.api import ModelApi, generate_raml
 
 
 # Fix for click using the wrong name if run using `python -m mllaunchpad`
-# Alsoo see: https://github.com/pallets/click/issues/365
-sys.argv[0] = "mllaunchpad"
+# Also see: https://github.com/pallets/click/issues/365
+sys.argv[0] = mllp.__name__
 
 
 # Adapted from https://click.palletsprojects.com/en/7.x/advanced/
@@ -49,14 +50,15 @@ class Settings:
         self.verbose: bool = False
         self.logger: Logger = None
         self.conf_file: str = None
+        self._config: Dict = None
 
     @property
     def config(self):
-        if not hasattr(self, "_config"):
+        if not hasattr(self, "_config") or not self._config:
             if self.conf_file:
-                self._config = lp.get_validated_config(self.conf_file)
+                self._config = mllp.get_validated_config(self.conf_file)
             else:
-                self._config = lp.get_validated_config()
+                self._config = mllp.get_validated_config()
         return self._config
 
 
@@ -96,7 +98,7 @@ def main(settings, log_config, config, verbose):
 @pass_settings
 def train(settings):
     """Run training, store created model and metrics."""
-    _, metrics = lp.train_model(settings.config)
+    _, metrics = mllp.train_model(settings.config)
     print(metrics)
 
 
@@ -104,7 +106,7 @@ def train(settings):
 @pass_settings
 def retest(settings):
     """Retest existing model, update metrics."""
-    metrics = lp.retest(settings.config)
+    metrics = mllp.retest(settings.config)
     print(metrics)
 
 
@@ -126,7 +128,7 @@ def api(settings):
 
 
 @main.command()
-@click.argument("json-file", type=click.File("r"))
+@click.argument("json-file", type=click.File("r"), default=sys.stdin)
 @pass_settings
 def predict(settings, json_file):
     """Run prediction on features from JSON file ( - for stdin).
@@ -136,7 +138,7 @@ def predict(settings, json_file):
                     "sepal.width": 1.8, "sepal.length": 4.0 }
     """
     arg_dict = json.load(json_file)
-    output = lp.predict(settings.config, arg_dict=arg_dict)
+    output = mllp.predict(settings.config, arg_dict=arg_dict)
     print(output)
 
 
