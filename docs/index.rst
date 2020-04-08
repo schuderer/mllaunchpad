@@ -15,6 +15,7 @@ Contents:
    usage
    mllaunchpad
    config
+   DataSources <datasources>
    contributing
    Code of Conduct <conduct>
    authors

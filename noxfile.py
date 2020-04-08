@@ -20,7 +20,14 @@ max_line_length = "79"  # I don't want a pyproject.toml just for 'black'...
 min_coverage = "30"  # TODO: get to >= 90%
 
 # Skip "tests-3.7" by default as they are included in "coverage"
-nox.options.sessions = ["format", "lint", "tests-3.6", "coverage", "docs"]
+nox.options.sessions = [
+    "format",
+    "lint",
+    "tests-3.6",
+    "tests-3.8",
+    "coverage",
+    "docs",
+]
 
 # TODO: Auto-parametrize dependencies from setup.py (regular mega-dep-check):
 # 1. loop over setup.cfg's "install_requires":
@@ -43,7 +50,9 @@ nox.options.sessions = ["format", "lint", "tests-3.6", "coverage", "docs"]
 def format_code(session):
     """Run code reformatter"""
     # session.install("-e", ".[lint]")
-    session.install("isort", "seed-isort-config", "black")
+    session.install(
+        "isort==4.3.21", "seed-isort-config==2.1.0", "black==19.10b0"
+    )
     session.run("seed-isort-config", success_codes=[0, 1])
     session.run("isort", "-rc", *files_to_format)
     session.run("black", "-l", max_line_length, *files_to_format)
@@ -54,13 +63,13 @@ def lint(session):
     """Run code style and vulnerability checkers"""
     # session.install("-e", ".[lint]")  # so isort can detect everything automatically, but heavy install
     session.install(
-        "mypy",
-        "isort",
-        "seed-isort-config",
-        "black",
-        "flake8",
-        "flake8-isort",
-        "bandit",
+        "mypy==0.761",
+        "isort==4.3.21",
+        "seed-isort-config==2.1.0",
+        "black==19.10b0",
+        "flake8==3.7.9",
+        "flake8-isort==2.9.1",
+        "bandit==1.6.2",
     )
     session.run("mypy", package_name)
     session.run("seed-isort-config", success_codes=[0, 1])
