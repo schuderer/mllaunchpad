@@ -36,6 +36,7 @@ import mllaunchpad
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.viewcode',
               'sphinx.ext.autosummary',
+              'sphinx_click.ext',
               # 'sphinx-napoleon',  # Support Google docstring style
               # 'recommonmark',
               # http://www.sphinx-doc.org/en/master/usage/markdown.html

@@ -74,13 +74,13 @@ pass_settings = click.make_pass_decorator(Settings, ensure=True)
     "--config",
     "-c",
     type=click.Path(exists=True),
-    help="Use this configuration file. [default: try env var LAUNCHPAD_CFG, then ./LAUNCHPAD_CFG.yml]",
+    help="Use this configuration file. [default: look for env var LAUNCHPAD_CFG or ./LAUNCHPAD_CFG.yml]",
 )
 @click.option(
     "--log-config",
     "-l",
     type=click.Path(exists=True),
-    help="Use this log configuration file. [default: try env var LAUNCHPAD_LOG, then ./LAUNCHPAD_LOG.yml]",
+    help="Use this log configuration file. [default: look for env var LAUNCHPAD_LOG or ./LAUNCHPAD_LOG.yml]",
 )
 @pass_settings
 def main(settings, log_config, config, verbose):

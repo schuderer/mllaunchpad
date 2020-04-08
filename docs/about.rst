@@ -90,11 +90,11 @@ like ``<my_model_name>.py``, a configuration file like
 **Note**: For a step-by-step guide on this part, see the :ref:`tutorial` section.
 
 (To help with getting the RAML file started, the command
-``mllaunchpad -g my_source`` is used.)
+``mllaunchpad gen my_source`` is used.)
 
-If everything is filled in, it is time to train the model::
+When everything is filled in, it is time to train the model::
 
-  $ mllaunchpad -c <my_model>_cfg.yml -t
+  $ mllaunchpad -c <my_model>_cfg.yml t
 
 The trained model is persisted in the ``model_store`` location
 defined in the configuration file.
@@ -108,19 +108,19 @@ in the current working directory).
 
 To test, the developer runs a (debugging-only!) REST API for
 the model, using the command
-``-a``::
+``api``, or ``a`` for short::
 
-   $ mllaunchpad -c <my_model>_cfg.yml -a
+   $ mllaunchpad -c <my_model>_cfg.yml a
 
 They test the API, and if it works as expected, the model
 can be used in a proper WSGI server, like for example
 gunicorn behind nginx.
 
 There comes a time when the deployed model starts to get out of date.
-To re-test the previously trained model, use the command ``-r``
+To re-test the previously trained model, use the command ``retest``/``r``
 or the Python API convenience functions::
 
-   $ mllaunchpad -c <my_model>_cfg.yml -r
+   $ mllaunchpad -c <my_model>_cfg.yml r
 
 
 The location of the configuration file (as well as that of a logging file)
@@ -254,7 +254,7 @@ deployment of one model in a low to medium load setting:
   ``cron`` or Control-M, which
   calls::
 
-    mllaunchpad -t
+    mllaunchpad train
 
 * For now, we'll not configure any re-testing of our deployed
   example model.
