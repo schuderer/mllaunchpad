@@ -3,6 +3,7 @@
 # Stdlib imports
 import logging
 import sys
+from typing import Dict
 
 # Project imports
 from mllaunchpad import resource
@@ -12,11 +13,11 @@ from mllaunchpad.model_interface import ModelInterface, ModelMakerInterface
 logger = logging.getLogger(__name__)
 
 
-_cached_model_stores = {}
-_cached_model_tuples = {}
-_cached_data_source_sink_tuples = {}
-_cached_model_makers = {}
-_cached_model_classes = {}
+_cached_model_stores: Dict = {}
+_cached_model_tuples: Dict = {}
+_cached_data_source_sink_tuples: Dict = {}
+_cached_model_makers: Dict = {}
+_cached_model_classes: Dict = {}
 
 suppress_order_columns_not_used_warning = (
     "To adjust this warning, set model config's `order_columns_not_used_warning` "
@@ -173,18 +174,18 @@ def clear_caches():
     global _cached_model_makers
     global _cached_model_classes
 
-    _cached_model_stores = {}
-    _cached_model_tuples = {}
-    _cached_data_source_sink_tuples = {}
-    _cached_model_makers = {}
-    _cached_model_classes = {}
+    _cached_model_stores.clear()
+    _cached_model_tuples.clear()
+    _cached_data_source_sink_tuples.clear()
+    _cached_model_makers.clear()
+    _cached_model_classes.clear()
 
 
 def _model_key(model_conf):
     return model_conf["name"] + "_" + model_conf["version"]
 
 
-def _find_subclass(module_name, superclass, cache=True):
+def _find_subclass(module_name, superclass):
     """Locate and instantiate class of data-scientist-provided ModelMaker
     or model class.
     For this to work, your model module (.py file) needs to be in python's
@@ -205,6 +206,7 @@ def _find_subclass(module_name, superclass, cache=True):
     __import__(module_name)
 
     classes = superclass.__subclasses__()
+    print(classes)
     if len(classes) != 1:
         raise ValueError(
             "The configured model module (.py file) must contain "
@@ -240,7 +242,7 @@ def _get_model_maker(complete_conf, cache=True):
     if mm is None:
         logger.debug("Locating and instantiating ModelMaker...")
         mm_cls = _find_subclass(
-            complete_conf["model"]["module"], ModelMakerInterface, cache=cache
+            complete_conf["model"]["module"], ModelMakerInterface
         )
         mm = mm_cls()
         if cache:
@@ -271,7 +273,7 @@ def _get_model_class(complete_conf, cache=True):
     if m_cls is None:
         logger.debug("Locating Model class...")
         m_cls = _find_subclass(
-            complete_conf["model"]["module"], ModelInterface, cache=cache
+            complete_conf["model"]["module"], ModelInterface
         )
         if cache:
             _cached_model_classes[key] = m_cls
