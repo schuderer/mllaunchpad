@@ -10,7 +10,9 @@ import ramlfications
 
 # Project imports
 import mllaunchpad.api as api
-from mllaunchpad.model_interface import ModelInterface
+
+# from mllaunchpad.model_interface import ModelInterface
+from .mock_model import MockModelClass
 
 
 class MockApp:
@@ -23,14 +25,17 @@ def app():
     return MockApp()
 
 
-class MockModel(ModelInterface):
-    def predict(self, *args):
-        return {}
-
-
-@pytest.fixture
-def model():
-    return MockModel()
+# @pytest.fixture
+# def model():
+#     class MockModel(ModelInterface):
+#         def predict(self, *args):
+#             return {}
+#
+#     yield MockModel()
+#
+#     del MockModel
+#     import gc
+#     gc.collect()
 
 
 def parsed_raml(string):
@@ -69,10 +74,10 @@ documentation:
 @patch("mllaunchpad.api._load_raml", autospec=True)
 @patch("mllaunchpad.api.Api", autospec=True)
 @patch("mllaunchpad.resource.ModelStore.load_trained_model")
-def test_model_api_init(load_model_mock, api_mock, raml_mock, app, model):
+def test_model_api_init(load_model_mock, api_mock, raml_mock, app):
     """Test minimal api initialization."""
     load_model_mock.return_value = (
-        model,
+        MockModelClass,
         {"name": "my_model", "version": "1.2.3", "created": "2020.02.02"},
     )
     raml_mock.return_value = parsed_raml(minimal_raml_str)
@@ -112,10 +117,10 @@ documentation:
 @patch("mllaunchpad.api._load_raml", autospec=True)
 @patch("mllaunchpad.api.Api", autospec=True)
 @patch("mllaunchpad.resource.ModelStore.load_trained_model")
-def test_model_api_fileraml(load_model_mock, api_mock, raml_mock, app, model):
+def test_model_api_fileraml(load_model_mock, api_mock, raml_mock, app):
     """Test minimal api initialization."""
     load_model_mock.return_value = (
-        model,
+        MockModelClass,
         {"name": "my_model", "version": "1.2.3", "created": "2020.02.02"},
     )
     raml_mock.return_value = parsed_raml(file_raml_str)
