@@ -36,7 +36,7 @@ if conf:
     application = Flask(__name__, root_path=conf["api"].get("root_path"))
     ModelApi(conf, application)
 
-    if __name__ == "__main__":
+    if __name__ == "__main__":  # pragma: no cover
         logger.warning(
             "Starting Flask debug server.\nIn production, please use a WSGI server, "
             + "e.g. 'gunicorn -w 4 -b 127.0.0.1:5000 mllaunchpad.wsgi:application'"
