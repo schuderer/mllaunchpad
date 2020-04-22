@@ -1,8 +1,7 @@
 """Tests for `mllaunchpad.api` module."""
 
 # Stdlib imports
-from tempfile import NamedTemporaryFile
-from unittest.mock import patch
+from unittest import mock
 
 # Third-party imports
 import pytest
@@ -10,49 +9,75 @@ import ramlfications
 
 # Project imports
 import mllaunchpad.api as api
-from mllaunchpad.model_interface import ModelInterface
+
+# from mllaunchpad.model_interface import ModelInterface
+from .mock_model import MockModelClass, prediction_output
 
 
-class MockApp:
-    def __init__(self):
-        pass
+# TODO: tests for the API proper (see https://flask.palletsprojects.com/en/1.1.x/testing/)
 
 
 @pytest.fixture
 def app():
-    return MockApp()
+    return mock.Mock()
 
 
-class MockModel(ModelInterface):
-    def predict(self, *args):
-        return {}
+# @pytest.fixture
+# def model():
+#     class MockModel(ModelInterface):
+#         def predict(self, *args):
+#             return {}
+#
+#     yield MockModel()
+#
+#     del MockModel
+#     import gc
+#     gc.collect()
 
 
-@pytest.fixture
-def model():
-    return MockModel()
+def load_model_result(config):
+    return (
+        MockModelClass(),
+        {
+            "name": config["model"]["name"],
+            "version": config["model"]["version"],
+            "created": "2020.02.02",
+        },
+    )
 
 
 def parsed_raml(string):
-    with NamedTemporaryFile("w", delete=False) as f:
-        f.write(string)
-    return ramlfications.parse(f.name)
+    return ramlfications.parse_raml(
+        ramlfications.loads(string), ramlfications.setup_config(None)
+    )
+    # return ramlfications.parse(string)
 
 
 minimal_config = {
     "model_store": {"location": "model_store"},
     "model": {"name": "my_model", "version": "1.2.3", "module": "my_module"},
-    "api": {"name": "my_api", "version": "1.2.3", "raml": "bla.raml"},
+    "api": {"name": "my_api", "raml": "bla.raml"},
 }
-minimal_raml_str = """#%RAML 0.8
+minimal_config_bad_version = {
+    "model_store": {"location": "model_store"},
+    "model": {
+        "name": "my_model",
+        "version": "hey.you.41",
+        "module": "my_module",
+    },
+    "api": {"name": "my_api", "raml": "bla.raml"},
+}
+raml_head_str = """#%RAML 0.8
 ---
 title: Some API
 baseUri: https://{host}/bla/{version}
-version: v0
+version: v1
 documentation:
     - title: An API
       content: |
         Predicting something
+"""
+raml_query_resource_str = """
 
 /something:
   get:
@@ -64,32 +89,22 @@ documentation:
         description: the param's description
         required: true
 """
+raml_resource_id_str = """
 
+/something_else:
+  /{test_key}: # just to test
+    get:
+      queryParameters:
+        hallo:
+          description: some demo query parameter in addition to the uri param
+          type: string
+          required: true
+          enum: ['metric', 'imperial']
+          #default: 42
+"""
+raml_file_resource_str = """
 
-@patch("mllaunchpad.api._load_raml", autospec=True)
-@patch("mllaunchpad.api.Api", autospec=True)
-@patch("mllaunchpad.resource.ModelStore.load_trained_model")
-def test_model_api_init(load_model_mock, api_mock, raml_mock, app, model):
-    """Test minimal api initialization."""
-    load_model_mock.return_value = (
-        model,
-        {"name": "my_model", "version": "1.2.3", "created": "2020.02.02"},
-    )
-    raml_mock.return_value = parsed_raml(minimal_raml_str)
-    _ = api.ModelApi(minimal_config, app)
-
-
-file_raml_str = """#%RAML 0.8
----
-title: Some API
-baseUri: https://{host}/bla/{version}
-version: v0
-documentation:
-    - title: An API
-      content: |
-        Predicting something
-
-/something:
+/some_file:
   post:
     description: Upload a file
     body:
@@ -107,16 +122,166 @@ documentation:
             type: file
             fileTypes: ["application/pdf"]
 """
+minimal_raml_str = raml_head_str + raml_query_resource_str
 
 
-@patch("mllaunchpad.api._load_raml", autospec=True)
-@patch("mllaunchpad.api.Api", autospec=True)
-@patch("mllaunchpad.resource.ModelStore.load_trained_model")
-def test_model_api_fileraml(load_model_mock, api_mock, raml_mock, app, model):
-    """Test minimal api initialization."""
-    load_model_mock.return_value = (
-        model,
-        {"name": "my_model", "version": "1.2.3", "created": "2020.02.02"},
-    )
-    raml_mock.return_value = parsed_raml(file_raml_str)
-    _ = api.ModelApi(minimal_config, app)
+@pytest.mark.parametrize(
+    "raml",
+    [
+        raml_head_str + raml_query_resource_str,
+        raml_head_str + raml_file_resource_str,
+        raml_head_str + raml_query_resource_str + raml_file_resource_str,
+        raml_head_str
+        + raml_file_resource_str
+        + raml_query_resource_str,  # just checking once; order should not matter
+        raml_head_str + raml_query_resource_str + raml_file_resource_str,
+        raml_head_str
+        + raml_file_resource_str
+        + raml_query_resource_str.replace(
+            "/something:", ""
+        ),  # same resource with both query and file functionality
+        raml_head_str + raml_resource_id_str,
+        raml_head_str + raml_query_resource_str + raml_resource_id_str,
+        raml_head_str + raml_file_resource_str + raml_resource_id_str,
+        raml_head_str
+        + raml_query_resource_str
+        + raml_file_resource_str
+        + raml_resource_id_str,
+    ],
+)
+@mock.patch("mllaunchpad.api.Api", autospec=True)
+@mock.patch(
+    "mllaunchpad.resource.ModelStore.load_trained_model",
+    side_effect=lambda _: load_model_result(minimal_config),
+)
+def test_model_modelapi_legal_resource_combinations(
+    load_model_mock, api_mock, raml, app
+):
+    """Should allow between 0 and 3 resources, with 0 or 1 of each resource type."""
+    with mock.patch(
+        "ramlfications.parse",
+        autospec=True,
+        side_effect=lambda _: parsed_raml(raml),
+    ):
+        _ = api.ModelApi(minimal_config, app)
+    api_mock.assert_called_once()
+    load_model_mock.assert_called_once_with(minimal_config["model"])
+
+
+@pytest.mark.parametrize(
+    "raml",
+    [
+        raml_head_str
+        + raml_query_resource_str
+        + raml_query_resource_str.replace("/some", "/some2"),
+        raml_head_str
+        + raml_query_resource_str
+        + raml_file_resource_str
+        + raml_file_resource_str.replace("/some", "/some2"),
+        raml_head_str
+        + raml_query_resource_str
+        + raml_resource_id_str
+        + raml_resource_id_str.replace("/some", "/some2"),
+        raml_head_str
+        + raml_query_resource_str
+        + raml_resource_id_str
+        + raml_resource_id_str.replace("/some", "/some2"),
+        raml_head_str
+        + raml_file_resource_str
+        + raml_file_resource_str.replace("/some", "/some2"),
+        raml_head_str
+        + raml_file_resource_str
+        + raml_query_resource_str
+        + raml_query_resource_str.replace("/some", "/some2"),
+        raml_head_str
+        + raml_file_resource_str
+        + raml_resource_id_str
+        + raml_resource_id_str.replace("/some", "/some2"),
+        raml_head_str
+        + raml_resource_id_str
+        + raml_resource_id_str.replace("/some", "/some2"),
+        raml_head_str
+        + raml_resource_id_str
+        + raml_file_resource_str
+        + raml_file_resource_str.replace("/some", "/some2"),
+        raml_head_str
+        + raml_resource_id_str
+        + raml_query_resource_str
+        + raml_query_resource_str.replace("/some", "/some2"),
+    ],
+)
+@mock.patch("mllaunchpad.api.Api", autospec=True)
+@mock.patch(
+    "mllaunchpad.resource.ModelStore.load_trained_model",
+    side_effect=lambda _: load_model_result(minimal_config),
+)
+def test_model_modelapi_illegal_resource_combinations(
+    load_model_mock, api_mock, raml, app
+):
+    """Should allow between 0 and 3 resources, with 0 or 1 of each resource type."""
+    with mock.patch(
+        "ramlfications.parse",
+        autospec=True,
+        side_effect=lambda _: parsed_raml(raml),
+    ):
+        with pytest.raises(ValueError, match="resources"):
+            _ = api.ModelApi(minimal_config, app)
+    api_mock.assert_called_once()
+    load_model_mock.assert_called_once_with(minimal_config["model"])
+
+
+@mock.patch(
+    "ramlfications.parse",
+    autospec=True,
+    side_effect=lambda _: parsed_raml(
+        minimal_raml_str.replace("version: v1", "version: v99")
+    ),
+)
+@mock.patch("mllaunchpad.api.Api", autospec=True)
+@mock.patch(
+    "mllaunchpad.resource.ModelStore.load_trained_model",
+    side_effect=lambda _: load_model_result(minimal_config),
+)
+def test_model_modelapi_version_mismatch(
+    load_model_mock, api_mock, raml_mock, app
+):
+    """Should raise error if RAML version does not match major version in config."""
+    with pytest.raises(ValueError, match="does not match API version"):
+        _ = api.ModelApi(minimal_config, app)
+
+
+@mock.patch(
+    "ramlfications.parse",
+    autospec=True,
+    side_effect=lambda _: parsed_raml(minimal_raml_str),
+)
+@mock.patch("mllaunchpad.api.Api", autospec=True)
+@mock.patch(
+    "mllaunchpad.resource.ModelStore.load_trained_model",
+    side_effect=lambda _: load_model_result(minimal_config_bad_version),
+)
+def test_model_modelapi_malformed_version(
+    load_model_mock, api_mock, raml_mock, app
+):
+    """Should raise error if RAML version does not contain of three integers separated by dots ("0.11.22")."""
+    with pytest.raises(ValueError, match="malformed"):
+        _ = api.ModelApi(minimal_config_bad_version, app)
+
+
+@mock.patch(
+    "ramlfications.parse",
+    autospec=True,
+    side_effect=lambda _: parsed_raml(minimal_raml_str),
+)
+@mock.patch("mllaunchpad.api.Api", autospec=True)
+@mock.patch(
+    "mllaunchpad.resource.ModelStore.load_trained_model",
+    side_effect=lambda _: load_model_result(minimal_config),
+)
+def test_model_modelapi_predict_using_model(
+    load_model_mock, api_mock, raml_mock, app
+):
+    """Should return expected output."""
+    a = api.ModelApi(minimal_config, app)
+    output = a.predict_using_model({"a": [1, 2, 3]})
+    assert output == prediction_output

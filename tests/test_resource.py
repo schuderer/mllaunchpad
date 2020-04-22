@@ -436,6 +436,84 @@ def test_oracledatasource_df(user_pw, pd_read, oracledatasource_cfg_and_data):
     del sys.modules["cx_Oracle"]
 
 
+@pytest.mark.parametrize(
+    "values, expected",
+    [
+        (
+            pd.DataFrame(
+                {
+                    "a": [1, 2, 3, 4, 5, 6, 7],
+                    "b": [3, 2, 7, None, 5, 7, 3],
+                    "c": [1, 6, np.nan, 5, 7, None, 0],
+                }
+            ),
+            pd.DataFrame(
+                {
+                    "a": [1, 2, 3, 4, 5, 6, 7],
+                    "b": [3, 2, 7, np.nan, 5, 7, 3],
+                    "c": [1, 6, np.nan, 5, 7, np.nan, 0],
+                }
+            ),
+        ),
+        (
+            pd.DataFrame(
+                {
+                    "a": [1, 2, "3", None, 5, 6, 7],
+                    "b": [3, 2, 7, None, "4", 7, 3],
+                    "c": [1, 6, np.nan, 5, 7, "0", 0],
+                }
+            ),
+            pd.DataFrame(
+                {
+                    "a": [1, 2, "3", np.nan, 5, 6, 7],
+                    "b": [3, 2, 7, np.nan, "4", 7, 3],
+                    "c": [1, 6, np.nan, 5, 7, "0", 0],
+                }
+            ),
+        ),
+        (
+            pd.DataFrame(
+                {
+                    "a": [1, 2, "x", 4, 5, 6, 7],
+                    "b": [3, 2, 7, None, "y", 7, 3],
+                    "c": [1, 6, np.nan, 5, 7, "z", 0],
+                }
+            ),
+            pd.DataFrame(
+                {
+                    "a": [1, 2, "x", 4, 5, 6, 7],
+                    "b": [3, 2, 7, np.nan, "y", 7, 3],
+                    "c": [1, 6, np.nan, 5, 7, "z", 0],
+                }
+            ),
+        ),
+    ],
+)
+@mock.patch("{}.pd.read_sql".format(r.__name__))
+@mock.patch("{}.get_user_pw".format(r.__name__), return_value=("foo", "bar"))
+def test_regression_oracle_nas_issue86(
+    user_pw, pd_read, values, expected, oracledatasource_cfg_and_data
+):
+    """
+    OracleDataSource should connect, read dataframe and return it unaltered
+    with the exception of None values --> they should be converted to np.nan.
+    """
+    cfg, dbms_cfg, _ = oracledatasource_cfg_and_data()
+    ora_mock = mock.MagicMock()
+    sys.modules["cx_Oracle"] = ora_mock
+    pd_read.return_value = values
+
+    ds = r.OracleDataSource("bla", cfg, dbms_cfg)
+    df = ds.get_dataframe()
+
+    pd.testing.assert_frame_equal(df, expected)
+    # assert df == expected
+    ora_mock.connect.assert_called_once()
+    pd_read.assert_called_once()
+
+    del sys.modules["cx_Oracle"]
+
+
 @mock.patch("{}.get_user_pw".format(r.__name__), return_value=("foo", "bar"))
 def test_oracledatasource_notimplemented(
     user_pw, oracledatasource_cfg_and_data

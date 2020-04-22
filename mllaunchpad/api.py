@@ -383,7 +383,7 @@ class ModelApi:
         logger.info(
             "%s datasink(s) initialized: %s", len(dsi), list(dsi.keys())
         )
-        if config["api"].get("preload_datasources", False):
+        if config["api"].get("preload_datasources"):
             logger.info("Preloading datasources...")
             for ds in dso.values():
                 _ = ds.get_dataframe()
