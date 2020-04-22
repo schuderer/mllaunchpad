@@ -505,6 +505,7 @@ class OracleDataSource(DataSource):
         df = pd.read_sql(
             query, con=self.connection, params=params, **kw_options
         )
+        df.fillna(np.nan, inplace=True)
 
         self._cache_df_if_required(df)
 
