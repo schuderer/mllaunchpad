@@ -25,7 +25,9 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ------------------------------------------------------------------------------
 
-* Nothing here yet. Be the first to :doc:`contribute <contributing>` to the next release! :)
+* |Fixed| Type guessing fails when connecting to (Oracle) datasource,
+  `issue #86 <https://github.com/schuderer/mllaunchpad/issues/86>`_,
+  by `Bob Platte <https://github.com/bobplatte>`_.
 
 0.1.1 (2020-04-02)
 ------------------------------------------------------------------------------
