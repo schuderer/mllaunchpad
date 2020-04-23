@@ -174,6 +174,17 @@ in the docs on-the-fly::
 
   $ nox -s docs -- monitor
 
+On step 4 or 6, you might get a merge conflict on `docs/_static/examples.zip`.
+This file is generated automatically by nox when building the docs, and differences
+lead to a different file. To resolve::
+
+  $ git checkout --ours -- docs/_static/examples.zip
+  $ git add docs/_static/examples.zip
+  $ git commit
+
+Then continue with what you wanted to do (in case of step 4, working on your code,
+in case of step 6, pushing.
+
 Deploying
 ------------------------------------------------------------------------------
 
@@ -193,7 +204,7 @@ Make sure all your changes are committed and do the following:
    at target ``master``, and a name like ``Release 2.1.23``.
 9. Get the doc's changes and paste it into the description (make it look nice).
 10. Publish the release.
-11. Check that Travis CI deployed the release successfully.
+11. Check that Travis CI deployed the release to PyPI successfully.
 
 Alternatively, you can also release ``mllaunchpad`` with these commands
 (assuming you have already committed your version and changelog changes)::
