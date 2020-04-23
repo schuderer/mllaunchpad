@@ -4,14 +4,17 @@
 from unittest import mock
 
 # Third-party imports
+import pandas as pd
 import pytest
 import ramlfications
 
 # Project imports
 import mllaunchpad.api as api
 
-# from mllaunchpad.model_interface import ModelInterface
 from .mock_model import MockModelClass, prediction_output
+
+
+# from mllaunchpad.model_interface import ModelInterface
 
 
 # TODO: tests for the API proper (see https://flask.palletsprojects.com/en/1.1.x/testing/)
@@ -285,3 +288,15 @@ def test_model_modelapi_predict_using_model(
     a = api.ModelApi(minimal_config, app)
     output = a.predict_using_model({"a": [1, 2, 3]})
     assert output == prediction_output
+
+
+def test_generate_raml():
+    df = pd.DataFrame({"c1": [1, 2, 3], "c2": ["a", "b", "c"]})
+
+    out = api.generate_raml(
+        minimal_config, data_frame=df, resource_name="findme"
+    )
+
+    # Should be parseable
+    parsed_raml(out)
+    assert "/findme" in out
