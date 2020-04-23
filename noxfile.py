@@ -17,7 +17,7 @@ package_name = "mllaunchpad"
 my_py_ver = "3.7"
 files_to_format = [package_name, "tests", "noxfile.py", "setup.py"]
 max_line_length = "79"  # I don't want a pyproject.toml just for 'black'...
-min_coverage = "30"  # TODO: get to >= 90%
+min_coverage = "80"  # TODO: get to >= 90%
 
 # Skip "tests-3.7" by default as they are included in "coverage"
 nox.options.sessions = [
