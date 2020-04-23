@@ -174,7 +174,7 @@ in the docs on-the-fly::
 
   $ nox -s docs -- monitor
 
-On step 4 or 6, you might get a merge conflict on `docs/_static/examples.zip`.
+On step 4 or 6, you might get a merge conflict on ``docs/_static/examples.zip``.
 This file is generated automatically by nox when building the docs, and differences
 lead to a different file. To resolve::
 
@@ -183,7 +183,7 @@ lead to a different file. To resolve::
   $ git commit
 
 Then continue with what you wanted to do (in case of step 4, working on your code,
-in case of step 6, pushing.
+in case of step 6, pushing).
 
 Deploying
 ------------------------------------------------------------------------------
@@ -196,13 +196,13 @@ Make sure all your changes are committed and do the following:
 3. Make sure ``CHANGELOG.rst`` is complete and move all unreleased changes
    under a new header for this version.
 4. Change the line ``version = ...`` in ``setup.cfg`` to the new version number.
-5. Run ``nox`` again to make sure you did not break something.
+5. Run ``nox`` again to make sure you did not break anything.
 6. Commit and push the changes and create a pull request.
-7. Modify/correct things in the PR to your heart's content, when satisfied,
-   merge it to master.
+7. Modify/correct things in the PR to your heart's content, and when satisfied,
+   merge it to ``master``.
 8. On GitHub, create a draft release with a tag name like e.g. ``v2.1.23``,
-   at target ``master``, and a name like ``Release 2.1.23``.
-9. Get the doc's changes and paste it into the description (make it look nice).
+   at target ``master``, and a name like e.g. ``Release 2.1.23``.
+9. Get the doc's changes and paste them into the description (make them look nice).
 10. Publish the release.
 11. Check that Travis CI deployed the release to PyPI successfully.
 
