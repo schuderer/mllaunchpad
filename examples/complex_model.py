@@ -30,7 +30,7 @@ class MyModelMaker(ModelMakerInterface):
     def create_trained_model(self, model_conf, data_sources, data_sinks, old_model=None):
         # demo: get the database data source
         limit = model_conf["train_options"]["num_ora_rows"]
-        dbdf = data_sources["panel"].get_dataframe(arg_dict={"limit": limit})
+        dbdf = data_sources["panel"].get_dataframe(params={"limit": limit})
         print(dbdf)
 
         # just for lolz

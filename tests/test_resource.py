@@ -132,73 +132,105 @@ def datasource_expires_config():
 class MockDataSource(r.DataSource):
     serves = ["mock"]
 
-    def get_dataframe(self, arg_dict=None, buffer=False):
-        cached = self._try_get_cached_df()
-        if cached is not None:
-            print("cached")
-            return cached
-        df = pd.DataFrame(arg_dict)
-        self._cache_df_if_required(df)
+    def get_dataframe(self, params=None, buffer=False):
+        df = pd.DataFrame(params)
         return df
 
-    def get_raw(self, arg_dict=None, buffer=False):
-        cached = self._try_get_cached_raw()
-        if cached is not None:
-            print("cached")
-            return cached
-        raw = arg_dict
-        self._cache_raw_if_required(arg_dict)
+    def get_raw(self, params=None, buffer=False):
+        raw = params
         return raw
 
 
 @pytest.mark.parametrize(
     "expires, expected_cached", [(0, False), (100000, True), (-1, True)]
 )
-def test_datasource_caching_df(
-    expires, expected_cached, capsys, datasource_expires_config
+def test_datasource_expires_df(
+    expires, expected_cached, datasource_expires_config
 ):
     args = {"a": [1, 2, 3], "b": [3, 4, 5]}
     ds = MockDataSource("mock", datasource_expires_config(expires))
 
     # 1st DF read
-    df = ds.get_dataframe(arg_dict=args)
-    out, _ = capsys.readouterr()
-    pd.testing.assert_frame_equal(df, pd.DataFrame(args))
-    assert "cached" not in out
+    df1 = ds.get_dataframe(params=args.copy())
+    pd.testing.assert_frame_equal(df1, pd.DataFrame(args))
+    assert df1 is not pd.DataFrame(args)
 
     # 2nd DF read
-    df = ds.get_dataframe(arg_dict=args)
-    out, _ = capsys.readouterr()
-    pd.testing.assert_frame_equal(df, pd.DataFrame(args))
-    assert ("cached" in out) == expected_cached
+    df2 = ds.get_dataframe(params=args.copy())
+    pd.testing.assert_frame_equal(df2, pd.DataFrame(args))
+    assert (df2 is df1) == expected_cached
 
     # 3rd DF read
-    df = ds.get_dataframe(arg_dict=args)
-    out, _ = capsys.readouterr()
-    pd.testing.assert_frame_equal(df, pd.DataFrame(args))
-    assert ("cached" in out) == expected_cached
+    df3 = ds.get_dataframe(params=args.copy())
+    pd.testing.assert_frame_equal(df3, pd.DataFrame(args))
+    assert (df3 is df1) == expected_cached
 
 
 @pytest.mark.parametrize(
     "expires, expected_cached", [(0, False), (100000, True), (-1, True)]
 )
-def test_datasource_caching_raw(
-    expires, expected_cached, capsys, datasource_expires_config
+def test_datasource_expires_raw(
+    expires, expected_cached, datasource_expires_config
 ):
     args = {"a": [1, 2, 3], "b": [3, 4, 5]}
     ds = MockDataSource("mock", datasource_expires_config(expires))
 
     # 1st raw read
-    raw = ds.get_raw(arg_dict=args)
-    out, _ = capsys.readouterr()
-    assert raw == args
-    assert "cached" not in out
+    raw1 = ds.get_raw(params=args.copy())
+    assert raw1 == args
 
     # 2nd raw read
-    raw = ds.get_raw(arg_dict=args)
-    out, _ = capsys.readouterr()
-    assert raw == args
-    assert ("cached" in out) == expected_cached
+    raw2 = ds.get_raw(params=args.copy())
+    assert raw2 == args
+    assert (raw2 is raw1) == expected_cached
+
+
+def test_datasource_memoization_df(datasource_expires_config):
+    args1 = {"a": [1, 2, 3], "b": [3, 4, 5]}
+    args2_same = {"a": [1, 2, 3], "b": [3, 4, 5]}
+    args3_different = {"A": [3, 2, 1], "B": [3, 4, 5]}
+    args4_again_different = {"C": [3, 2, 1], "D": [3, 4, 5]}
+    cfg = datasource_expires_config(-1)  # use cache
+    cfg["cache_size"] = 2
+    ds = MockDataSource("mock", cfg)
+
+    # 1st DF read (cached as 1st cache element)
+    df1 = ds.get_dataframe(params=args1.copy())
+    pd.testing.assert_frame_equal(df1, pd.DataFrame(args1))
+    assert df1 is not pd.DataFrame(args1)  # not from cache
+
+    # 2nd DF read (getting from cache)
+    df2 = ds.get_dataframe(params=args2_same.copy())
+    pd.testing.assert_frame_equal(df2, pd.DataFrame(args2_same))
+    assert df2 is df1  # from cache
+
+    # 3rd DF read (different params passed, will be cached as 2nd cache element)
+    df3 = ds.get_dataframe(params=args3_different.copy())
+    pd.testing.assert_frame_equal(df3, pd.DataFrame(args3_different))
+    assert df3 is not df2  # not from cache
+    assert df3 is not df1  # not from cache
+
+    # 4rth DF read (original params passed again -- it is still in the cache due to size of 2)
+    df4 = ds.get_dataframe(params=args1.copy())
+    pd.testing.assert_frame_equal(df4, pd.DataFrame(args1))
+    assert df4 is df1  # from cache
+
+    # 5th DF read (yet unseen params passed -- will be cached, replacing args1)
+    df5 = ds.get_dataframe(params=args4_again_different.copy())
+    pd.testing.assert_frame_equal(df5, pd.DataFrame(args4_again_different))
+    assert df5 is not df4  # not from cache
+    assert df5 is not df3  # not from cache
+    assert df5 is not df2  # not from cache
+    assert df5 is not df1  # not from cache
+
+    # 6th DF read (original params passed -- not in cache any more due to cache size limit of 2)
+    df6 = ds.get_dataframe(params=args1.copy())
+    pd.testing.assert_frame_equal(df6, pd.DataFrame(args1))
+    assert df6 is not df5  # not from cache
+    assert df6 is not df4  # not from cache
+    assert df6 is not df3  # not from cache
+    assert df6 is not df2  # not from cache
+    assert df6 is not df1  # not from cache
 
 
 # Test FileDataSource
@@ -436,6 +468,23 @@ def test_oracledatasource_df(user_pw, pd_read, oracledatasource_cfg_and_data):
     del sys.modules["cx_Oracle"]
 
 
+@mock.patch("{}.get_user_pw".format(r.__name__), return_value=("foo", "bar"))
+def test_oracledatasource_notimplemented(
+    user_pw, oracledatasource_cfg_and_data
+):
+    cfg, dbms_cfg, _ = oracledatasource_cfg_and_data()
+    ora_mock = mock.MagicMock()
+    sys.modules["cx_Oracle"] = ora_mock
+
+    ds = r.OracleDataSource("bla", cfg, dbms_cfg)
+    with pytest.raises(NotImplementedError):
+        ds.get_dataframe(buffer=True)
+    with pytest.raises(NotImplementedError, match="get_dataframe"):
+        ds.get_raw()
+
+    del sys.modules["cx_Oracle"]
+
+
 @pytest.mark.parametrize(
     "values, expected",
     [
@@ -491,7 +540,7 @@ def test_oracledatasource_df(user_pw, pd_read, oracledatasource_cfg_and_data):
 )
 @mock.patch("{}.pd.read_sql".format(r.__name__))
 @mock.patch("{}.get_user_pw".format(r.__name__), return_value=("foo", "bar"))
-def test_regression_oracle_nas_issue86(
+def test_oracledatasource_regression_nas_issue86(
     user_pw, pd_read, values, expected, oracledatasource_cfg_and_data
 ):
     """
@@ -510,23 +559,6 @@ def test_regression_oracle_nas_issue86(
     # assert df == expected
     ora_mock.connect.assert_called_once()
     pd_read.assert_called_once()
-
-    del sys.modules["cx_Oracle"]
-
-
-@mock.patch("{}.get_user_pw".format(r.__name__), return_value=("foo", "bar"))
-def test_oracledatasource_notimplemented(
-    user_pw, oracledatasource_cfg_and_data
-):
-    cfg, dbms_cfg, _ = oracledatasource_cfg_and_data()
-    ora_mock = mock.MagicMock()
-    sys.modules["cx_Oracle"] = ora_mock
-
-    ds = r.OracleDataSource("bla", cfg, dbms_cfg)
-    with pytest.raises(NotImplementedError):
-        ds.get_dataframe(buffer=True)
-    with pytest.raises(NotImplementedError, match="get_dataframe"):
-        ds.get_raw()
 
     del sys.modules["cx_Oracle"]
 
