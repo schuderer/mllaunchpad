@@ -59,10 +59,11 @@ Here's an example configuration with comments:
         # in all types of datasources/datasinks.
         # All other properties are specific to the datasource type.
         type: csv  # Generic; the type of the datasource
-        path: ./iris_train.csv  # Can also be a URL. Valid URL schemes: http, ftp, s3, and file.
-        expires: 0  # -1: never (=cached forever), 0: immediately (=no caching), >0: time in seconds.
+        path: ./iris_train.csv  # Can also be a URL. Valid URL schemes: http, ftp, s3, and file
+        expires: 0  # -1: never (=cached forever), 0: immediately (=no caching), >0: time in seconds
+        cache_size: 10  # Optional: maximum number of different results to keep in memory, default=32
         options: {}  # Special kwargs to pass to the datasource's implementation
-        tags: train  # String or list of strings. Valid are "train", "test" and/or "predict"
+        tags: train  # String or list of strings. Valid are "train", "test" and/or "predict".
       petals_test:
         type: csv
         path: ./iris_holdout.csv

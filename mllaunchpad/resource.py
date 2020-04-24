@@ -11,6 +11,7 @@ from collections import OrderedDict
 from datetime import datetime
 from time import time
 from typing import (
+    Any,
     Dict,
     Iterable,
     List,
@@ -310,7 +311,55 @@ def create_data_sources_and_sinks(
     return sources, sinks
 
 
-class DataSource:
+class CacheDict(OrderedDict):
+    def __init__(self, *args, **kwds):
+        self.maxsize = kwds.pop("maxsize", None)
+        OrderedDict.__init__(self, *args, **kwds)
+        self._check_size_limit()
+
+    def __setitem__(self, key, value):
+        OrderedDict.__setitem__(self, key, value)
+        self._check_size_limit()
+
+    def _check_size_limit(self):
+        if self.maxsize is not None:
+            while len(self) > self.maxsize:
+                self.popitem(last=False)
+
+    def __hash__(self):
+        return hash(frozenset(self.items()))
+
+
+class CachedDataSource(type):
+    """Metaclass to Auto-apply decorators "@cached" to data getters.
+    https://stackoverflow.com/questions/10067262/automatically-decorating-every-instance-method-in-a-class
+    """
+
+    def __new__(mcs, name, bases, dct):
+        for attr, func in dct.items():
+            if attr.startswith("get_"):
+                dct[attr] = CachedDataSource.cached(func)
+        return type.__new__(mcs, name, bases, dct)
+
+    @classmethod
+    def cached(mcs, func):
+        """This decorator is automatically applied to `get_dataframe` and `get_raw` methods to enable caching."""
+
+        def wrapper(self, params: Dict = None, buffer: bool = False):
+            key = (func.__name__, json.dumps(params, sort_keys=True), buffer)
+            item = self._get_cached(key)
+            if item is not None:
+                return item
+            else:
+                result = func(self, params, buffer)
+                self._to_cache(key, result)
+                return result
+
+        wrapper.__doc__ = func.__doc__
+        return wrapper
+
+
+class DataSource(metaclass=CachedDataSource):
     """Interface, used by the Data Scientist's model to get its data from.
     Concrete DataSources (for files, data bases, etc.) need to inherit from this class.
     """
@@ -321,7 +370,7 @@ class DataSource:
         self,
         identifier: str,
         datasource_config: Dict,
-        sub_config: Optional[Dict] = None,
+        sub_config: Optional[Dict] = None,  # used in DBMS subclasses
     ):
         """Please call super().__init(...) when overwriting this method
         """
@@ -331,60 +380,34 @@ class DataSource:
 
         self.expires = self.config.get("expires", 0)
 
-        self._cached_df = None
-        self._cached_df_time = 0
-        self._cached_raw = None
-        self._cached_raw_time = 0
+        maxsize = self.config.get("cache_size", 32)
+        self._cache = CacheDict(maxsize=maxsize)
 
     @abc.abstractmethod
     def get_dataframe(
-        self, arg_dict: Dict = None, buffer: bool = False
+        self, params: Dict = None, buffer: bool = False
     ) -> pd.DataFrame:
         ...
 
     @abc.abstractmethod
-    def get_raw(self, arg_dict: Dict = None, buffer: bool = False) -> Raw:
+    def get_raw(self, params: Dict = None, buffer: bool = False) -> Raw:
         ...
 
-    def _try_get_cached_df(self):
-        if self._cached_df is not None and (
-            self.expires == -1  # cache indefinitely
-            or (
-                self.expires > 0
-                and time() <= self._cached_df_time + self.expires
-            )
-        ):
-            logger.debug(
-                "Returning cached dataframe for datasource %s", self.id
-            )
-            return self._cached_df
-        else:  # either immediately expires (0) or has expired in meantime (>0)
-            return None
+    def _get_cached(self, key) -> Any:
+        if self.expires == -1 or self.expires > 0:
+            item, time_stamp = self._cache.get(key, (None, 0))
+            if item is not None and (
+                self.expires == -1 or time() <= time_stamp + self.expires
+            ):
+                logger.debug(
+                    "Returning cached item for datasource %s", self.id
+                )
+                return item
+        return None  # either immediately expires (0) or has expired in meantime (>0)
 
-    def _try_get_cached_raw(self):
-        if self._cached_raw is not None and (
-            self.expires == -1  # cache indefinitely
-            or (
-                self.expires > 0
-                and time() <= self._cached_raw_time + self.expires
-            )
-        ):
-            logger.debug(
-                "Returning cached raw data for datasource %s", self.id
-            )
-            return self._cached_raw
-        else:  # either immediately expires (0) or has expired in meantime (>0)
-            return None
-
-    def _cache_df_if_required(self, df):
+    def _to_cache(self, key, item) -> None:
         if self.expires != 0:
-            self._cached_df_time = time()
-            self._cached_df = df
-
-    def _cache_raw_if_required(self, raw):
-        if self.expires != 0:
-            self._cached_raw_time = time()
-            self._cached_raw = raw
+            self._cache[key] = (item, time())
 
     def __del__(self):
         """Overwrite to clean up any resources (connections, temp files, etc.).
@@ -470,7 +493,7 @@ class OracleDataSource(DataSource):
         self.connection = _get_oracle_connection(dbms_config)
 
     def get_dataframe(
-        self, arg_dict: Dict = None, buffer: bool = False
+        self, params: Dict = None, buffer: bool = False
     ) -> pd.DataFrame:
         """Get the data as pandas dataframe.
 
@@ -478,8 +501,8 @@ class OracleDataSource(DataSource):
 
             data_sources["my_datasource"].get_dataframe({"id": 387})
 
-        :param arg_dict: Query parameters to fill in query (e.g. replace query's `:id` parameter with value `387`)
-        :type arg_dict: optional dict
+        :param params: Query parameters to fill in query (e.g. replace query's `:id` parameter with value `387`)
+        :type params: optional dict
         :param buffer: Currently not implemented
         :type buffer: optional bool
 
@@ -488,13 +511,9 @@ class OracleDataSource(DataSource):
         if buffer:
             raise NotImplementedError("Buffered reading not supported yet")
 
-        cached = self._try_get_cached_df()
-        if cached is not None:
-            return cached
-
         # TODO: maybe want to open/close connection on every method call (shouldn't happen often)
         query = self.config["query"]
-        params = arg_dict or {}
+        params = params or {}
         kw_options = self.options
 
         logger.debug(
@@ -507,11 +526,9 @@ class OracleDataSource(DataSource):
         )
         df.fillna(np.nan, inplace=True)
 
-        self._cache_df_if_required(df)
-
         return df
 
-    def get_raw(self, arg_dict: Dict = None, buffer: bool = False) -> Raw:
+    def get_raw(self, params: Dict = None, buffer: bool = False) -> Raw:
         """Not implemented.
 
         :raises NotImplementedError: Raw/blob format currently not supported.
@@ -566,7 +583,7 @@ class FileDataSource(DataSource):
         self.path = datasource_config["path"]
 
     def get_dataframe(
-        self, arg_dict: Dict = None, buffer: bool = False
+        self, params: Dict = None, buffer: bool = False
     ) -> pd.DataFrame:
         """Get data as a pandas dataframe.
 
@@ -574,8 +591,8 @@ class FileDataSource(DataSource):
 
             data_sources["my_datasource"].get_dataframe()
 
-        :param arg_dict: Currently not implemented
-        :type arg_dict: optional dict
+        :param params: Currently not implemented
+        :type params: optional dict
         :param buffer: Currently not implemented
         :type buffer: optional bool
 
@@ -583,10 +600,6 @@ class FileDataSource(DataSource):
         """
         if buffer:
             raise NotImplementedError("Buffered reading not supported yet")
-
-        cached = self._try_get_cached_df()
-        if cached is not None:
-            return cached
 
         kw_options = self.options
 
@@ -604,19 +617,17 @@ class FileDataSource(DataSource):
                 'Can only read csv files as dataframes. Use method "get_raw" for raw data'
             )
 
-        self._cache_df_if_required(df)
-
         return df
 
-    def get_raw(self, arg_dict: Dict = None, buffer: bool = False) -> Raw:
+    def get_raw(self, params: Dict = None, buffer: bool = False) -> Raw:
         """Get data as raw (unstructured) data.
 
         Example::
 
             data_sources["my_raw_datasource"].get_raw()
 
-        :param arg_dict: Currently not implemented
-        :type arg_dict: optional dict
+        :param params: Currently not implemented
+        :type params: optional dict
         :param buffer: Currently not implemented
         :type buffer: optional bool
 
@@ -625,10 +636,6 @@ class FileDataSource(DataSource):
         """
         if buffer:
             raise NotImplementedError("Buffered reading not supported yet")
-
-        cached = self._try_get_cached_raw()
-        if cached is not None:
-            return cached
 
         kw_options = self.options
 
@@ -651,7 +658,6 @@ class FileDataSource(DataSource):
                 'Use method "get_dataframe" for dataframes'
             )
 
-        self._cache_raw_if_required(raw)
         return raw
 
 
@@ -676,12 +682,12 @@ class DataSink:
 
     @abc.abstractmethod
     def put_dataframe(
-        self, dataframe: pd.DataFrame, arg_dict=None, buffer=False
+        self, dataframe: pd.DataFrame, params=None, buffer=False
     ) -> None:
         ...
 
     @abc.abstractmethod
-    def put_raw(self, raw_data: Raw, arg_dict=None, buffer=False) -> None:
+    def put_raw(self, raw_data: Raw, params=None, buffer=False) -> None:
         ...
 
     def __del__(self):
@@ -730,7 +736,7 @@ class FileDataSink(DataSink):
     def put_dataframe(
         self,
         dataframe: pd.DataFrame,
-        arg_dict: Dict = None,
+        params: Dict = None,
         buffer: bool = False,
     ) -> None:
         """Write a pandas dataframe to file.
@@ -743,8 +749,8 @@ class FileDataSink(DataSink):
 
         :param dataframe: The pandas dataframe to save
         :type dataframe: pandas DataFrame
-        :param arg_dict: Currently not implemented
-        :type arg_dict: optional dict
+        :param params: Currently not implemented
+        :type params: optional dict
         :param buffer: Currently not implemented
         :type buffer: optional bool
         """
@@ -770,7 +776,7 @@ class FileDataSink(DataSink):
             )
 
     def put_raw(
-        self, raw_data: Raw, arg_dict: Dict = None, buffer: bool = False,
+        self, raw_data: Raw, params: Dict = None, buffer: bool = False,
     ) -> None:
         """Write raw (unstructured) data to file.
 
@@ -780,8 +786,8 @@ class FileDataSink(DataSink):
 
         :param raw_data: The data to save (bytes for binary, string for text file)
         :type raw_data: bytes or str
-        :param arg_dict: Currently not implemented
-        :type arg_dict: optional dict
+        :param params: Currently not implemented
+        :type params: optional dict
         :param buffer: Currently not implemented
         :type buffer: optional bool
         """
@@ -857,7 +863,7 @@ class OracleDataSink(DataSink):
     def put_dataframe(
         self,
         dataframe: pd.DataFrame,
-        arg_dict: Dict = None,
+        params: Dict = None,
         buffer: bool = False,
     ) -> None:
         """Store the pandas dataframe as a table.
@@ -870,8 +876,8 @@ class OracleDataSink(DataSink):
 
         :param dataframe: The pandas dataframe to store
         :type dataframe: pandas DataFrame
-        :param arg_dict: Currently not implemented
-        :type arg_dict: optional dict
+        :param params: Currently not implemented
+        :type params: optional dict
         :param buffer: Currently not implemented
         :type buffer: optional bool
         """
@@ -892,7 +898,7 @@ class OracleDataSink(DataSink):
         dataframe.to_sql(table, con=self.connection, **kw_options)
 
     def put_raw(
-        self, raw_data, arg_dict: str = None, buffer: bool = False
+        self, raw_data, params: str = None, buffer: bool = False
     ) -> None:
         """Not implemented.
 

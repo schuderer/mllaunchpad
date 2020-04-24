@@ -78,15 +78,15 @@ class RecordsDbDataSource(DataSource):
         connection_string = f"{dbtype}://{user}:{pw}@{host}{port}{service_name}"
         self.db = records.Database(connection_string, **kwargs)
 
-    def get_dataframe(self, arg_dict=None, buffer=False):
+    def get_dataframe(self, params=None, buffer=False):
         """Get data as a pandas dataframe.
 
         Example::
 
             data_sources["my_datasource"].get_dataframe({"id": 387})
 
-        :param arg_dict: Query parameters to fill in query (e.g. `:id` with value 387)
-        :type arg_dict: optional dict
+        :param params: Query parameters to fill in query (e.g. `:id` with value 387)
+        :type params: optional dict
         :param buffer: Currently not implemented
         :type buffer: optional bool
 
@@ -96,12 +96,8 @@ class RecordsDbDataSource(DataSource):
             raise NotImplementedError("Buffered reading not supported yet")
             # the resulting `rows` of a query provides a nice way to do this, though
 
-        cached = self._try_get_cached_df()
-        if cached is not None:
-            return cached
-
         query = self.config["query"]
-        params = arg_dict or {}
+        params = params or {}
 
         logger.debug(
             "Fetching query {} with params {}...".format(
@@ -111,15 +107,13 @@ class RecordsDbDataSource(DataSource):
         rows = self.db.query(query, fetchall=True, **params)
         df = rows.export("df")
 
-        self._cache_df_if_required(df)
-
         return df
 
-    def get_raw(self, arg_dict=None, buffer=False):
+    def get_raw(self, params=None, buffer=False):
         """Not implemented.
 
-        :param arg_dict: Query parameters to fill in query (e.g. `:id` with value 387)
-        :type arg_dict: optional dict
+        :param params: Query parameters to fill in query (e.g. `:id` with value 387)
+        :type params: optional dict
         :param buffer: Currently not implemented
         :type buffer: optional bool
 
