@@ -25,9 +25,21 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ------------------------------------------------------------------------------
 
-* |Fixed| Type guessing fails when connecting to (Oracle) datasource,
+* |Enhancement| DataSource caching overhaul: data cached separately for different
+  :meth:`params <mllaunchpad.resource.FileDataSource.get_dataframe>`,
+  configurable ``cache_size``,
+  `issue #97 <https://github.com/schuderer/mllaunchpad/issues/97>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
+
+0.1.2 (2020-04-23)
+------------------------------------------------------------------------------
+
+* |Fixed| Oracle DataSource's ``get_dataframe`` now interprets ``Null`` as ``nan``,
   `issue #86 <https://github.com/schuderer/mllaunchpad/issues/86>`_,
   by `Bob Platte <https://github.com/bobplatte>`_.
+* |Enhancement| Add a truckload of unit tests,
+  `issue #46 <https://github.com/schuderer/mllaunchpad/issues/46>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
 
 0.1.1 (2020-04-02)
 ------------------------------------------------------------------------------

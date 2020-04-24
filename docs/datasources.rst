@@ -47,6 +47,7 @@ Here is an example for a configured
         type: csv
         path: ./iris_train.csv
         expires: 0
+        cache_size: 32  # optional
         options: {}
         tags: train
 
@@ -55,7 +56,8 @@ Where the parts of this examples are:
 * ``datasources`` (or ``datasinks``; optional): Can contain
   as many child elements (configured DataSources or DataSinks) as you like.
 * ``my_datasource``: The name by which you want to refer to a specific configured DataSource.
-  Used to get data, e.g.: ``data_sources["my_datasource"].get_dataframe()``. This name is up to you to choose.
+  Used to get data, e.g.: :meth:`data_sources["my_datasource"].get_dataframe() <mllaunchpad.resource.FileDataSource.get_dataframe>`.
+  This name is up to you to choose.
 * ``type`` (required in every DataSource): the ``type`` that a DataSource needs to
   serve in order to be chosen for you. In this case, when ML Launchpad looks up
   which DataSources serve the ``csv`` type, it finds
@@ -66,7 +68,11 @@ Where the parts of this examples are:
 * ``expires`` (required in every DataSource): This controls caching of the data.
   0 means that it expires immediately, -1 that it never expires, and another
   number specifies the number of seconds after the cached data expires and
-  should be gotten afresh from the source.
+  should be gotten afresh from the source. Note that data is cached specifically
+  for each unique combination of ``params`` passed to
+  :meth:`~mllaunchpad.resource.FileDataSource.get_dataframe`, up to the maximum
+  cache size.
+* ``cache_size`` (optional, default: 32, DataSources only): Maximum number of items to cache.
 * ``tags`` (required in every DataSource): a combination of one or several of
   the possible tags ``train``, ``test`` and ``predict`` (use [brackets] around
   more than one tag). This determines the model function(s) the DataSource will be

@@ -82,15 +82,15 @@ class ImpalaDataSource(DataSource):
 
         self.dbms_config = new_dbms_config
 
-    def get_dataframe(self, arg_dict=None, buffer=False):
+    def get_dataframe(self, params=None, buffer=False):
         """Get data as a pandas dataframe.
 
         Example::
 
             data_sources["my_datasource"].get_dataframe({"id": 387})
 
-        :param arg_dict: Query parameters to fill in query (e.g. `:id` with value 387)
-        :type arg_dict: optional dict
+        :param params: Query parameters to fill in query (e.g. `:id` with value 387)
+        :type params: optional dict
         :param buffer: Currently not implemented
         :type buffer: optional bool
 
@@ -98,10 +98,6 @@ class ImpalaDataSource(DataSource):
         """
         if buffer:
             raise NotImplementedError('Buffered reading not supported yet')
-
-        cached = self._try_get_cached_df()
-        if cached is not None:
-            return cached
 
         # Open connection
         logger.info(
@@ -113,7 +109,7 @@ class ImpalaDataSource(DataSource):
         with connect(**conn_args) as conn:
             # Fetch query
             query = self.config["query"]
-            params = arg_dict or {}
+            params = params or {}
             kw_options = self.config.get("options", {})
             logger.debug(
                 "Fetching query {} with params {} and options {}...".format(
@@ -124,15 +120,13 @@ class ImpalaDataSource(DataSource):
                 query, con=conn, params=params, **kw_options
             )
 
-        self._cache_df_if_required(df)
-
         return df
 
-    def get_raw(self, arg_dict=None, buffer=False):
+    def get_raw(self, params=None, buffer=False):
         """Not implemented.
 
-        :param arg_dict: Query parameters to fill in query (e.g. `:id` with value 387)
-        :type arg_dict: optional dict
+        :param params: Query parameters to fill in query (e.g. `:id` with value 387)
+        :type params: optional dict
         :param buffer: Currently not implemented
         :type buffer: optional bool
 
