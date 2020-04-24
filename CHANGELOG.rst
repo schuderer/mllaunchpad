@@ -25,6 +25,9 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ------------------------------------------------------------------------------
 
+* |Enhancement| New command line interface (usage changes only slightly, see issue),
+  `issue #77 <https://github.com/schuderer/mllaunchpad/issues/77>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Enhancement| DataSource caching overhaul: data cached separately for different
   :meth:`params <mllaunchpad.resource.FileDataSource.get_dataframe>`,
   configurable ``cache_size``,
