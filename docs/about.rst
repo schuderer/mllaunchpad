@@ -184,17 +184,16 @@ For running an actual Machine Learning model in ML Launchpad, you
 need, as a minimum:
 
 * Training data and test data for your model (in a format and location
-  that is
-  accessible for the built-in :doc:`DataSources <datasources>`). Side note: Validation data
-  here counts as a part of training data because validation happens during
-  the model creation phase.
+  that is accessible for the built-in :doc:`DataSources <datasources>`).
+  Side note: Validation data here counts as a part of training data because
+  validation happens during the model creation (=training) phase.
 * A python module (``.py`` file) containing the implementation
   of the ``create_trained_model``, ``test_trained_model``
   and ``predict`` methods of the model interfaces.
 * A file system location that will become the ``model_store``.
 * An API definition in form of a ``.raml`` file, e.g. generated using
-  the ``-g`` parameter of the ``mllaunchpad`` command line tool, and
-  adapted.
+  the ``generate-raml`` parameter of the ``mllaunchpad`` command line tool,
+  and adapted.
 * A model configuration file that ties the above together.
 * Any computer to run the training and/or the API on.
 
