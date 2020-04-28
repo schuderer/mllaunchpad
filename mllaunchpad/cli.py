@@ -1,116 +1,157 @@
 """This module provides the command line interface for ML Launchpad"""
 
 # Stdlib imports
-import getopt
+import json
 import sys
+from logging import Logger
+from typing import Dict
 
 # Third-party imports
+import click
 from flask import Flask
 
 # Project imports
-import mllaunchpad as lp
+import mllaunchpad as mllp
 from mllaunchpad import logutil
 from mllaunchpad.api import ModelApi, generate_raml
 
 
-HELP_STRING = """
-Parameters:
--h          / --help                  : Print this help
--v          / --version               : Print the version
--t          / --train                 : Run training, store model and metrics
--r          / --retest                : Retest model, update metrics
--a          / --api                   : Run API Server (Debug Mode!)
--c <file>   / --config=<file>         : Config file to use
--l <file>   / --logconfig=<file>      : Log config file to use
--g <datsrc> / --generateraml=<datsrc> : Generate and print RAML template
-                                        from data source name
-"""
+# Fix for click using the wrong name if run using `python -m mllaunchpad`
+# Also see: https://github.com/pallets/click/issues/365
+sys.argv[0] = mllp.__name__
 
 
-def main():
-    fullCmdArguments = sys.argv
-    argumentList = fullCmdArguments[1:]
-    unixOptions = "hvtrpac:l:g:"
-    gnuOptions = [
-        "help",
-        "version",
-        "train",
-        "retest",
-        "predict",
-        "api",
-        "config=",
-        "logconfig=",
-        "generateraml=",
-    ]
-    try:
-        arguments, _ = getopt.getopt(argumentList, unixOptions, gnuOptions)
-    except getopt.error as err:
-        # output error, and return with an error code
-        print(str(err), file=sys.stderr)
-        sys.exit(2)
-    # evaluate given options
-    cmd = None
-    conffile = None
-    logfile = None
-    raml_ds = None
-    for currentArgument, currentValue in arguments:
-        if currentArgument in ("-l", "--logconfig"):
-            logfile = currentValue
-        elif currentArgument in ("-c", "--config"):
-            conffile = currentValue
-        elif currentArgument in ("-t", "--train"):
-            cmd = "train"
-        elif currentArgument in ("-r", "--retest"):
-            cmd = "retest"
-        elif currentArgument in ("-p", "--predict"):
-            cmd = "predict"
-        elif currentArgument in ("-a", "--api"):
-            cmd = "api"
-        elif currentArgument in ("-g", "--generateraml"):
-            cmd = "genraml"
-            raml_ds = currentValue
-        elif currentArgument in ("-h", "--help"):
-            print(HELP_STRING, file=sys.stderr)
-            exit(0)
-        elif currentArgument in ("-v", "--version"):
-            print("ML Launchpad version " + lp.__version__, file=sys.stderr)
-            exit(0)
+# Adapted from https://click.palletsprojects.com/en/7.x/advanced/
+class AliasedGroup(click.Group):
+    """Commands can be abbreviated, e.g. t or tr for train, a for api, etc."""
 
-    if cmd is None:
-        print("\nNo command given.", file=sys.stderr)
-        print(HELP_STRING, file=sys.stderr)
-        exit(1)
-
-    # Initialize logging before any other library code so that we can log stuff
-    logger = (
-        logutil.init_logging(logfile) if logfile else logutil.init_logging()
-    )
-    conf = (
-        lp.get_validated_config(conffile)
-        if conffile
-        else lp.get_validated_config()
-    )
-    if cmd == "train":
-        _, _ = lp.train_model(conf)
-    elif cmd == "retest":
-        _ = lp.retest(conf)
-    elif cmd == "predict":
-        # TODO decide: get batch args from config? Don't support arguments?
-        _ = lp.predict(conf, arg_dict={})
-    elif cmd == "api":
-        logger.warning(
-            "Starting Flask debug server. In production, please "
-            "use a WSGI server, e.g. "
-            "'export LAUNCHPAD_CFG=addition_cfg.yml'"
-            "'gunicorn -w 4 -b 127.0.0.1:5000 mllaunchpad.wsgi:application'"
+    def get_command(self, ctx, cmd_name):
+        rv = click.Group.get_command(self, ctx, cmd_name)
+        if rv is not None:
+            return rv
+        matches = [
+            x for x in self.list_commands(ctx) if x.startswith(cmd_name)
+        ]
+        if not matches:
+            return None
+        elif len(matches) == 1:
+            click.echo("Command {} matches {}".format(cmd_name, matches[0]))
+            return click.Group.get_command(self, ctx, matches[0])
+        ctx.fail(
+            "Command {} is ambiguous: {}".format(
+                cmd_name, ", ".join(sorted(matches))
+            )
         )
-        app = Flask(__name__, root_path=conf["api"].get("root_path"))
-        ModelApi(conf, app)
-        # Flask apps must not be run in debug mode in production, because this allows for arbitrary code execution.
-        # We know that and advise the user that this is only for debugging, so this is not a security issue (marked nosec):
-        app.run(debug=True)  # nosec
-    elif cmd == "genraml":
-        print(generate_raml(conf, data_source_name=raml_ds))
+
+
+# TODO: Migrate to @dataclass when dropping support for Python 3.6
+class Settings:
+    def __init__(self):
+        self.verbose: bool = False
+        self.logger: Logger = None
+        self.conf_file: str = None
+        self._config: Dict = None
+
+    @property
+    def config(self):
+        if not hasattr(self, "_config") or not self._config:
+            if self.conf_file:
+                self._config = mllp.get_validated_config(self.conf_file)
+            else:
+                self._config = mllp.get_validated_config()
+        return self._config
+
+
+pass_settings = click.make_pass_decorator(Settings, ensure=True)
+
+
+@click.group(
+    cls=AliasedGroup, context_settings=dict(help_option_names=["-h", "--help"])
+)
+@click.version_option(prog_name="ML Launchpad")
+@click.option("--verbose", "-v", is_flag=True, help="Print debug messages.")
+@click.option(
+    "--config",
+    "-c",
+    type=click.Path(exists=True),
+    help="Use this configuration file. [default: look for env var LAUNCHPAD_CFG or ./LAUNCHPAD_CFG.yml]",
+)
+@click.option(
+    "--log-config",
+    "-l",
+    type=click.Path(exists=True),
+    help="Use this log configuration file. [default: look for env var LAUNCHPAD_LOG or ./LAUNCHPAD_LOG.yml]",
+)
+@pass_settings
+def main(settings, log_config, config, verbose):
+    """Train, test or run a config file's model."""
+    # Initialize logging before any library code so that mllp can log stuff
+    if log_config:
+        settings.logger = logutil.init_logging(log_config, verbose=verbose)
+    else:
+        settings.logger = logutil.init_logging(verbose=verbose)
+    settings.verbose = verbose
+    settings.conf_file = config
+
+
+@main.command()
+@pass_settings
+def train(settings):
+    """Run training, store created model and metrics."""
+    _, metrics = mllp.train_model(settings.config)
+    print(metrics)
+
+
+@main.command()
+@pass_settings
+def retest(settings):
+    """Retest existing model, update metrics."""
+    metrics = mllp.retest(settings.config)
+    print(metrics)
+
+
+@main.command()
+@pass_settings
+def api(settings):
+    """Run API server in unsafe debug mode."""
+    settings.logger.warning(
+        "Starting Flask debug server. In production, please "
+        "use a WSGI server, e.g.\n"
+        "'export LAUNCHPAD_CFG=addition_cfg.yml'\n"
+        "'gunicorn -w 4 -b 127.0.0.1:5000 mllaunchpad.wsgi:application'"
+    )
+    app = Flask(__name__, root_path=settings.config["api"].get("root_path"))
+    ModelApi(settings.config, app)
+    # Flask apps must not be run in debug mode in production, because this allows for arbitrary code execution.
+    # We know that and advise the user that this is only for debugging, so this is not a security issue (marked nosec):
+    app.run(debug=True)  # nosec
+
+
+@main.command()
+@click.argument("json-file", type=click.File("r"), default=sys.stdin)
+@pass_settings
+def predict(settings, json_file):
+    """Run prediction on features from JSON file ( - for stdin).
+
+    \b
+    Example JSON: { "petal.width": 1.4, "petal.length": 2.0,
+                    "sepal.width": 1.8, "sepal.length": 4.0 }
+    """
+    arg_dict = json.load(json_file)
+    output = mllp.predict(settings.config, arg_dict=arg_dict)
+    print(output)
+
+
+@main.command(name="generate-raml")
+@click.argument("datasource-name", type=str, required=True)
+@pass_settings
+def cli_generate_raml(settings, datasource_name):
+    """Generate and print RAML template from DATASOURCE_NAME.
+
+    The datasource named DATASOURCE_NAME in the config will be used
+    to create the API's query parameters (from columns), types, and examples.
+    """
+    print(generate_raml(settings.config, data_source_name=datasource_name))
 
 
 if __name__ == "__main__":

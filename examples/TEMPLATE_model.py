@@ -8,10 +8,10 @@ from mllaunchpad import ModelInterface, ModelMakerInterface, order_columns
 logger = logging.getLogger(__name__)
 
 # Train this example from the command line:
-# python -m mllaunchpad -c TEMPLATE_cfg.yml -t
+# python -m mllaunchpad -c TEMPLATE_cfg.yml train
 #
 # Start REST API:
-# python -m mllaunchpad -c TEMPLATE_cfg.yml -a
+# python -m mllaunchpad -c TEMPLATE_cfg.yml api
 #
 # Example API call:
 # http://127.0.0.1:5000/TEMPLATE/v0/varieties?sepal.length=4.9&sepal.width=2.4&petal.length=3.3&petal.width=1

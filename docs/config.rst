@@ -22,7 +22,9 @@ providing the configuration. From most common to least common:
 * Provide the path to the config file on the command line (``--config`` or ``-c`` option).
 * Set the environment variable ``LAUNCHPAD_CFG`` to the path of the config file.
 * Put a config file named ``LAUNCHPAD_CFG.yml`` in the current working directory.
-* Call :meth:`~mllaunchpad.get_validated_config` with the path of the config file to get a config ``dict`` and provide it as an argument when calling :meth:`~mllaunchpad.predict`, :meth:`~mllaunchpad.retest` and/or :meth:`~mllaunchpad.train_model`.
+* Call :meth:`~mllaunchpad.get_validated_config` with the path of the config file
+  to get a config ``dict`` and provide it as an argument when calling
+  :meth:`~mllaunchpad.predict`, :meth:`~mllaunchpad.retest` and/or :meth:`~mllaunchpad.train_model`.
 
 
 =====================================   =======================================
@@ -131,7 +133,8 @@ has been chosen as the way to specify the API in a way that is compatible with c
 The RAML is the contract between you and you service API's clients.
 How to write a valid RAML is beyond the scope of this documentation.
 But to help you starting out, there are various `examples <https://github.com/schuderer/mllaunchpad/tree/master/examples>`_,
-and you can generate a basic :ref:`queryparams`-based RAML using :ref:`mllaunchpad --generate-raml <cli>`.
+and you can generate a basic :ref:`queryparams`-based RAML using
+:ref:`mllaunchpad generate-raml <cli>`.
 
 ML Launchpad understands a subset of RAML in order to automatically create APIs for
 the (currently) three most common use cases (please note that they support GET as well as POST):

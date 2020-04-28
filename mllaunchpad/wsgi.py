@@ -39,7 +39,7 @@ if conf:
     if __name__ == "__main__":  # pragma: no cover
         logger.warning(
             "Starting Flask debug server.\nIn production, please use a WSGI server, "
-            + "e.g. 'gunicorn -w 4 -b 127.0.0.1:5000 mllaunchpad.wsgi:application'"
+            "e.g. 'gunicorn -w 4 -b 127.0.0.1:5000 mllaunchpad.wsgi:application'"
         )
         # Flask apps must not be run in debug mode in production, because this allows for arbitrary code execution.
         # We know that and advise the user that this is only for debugging, so this is not a security issue (marked nosec):

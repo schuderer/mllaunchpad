@@ -88,11 +88,11 @@ The ``examples`` contain a few example model implementations.
 Look here for inspiration on how to use this package. Every model here
 consists of at least three files:
 
-* ``<examplename>_model.py``: the example’s actual model code
+* ``<examplename>_model.py``: the example's actual model code
 
-* ``<examplename>_cfg.yml``: the example’s configuration file
+* ``<examplename>_cfg.yml``: the example's configuration file
 
-* ``<examplename>.raml``: example’s RESTful API specification.
+* ``<examplename>.raml``: example's RESTful API specification.
   Used, among others, to parse and validate parameters.
 
 * There are also some extra files, like CSV files to use, or
@@ -113,43 +113,44 @@ numbers, use the command:
 
 .. code:: console
 
-  $ mllaunchpad -c addition_cfg.yml -t
+  $ mllaunchpad -c addition_cfg.yml t
 
-(We give it a config file after the ``-c`` parameter, and ``-t`` is
-short for the command ``--train``. There’s also a parameter ``-h`` to
-print help)
+(We give it a config file after the ``-c`` parameter, and ``t`` is
+short for the command ``train``. There's also a parameter ``-h`` to
+print help. For all details of the command line interface, see
+the `Usage section <https://mllaunchpad.readthedocs.io/en/latest/usage.html#command-line-interface>`_.)
 
 Some log information is printed (you can give it a log-config file to
 change this, see examples/logging_cfg.yml). At the end, it should say
 “Created and stored trained model”, followed by something about metrics.
 
-This created a model_store if it didn’t exist yet (which for now is just
+This created a model_store if it didn't exist yet (which for now is just
 a directory). For our examples, the model store is conveniently located
 in the same directory. It contains our persisted ``addition`` model and
 its metadata.
 
-To re-test the previously trained model, use the command ``-r``:
+To re-test the previously trained model, use the command ``r``:
 
 .. code:: console
 
-   $ mllaunchpad -c addition_cfg.yml -r
+   $ mllaunchpad -c addition_cfg.yml r
 
 To run a (debugging-only!) REST API for the model, use the command
-``-a``:
+``a``:
 
 .. code:: console
 
-   $ mllaunchpad -c addition_cfg.yml -a
+   $ mllaunchpad -c addition_cfg.yml a
 
 To quickly try out out our fancy addition model API, open this link in a
 browser: http://127.0.0.1:5000/add/v0/sum?x1=3&x2=2
-(``curl http://127.0.0.1:5000/add/v0/sum?x1=3&x2=2`` on the command
+(``curl "http://127.0.0.1:5000/add/v0/sum?x1=3&x2=2"`` on the command
 line)
 
 What next?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Have a look at the ``addition`` example’s python code (and comments),
+Have a look at the ``addition`` example's python code (and comments),
 its yml config, then look at the other examples. First, we suggest the
 ``tree`` example for intermediate complexity (although its prediction
 code does quite some complex stuff to be compatible with three different
@@ -157,7 +158,7 @@ kinds of prediction usage, which is not really that realistic).
 
 If you are wondering about the RAML file (which is a RESTful API
 specification standard that is used in some corporate environments, and
-a good idea in general), also look at the ``-g`` (generate raml) command
+a good idea in general), also look at the ``g`` (``generate-raml``) command
 line parameter, which does a lot of work (almost all of it, in fact) for
 getting you started with a first RAML.
 

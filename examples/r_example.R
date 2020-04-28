@@ -1,8 +1,8 @@
 # Train this example from the command line:
-# python -m mlaunchpad -c r_example_cfg.yml -t
+# python -m mlaunchpad -c r_example_cfg.yml train
 #
 # Start REST API:
-# python -m mlaunchpad -c r_example_cfg.yml -a
+# python -m mlaunchpad -c r_example_cfg.yml api
 #
 # Example API call:
 # http://127.0.0.1:5000/some/v0/varieties?sepal.length=4.9&sepal.width=2.4&petal.length=3.3&petal.width=1
