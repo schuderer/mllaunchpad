@@ -45,7 +45,6 @@ class ModelMakerInterface(abc.ABC):
             ModelInterface-inherited object and is accessible there using
             predict's model parameter (or the self.contents attribute.))
         """
-        ...
 
     @abc.abstractmethod
     def test_trained_model(self, model_conf, data_sources, data_sinks, model):
@@ -64,7 +63,6 @@ class ModelMakerInterface(abc.ABC):
         Return:
             Return a dict of metrics (like 'accuracy', 'f1', 'confusion_matrix', etc.)
         """
-        ...
 
 
 class ModelInterface(abc.ABC):
@@ -107,10 +105,8 @@ class ModelInterface(abc.ABC):
         Return:
             Prediction result as a dictionary/list structure which will be automatically turned into JSON.
         """
-        ...
 
     def __del__(self):
         """Clean up any resources (temporary files, sockets, etc.).
         If you overwrite this method, please call super().__del__() at the beginning.
         """
-        ...
