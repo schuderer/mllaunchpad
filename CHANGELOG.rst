@@ -25,6 +25,11 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ------------------------------------------------------------------------------
 
+* Nothing here yet. :)
+
+1.0.0rc1 (2020-04-29)
+------------------------------------------------------------------------------
+
 * |Removed| Removed 'api:version:' (deprecated since 0.1.0) from  configuration
   ('model:version:' is now the only location to specify both the model and the API version),
   `issue #66 <https://github.com/schuderer/mllaunchpad/issues/66>`_,
