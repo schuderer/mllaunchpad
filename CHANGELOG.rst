@@ -28,6 +28,8 @@ Unreleased
 * |Removed| Removed 'api:version:' (deprecated since 0.1.0) from  configuration
   ('model:version:' is now the only location to specify both the model and the API version),
   `issue #66 <https://github.com/schuderer/mllaunchpad/issues/66>`_,
+* |Enhancement| New command line interface (usage changes only slightly, see issue),
+  `issue #77 <https://github.com/schuderer/mllaunchpad/issues/77>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Enhancement| DataSource caching overhaul: data cached separately for different
   :meth:`params <mllaunchpad.resource.FileDataSource.get_dataframe>`,

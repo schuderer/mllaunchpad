@@ -8,13 +8,13 @@ import warnings
 import yaml
 
 
-LOG_CONF_FILENAME_DEFAULT = ""
+LOG_CONF_FILENAME_DEFAULT = "./LAUNCHPAD_LOG.yml"
 LOG_CONF_FILENAME_ENV = os.environ.get(
     "LAUNCHPAD_LOG", LOG_CONF_FILENAME_DEFAULT
 )
 
 
-def init_logging(filename=LOG_CONF_FILENAME_ENV):
+def init_logging(filename=LOG_CONF_FILENAME_ENV, verbose=False):
     """Only called from wsgi or cli module (mllaunchpad-as-an-app).
     It's important to not change logging/warning config from the library-only
     code.
@@ -25,22 +25,31 @@ def init_logging(filename=LOG_CONF_FILENAME_ENV):
     warnings.filterwarnings(
         action="default", category=DeprecationWarning, module="mllaunchpad.*"
     )
-    if filename == "":
+    try:
+        loaded_logging_config = yaml.safe_load(open(filename))
+        logging.config.dictConfig(loaded_logging_config)
+    except FileNotFoundError:
+        loaded_logging_config = None
         logging.basicConfig(
             format="%(asctime)s %(levelname)s %(name)s: %(message)s",
-            level=logging.DEBUG,
+            level=logging.INFO,
         )
-    else:
-        logging_config = yaml.safe_load(open(filename))
-        logging.config.dictConfig(logging_config)
 
     logging.captureWarnings(True)
     new_logger = logging.getLogger(__name__)
+    if verbose:
+        new_logger.setLevel(logging.DEBUG)
 
-    if filename == "":
+    if not loaded_logging_config:
         new_logger.warning(
-            "Logging filename environment variable LAUNCHPAD_LOG not set,"
-            + "using default logging configuration"
+            "Logging filename environment variable LAUNCHPAD_LOG not set, "
+            "and ./LAUNCHPAD_LOG.yml not found: using default logging "
+            "configuration"
+        )
+    elif filename == LOG_CONF_FILENAME_DEFAULT:
+        new_logger.warning(
+            "Logging filename environment variable LAUNCHPAD_LOG not set, "
+            "using default logging configuration file ./LAUNCHPAD_LOG.yml"
         )
 
     return new_logger

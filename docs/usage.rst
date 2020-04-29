@@ -9,55 +9,22 @@ Usage
 Command Line Interface
 ------------------------------------------------------------------------------
 
-ML Launchpad's command line interface us usually only used when developing and
+ML Launchpad's command line interface is usually only used when developing and
 preparing a machine learning application. When actually
 running the API in production, a WSGI server (e.g. Gunicorn
 or Waitress) is used to run ``mllaunchpad.wsgi:application`` instead
 (the config file is then provided via an environment variable).
 
-Usage:
+All commands (``train``, ``retest``, ``predict``, ``api`` and ``generate-raml``) can
+be abbreviated, so you can use ``mllaunchpad t`` or ``mllaunchpad pred`` to save
+some keystrokes.
 
-.. code-block:: console
+.. click:: mllaunchpad.cli:main
+   :prog: mllaunchpad
+   :show-nested:
 
-    $ mllaunchpad [OPTIONS]
-
-.. program:: mllaunchpad
-
-Options:
-
-.. option:: -c <config_file>, --config <config_file>
-
-    (Optional) Load configuration from <config_file>
-
-.. option:: -t, --train
-
-    Train, test and then store a new model (with test results).
-
-.. option:: -r, --retest
-
-    Retest an existing model and add test results to metadata.
-
-.. option:: -p, --predict
-
-    Run prediction on an existing model (with empty input).
-
-.. option:: -a, --api
-
-    Run API server (in debug mode, UNSAFE).
-
-.. option:: -g <data_source>, --generateraml  <data_source>
-
-    Generate and print RAML template based on data source <data_source>.
-
-.. option:: -h, --help
-
-    Print help.
-
-.. option:: -v, --version
-
-    Print the version.
-
-Environment variables:
+Environment variables
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. envvar:: LAUNCHPAD_CFG
 
@@ -371,7 +338,7 @@ been installed when you installed ML Launchpad:
 
 .. code-block:: console
 
-    $ mllaunchpad --config=tree_cfg.yml --generateraml=petals >tree.raml
+    $ mllaunchpad --config tree_cfg.yml generate-raml petals >tree.raml
 
 This creates the API definition file ``tree.raml`` using the columns
 and their types in the ``petals`` datasource for defining parameters.
@@ -397,14 +364,14 @@ Our model is done! Let's try it out.
 
 .. code-block:: console
 
-    $ mllaunchpad --config=tree_cfg.yml --train
+    $ mllaunchpad --config tree_cfg.yml train
 
 Now we have a trained model in our ``model_store``. Let's run a test Web API
 (only for debug purposes, :doc:`see here <about>` for running production APIs):
 
 .. code-block:: console
 
-    $ mllaunchpad --config=tree_cfg.yml --api
+    $ mllaunchpad --config tree_cfg.yml api
 
 We can find a test URL in our generated ``tree.raml``. Just remove
 the ``&variety=...`` part, and open the link
@@ -478,8 +445,8 @@ To run the ``tree`` example from this tutorial:
 .. code-block:: console
 
     $ cd examples
-    $ mllaunchpad --config=tree_cfg.yml --train
-    $ mllaunchpad --config=tree_cfg.yml --api
+    $ mllaunchpad --config tree_cfg.yml train
+    $ mllaunchpad --config tree_cfg.yml api
 
 Then open http://127.0.0.1:5000/static/tree.html in your browser.
 
