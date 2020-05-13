@@ -25,7 +25,9 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ------------------------------------------------------------------------------
 
-* Nothing here yet. :)
+* |Fixed| Readthedocs now shows the up-to-date :doc:`API docs <mllaunchpad>`,
+  `issue #110 <https://github.com/schuderer/mllaunchpad/issues/110>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
 
 1.0.0rc1 (2020-04-29)
 ------------------------------------------------------------------------------
