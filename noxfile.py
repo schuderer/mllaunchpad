@@ -143,15 +143,6 @@ def docs(session):
                 if not any([e in file_path for e in exclude]):
                     z.write(file_path, file_path[len_base:])
 
-    session.run(
-        "sphinx-apidoc",
-        "-M",  # put module documentation before submodule documentation
-        "-T",  # don't generate table of contents file
-        "-o",
-        "docs",
-        package_name,
-        "*wsgi*",  # exclude_patterns doesn't seem to work
-    )
     sphinx_args = [
         "-W",  # turn warnings into errors
         "-b",  # use builder: html
