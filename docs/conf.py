@@ -37,6 +37,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.viewcode',
               'sphinx.ext.autosummary',
               'sphinx_click.ext',
+              'sphinxcontrib.apidoc',
               # 'sphinx-napoleon',  # Support Google docstring style
               # 'recommonmark',
               # http://www.sphinx-doc.org/en/master/usage/markdown.html
@@ -88,6 +89,12 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
+# Apidoc-specific settings:
+apidoc_module_dir = '../mllaunchpad'
+apidoc_output_dir = '.'
+apidoc_excluded_paths = ["*wsgi*"]
+apidoc_toc_file = False
+apidoc_module_first = True
 
 # -- Options for HTML output -------------------------------------------
 
