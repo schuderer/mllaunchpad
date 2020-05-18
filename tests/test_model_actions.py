@@ -69,7 +69,38 @@ def config():
     return_value=(mock.Mock(), mock.MagicMock()),
 )
 def test_train_model(gm, ms, imp, config):
-    ma.train_model(config)
+    ma.train_model(config, cache=False)
+    ms_instance = ms.return_value
+    ms_instance.dump_trained_model.assert_called_once()
+
+
+@mock.patch("builtins.__import__")
+@mock.patch("{}.resource.ModelStore".format(ma.__name__), autospec=True)
+@mock.patch(
+    "{}._get_model".format(ma.__name__),
+    autospec=True,
+    return_value=(mock.Mock(), mock.MagicMock()),
+)
+def test_train_model_no_test(gm, ms, imp, config, caplog):
+    with caplog.at_level(logging.DEBUG):
+        _, metrics = ma.train_model(config, cache=False, test=False)
+    assert metrics == {}
+    assert "training".lower() in caplog.text.lower()
+    ms_instance = ms.return_value
+    ms_instance.dump_trained_model.assert_called_once()
+
+
+@mock.patch("builtins.__import__")
+@mock.patch("{}.resource.ModelStore".format(ma.__name__), autospec=True)
+@mock.patch(
+    "{}._get_model".format(ma.__name__),
+    autospec=True,
+    return_value=(mock.Mock(), mock.MagicMock()),
+)
+def test_train_model_no_persist(gm, ms, imp, config):
+    model, _ = ma.train_model(config, cache=False, persist=False)
+    ms_instance = ms.return_value
+    ms_instance.dump_trained_model.assert_not_called()
 
 
 @mock.patch("builtins.__import__")
@@ -81,7 +112,7 @@ def test_train_model(gm, ms, imp, config):
 )
 def test_train_model_not_found(gm, ms, imp, config, caplog):
     with caplog.at_level(logging.DEBUG):
-        ma.train_model(config)
+        ma.train_model(config, cache=False)
     assert "No old model".lower() in caplog.text.lower()
 
 
@@ -96,7 +127,7 @@ def test_train_model_not_found(gm, ms, imp, config, caplog):
 )
 def test_train_model_renamed(gm, ms, imp, config, caplog):
     with caplog.at_level(logging.DEBUG):
-        ma.train_model(config)
+        ma.train_model(config, cache=False)
     assert "renamed".lower() in caplog.text.lower()
 
 
@@ -108,7 +139,38 @@ def test_train_model_renamed(gm, ms, imp, config, caplog):
     return_value=(mock.Mock(), mock.MagicMock()),
 )
 def test_retest(gm, ms, imp, config):
-    ma.retest(config)
+    ma.retest(config, cache=False)
+    gm.assert_called_once()
+    ms_instance = ms.return_value
+    ms_instance.update_model_metrics.assert_called_once()
+
+
+@mock.patch("builtins.__import__")
+@mock.patch("{}.resource.ModelStore".format(ma.__name__), autospec=True)
+@mock.patch(
+    "{}._get_model".format(ma.__name__),
+    autospec=True,
+    return_value=(mock.Mock(), mock.MagicMock()),
+)
+def test_retest_own_model(gm, ms, imp, config):
+    ma.retest(config, cache=False, model=mock.Mock())
+    gm.assert_not_called()
+    ms_instance = ms.return_value
+    ms_instance.update_model_metrics.assert_called_once()
+
+
+@mock.patch("builtins.__import__")
+@mock.patch("{}.resource.ModelStore".format(ma.__name__), autospec=True)
+@mock.patch(
+    "{}._get_model".format(ma.__name__),
+    autospec=True,
+    return_value=(mock.Mock(), mock.MagicMock()),
+)
+def test_retest_no_persist(gm, ms, imp, config):
+    ma.retest(config, cache=False, persist=False)
+    gm.assert_called_once()
+    ms_instance = ms.return_value
+    ms_instance.update_model_metrics.assert_not_called()
 
 
 @mock.patch("builtins.__import__")
@@ -119,7 +181,36 @@ def test_retest(gm, ms, imp, config):
     return_value=(mock.Mock(), mock.MagicMock()),
 )
 def test_predict(gm, ms, imp, config):
-    ma.predict(config)
+    ma.predict(config, cache=False)
+    gm.assert_called_once()
+
+
+@mock.patch("builtins.__import__")
+@mock.patch("{}.resource.ModelStore".format(ma.__name__), autospec=True)
+@mock.patch(
+    "{}._get_model".format(ma.__name__),
+    autospec=True,
+    return_value=(mock.Mock(), mock.MagicMock()),
+)
+def test_predict_own_model(gm, ms, imp, config):
+    mock_model_wrapper = mock.Mock()
+    mock_model_wrapper.predict.return_value = "blafoo"
+    result = ma.predict(config, cache=False, model=mock_model_wrapper)
+    mock_model_wrapper.predict.assert_called_once()
+    assert result == "blafoo"
+    gm.assert_not_called()
+
+
+@mock.patch("builtins.__import__")
+@mock.patch("{}.resource.ModelStore".format(ma.__name__), autospec=True)
+@mock.patch(
+    "{}._get_model".format(ma.__name__),
+    autospec=True,
+    return_value=(mock.Mock(), mock.MagicMock()),
+)
+def test_predict_live_code(gm, ms, imp, config):
+    ma.predict(config, cache=False, use_live_code=True)
+    gm.return_value[0].predict.assert_not_called()
 
 
 def test_clear_caches():
