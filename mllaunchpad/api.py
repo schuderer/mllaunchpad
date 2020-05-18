@@ -15,7 +15,7 @@ from flask_restful import Api, Resource, reqparse
 from werkzeug.datastructures import FileStorage
 
 # Project imports
-from mllaunchpad import resource
+from mllaunchpad import model_actions, resource
 
 
 logger = logging.getLogger(__name__)
@@ -225,7 +225,7 @@ class ModelApi:
     For details, see the documentation in the module `model_interface`
     """
 
-    def __init__(self, config, application):
+    def __init__(self, config, application, debug=False):
         """When initializing ModelApi, your model will be automatically
         retrieved from the model store based on the currently active
         configuration.
@@ -233,10 +233,18 @@ class ModelApi:
         Params:
             config:       configuration dictionary to use
             application:  flask application to use
+            debug:        use current prediction code instead of that of persisted model
         """
         self.model_config = config["model"]
         model_store = resource.ModelStore(config)
         self.model_wrapper = self._load_model(model_store, self.model_config)
+        if debug:
+            # TODO: Hacky, should use model_actions functionality for a lot of API functionality instead of duplicating.
+            # Create a fresh model object from current code and transplant existing contents
+            m_cls = model_actions._get_model_class(config, cache=True)
+            curr_model_wrapper = m_cls(contents=self.model_wrapper.contents)
+            self.model_wrapper = curr_model_wrapper
+
         # Workaround (tensorflow has problem with spontaneously created threads such as with Flask):
         # https://kobkrit.com/tensor-something-is-not-an-element-of-this-graph-error-in-keras-on-flask-web-server-4173a8fe15e1
         try:

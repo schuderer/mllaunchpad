@@ -224,7 +224,6 @@ def predict(
         # Create a fresh model object from current code and transplant existing contents
         m_cls = _get_model_class(complete_conf, cache=cache)
         curr_model_wrapper: ModelInterface = m_cls(contents=inner_model)
-        curr_model_wrapper.contents = inner_model
         model_wrapper = curr_model_wrapper
 
     output = model_wrapper.predict(

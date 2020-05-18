@@ -121,7 +121,7 @@ def api(settings):
         "'gunicorn -w 4 -b 127.0.0.1:5000 mllaunchpad.wsgi:application'"
     )
     app = Flask(__name__, root_path=settings.config["api"].get("root_path"))
-    ModelApi(settings.config, app)
+    ModelApi(settings.config, app, debug=True)
     # Flask apps must not be run in debug mode in production, because this allows for arbitrary code execution.
     # We know that and advise the user that this is only for debugging, so this is not a security issue (marked nosec):
     app.run(debug=True)  # nosec
@@ -138,7 +138,9 @@ def predict(settings, json_file):
                     "sepal.width": 1.8, "sepal.length": 4.0 }
     """
     arg_dict = json.load(json_file)
-    output = mllp.predict(settings.config, arg_dict=arg_dict)
+    output = mllp.predict(
+        settings.config, arg_dict=arg_dict, use_live_code=True
+    )
     print(output)
 
 

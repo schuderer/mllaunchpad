@@ -113,7 +113,7 @@ def test_api(ma, flask, config, runner_cfg_logcfg, caplog):
         "production".lower() in caplog.text.lower()
     )  # Non-production Flask server warning
     flask.assert_called()
-    ma.assert_called_with(config, app)
+    ma.assert_called_with(config, app, debug=True)
     app.run.assert_called()
 
 
@@ -137,7 +137,7 @@ def test_predict(config, predict, runner_cfg_logcfg):
     )  # abbreviated on purpose to test short commands
     print(result.output)
     assert result.exit_code == 0
-    predict.assert_called_with(config, arg_dict=j_contents)
+    predict.assert_called_with(config, arg_dict=j_contents, use_live_code=True)
     assert "my_prediction" in result.output
 
 
