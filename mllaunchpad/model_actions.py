@@ -53,6 +53,14 @@ def train_model(complete_conf, cache=True):
     except FileNotFoundError:
         logger.info("No old model to load")
         old_inner_model = None
+    except AttributeError as e:
+        if "module '{}'".format(model_conf["module"]) in str(e):
+            logger.info(
+                "No model loaded. Model class appears to have been renamed since last training"
+            )
+            old_inner_model = None
+        else:
+            raise e
 
     inner_model = user_mm.create_trained_model(
         model_conf, dso, dsi, old_model=old_inner_model

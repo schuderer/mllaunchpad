@@ -1,6 +1,7 @@
 """Tests for `mllaunchpad.model_actions` module."""
 
 # Stdlib imports
+import logging
 from unittest import mock
 
 # Third-party imports
@@ -69,6 +70,34 @@ def config():
 )
 def test_train_model(gm, ms, imp, config):
     ma.train_model(config)
+
+
+@mock.patch("builtins.__import__")
+@mock.patch("{}.resource.ModelStore".format(ma.__name__), autospec=True)
+@mock.patch(
+    "{}._get_model".format(ma.__name__),
+    autospec=True,
+    side_effect=FileNotFoundError("blabla"),
+)
+def test_train_model_not_found(gm, ms, imp, config, caplog):
+    with caplog.at_level(logging.DEBUG):
+        ma.train_model(config)
+    assert "No old model".lower() in caplog.text.lower()
+
+
+@mock.patch("builtins.__import__")
+@mock.patch("{}.resource.ModelStore".format(ma.__name__), autospec=True)
+@mock.patch(
+    "{}._get_model".format(ma.__name__),
+    autospec=True,
+    side_effect=AttributeError(
+        r"AttributeError: Can't get attribute 'MyExampleModel' on <module 'blamodule' from '.\\tree_model.py'>"
+    ),
+)
+def test_train_model_renamed(gm, ms, imp, config, caplog):
+    with caplog.at_level(logging.DEBUG):
+        ma.train_model(config)
+    assert "renamed".lower() in caplog.text.lower()
 
 
 @mock.patch("builtins.__import__")
