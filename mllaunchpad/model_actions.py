@@ -30,6 +30,7 @@ def train_model(
     cache: bool = True,
     persist: bool = True,
     test: bool = True,
+    model: Optional[ModelInterface] = None,
 ):
     """Train and test a model as specified in the configuration and persist
     it in the model store.
@@ -42,6 +43,8 @@ def train_model(
     :type persist: optional bool, default: True
     :param test: Whether to test the model after training. This parameter exists mainly for making debugging and testing your model's code easier.
     :type test: optional bool, default: True
+    :param model: Use this model as previous model instead trying to load it from `model_store`. This parameter exists mainly for making debugging and testing your model's code easier.
+    :type model: optional object implementing ModelInterface, default: None
 
     :return: Tuple of (object implementing ModelInterface, metrics)
     """
@@ -54,29 +57,31 @@ def train_model(
 
     model_conf = complete_conf["model"]
 
-    # Training
-    try:
-        logger.debug("Trying to load old model...")
-        old_model_wrapper, _ = _get_model(complete_conf, cache=cache)
-        old_inner_model = old_model_wrapper.contents
-    except FileNotFoundError:
-        logger.info("No old model to load")
-        old_inner_model = None
-    except AttributeError as e:
-        if "module '{}'".format(model_conf["module"]) in str(e):
-            logger.info(
-                "No model loaded. Model class appears to have been renamed since last training"
-            )
+    if model:
+        old_inner_model = model.contents
+    else:
+        try:
+            logger.debug("Trying to load old model...")
+            old_model_wrapper, _ = _get_model(complete_conf, cache=cache)
+            old_inner_model = old_model_wrapper.contents
+        except FileNotFoundError:
+            logger.info("No old model to load")
             old_inner_model = None
-        else:
-            raise e
+        except AttributeError as e:
+            if "module '{}'".format(model_conf["module"]) in str(e):
+                logger.info(
+                    "No model loaded. Model class appears to have been renamed since last training"
+                )
+                old_inner_model = None
+            else:
+                raise e
 
     dso_train, dsi_train = _get_data_sources_and_sinks(
         complete_conf, tags=["train"], cache=cache
     )
 
     inner_model = user_mm.create_trained_model(
-        model_conf, dso_train, dso_train, old_model=old_inner_model
+        model_conf, dso_train, dsi_train, old_model=old_inner_model
     )
     m_cls = _get_model_class(complete_conf, cache=cache)
     model_wrapper: ModelInterface = m_cls(contents=inner_model)

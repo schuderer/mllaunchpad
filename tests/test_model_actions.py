@@ -108,6 +108,18 @@ def test_train_model_no_persist(gm, ms, imp, config):
 @mock.patch(
     "{}._get_model".format(ma.__name__),
     autospec=True,
+    return_value=(mock.Mock(), mock.MagicMock()),
+)
+def test_train_model_own_model(gm, ms, imp, config):
+    model, _ = ma.train_model(config, cache=False, model=mock.Mock())
+    gm.assert_not_called()
+
+
+@mock.patch("builtins.__import__")
+@mock.patch("{}.resource.ModelStore".format(ma.__name__), autospec=True)
+@mock.patch(
+    "{}._get_model".format(ma.__name__),
+    autospec=True,
     side_effect=FileNotFoundError("blabla"),
 )
 def test_train_model_not_found(gm, ms, imp, config, caplog):
