@@ -359,7 +359,7 @@ class ModelApi:
             raw_output = self.model_wrapper.predict(*predict_args)
 
         if (
-            hasattr(self.model_wrapper, "__ordered_columns")
+            self.model_wrapper.have_columns_been_ordered
             and not resource._order_columns_called
         ):
             logger.warning(

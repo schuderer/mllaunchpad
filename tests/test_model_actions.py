@@ -252,16 +252,16 @@ def test__get_model_caching(ms_class, config):
     assert mm1 is not mm2
 
 
-@mock.patch("mllaunchpad.model_interface.ModelInterface", autospec=True)
-def test__check_ordered_columns(mock_wrapper, caplog):
+def test__check_ordered_columns(caplog):
     from mllaunchpad.resource import order_columns
 
     dummy_config = {"model": {}}
+    mock_wrapper = MockModelClass()
 
     ma._check_ordered_columns(dummy_config, mock_wrapper, "never_ordered")
     assert "never_ordered".lower() not in caplog.text.lower()
 
-    mock_wrapper.__ordered_columns = True
+    mock_wrapper.have_columns_been_ordered = True
     ma._check_ordered_columns(
         dummy_config, mock_wrapper, "ordered_only_in_train"
     )

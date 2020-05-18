@@ -69,7 +69,7 @@ def train_model(complete_conf, cache=True):
     model_wrapper: ModelInterface = m_cls(contents=inner_model)
 
     if resource._order_columns_called:
-        model_wrapper.__ordered_columns = True
+        model_wrapper.have_columns_been_ordered = True
     elif (
         "order_columns_not_used_warning" not in model_conf
         or model_conf["order_columns_not_used_warning"] == "always"
@@ -361,7 +361,7 @@ def _check_ordered_columns(complete_conf, model_wrapper, what: str, times=1):
         and complete_conf["model"]["order_columns_not_used_warning"] == "never"
     ):
         return
-    if hasattr(model_wrapper, "__ordered_columns"):
+    if model_wrapper.have_columns_been_ordered:
         if resource._order_columns_called < times:
             logger.warning(
                 "Model has been trained on ordered columns, but "
