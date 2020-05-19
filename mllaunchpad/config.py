@@ -5,7 +5,7 @@
 # Stdlib imports
 import logging
 import os
-from typing import Dict
+from typing import AnyStr, Dict, TextIO, Union
 from warnings import warn
 
 # Third-party imports
@@ -13,7 +13,7 @@ import yaml  # https://camel.readthedocs.io/en/latest/yamlref.html
 
 # Project imports
 import mllaunchpad
-from mllaunchpad.yaml_loader import Loader
+from mllaunchpad.yaml_loader import SafeIncludeLoader
 
 
 logger = logging.getLogger(__name__)
@@ -64,20 +64,15 @@ def check_semantics(config_dict):
             )
 
 
-def get_validated_config(filename=CONFIG_ENV):
+def get_validated_config(filename: str = CONFIG_ENV) -> dict:
     """Read the configuration from file and return it as a dict object.
 
-    Validation is not done yet and planned when the configuration is more
-    stable.
+    :param filename: Path to configuration file
+    :type filename: optional str, default: environment variable LAUNCHPAD_CFG or file ./LAUNCHPAD_CFG.yml
 
-    Params:
-        - filename: path to configuration file
-                    (default: environment variable LAUNCHPAD_CFG or
-                     file LAUNCHPAD_CFG.yml)
-
-    Returns:
-        dict with configuration
-    """
+    :return: dict with configuration
+    :rtype: dict
+   """
     if filename == CONFIG_DEFAULT:
         logger.warning(
             "Config filename environment variable LAUNCHPAD_CFG not set, "
@@ -87,9 +82,22 @@ def get_validated_config(filename=CONFIG_ENV):
     logger.info("Loading configuration file %s...", filename)
 
     with open(filename) as f:
-        # Normally, one should use safe_load(), but our Loader
-        # is a subclass of yaml.SafeLoader
-        y = yaml.load(f, Loader)  # nosec
+        return get_validated_config_str(f)
+
+
+def get_validated_config_str(io: Union[AnyStr, TextIO]) -> dict:
+    """Read the configuration from a string or open file and return it as a dict object.
+    This function exists mainly for making debugging and unit testing your model's code easier.
+
+    :param io: Configuration as unicode string or b"byte string" or a open text file to read from
+    :type io: str or open text file handle
+
+    :return: configuration
+    :rtype: dict
+    """
+    # Normally, one should use safe_load(), but our Loader
+    # is a subclass of yaml.SafeLoader
+    y = yaml.load(io, SafeIncludeLoader)  # nosec
 
     validate_config(y, required_config)
     check_semantics(y)

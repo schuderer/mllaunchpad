@@ -32,5 +32,5 @@ def test_yaml_include(mo):
     mo.side_effect = handlers
 
     with open(test_file_yaml) as f:
-        data = yaml.load(f, yloader.Loader)
+        data = yaml.load(f, yloader.SafeIncludeLoader)
         assert data["dbms"]["xob10"]["type"] == "oracle"

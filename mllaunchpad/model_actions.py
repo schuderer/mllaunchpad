@@ -39,11 +39,11 @@ def train_model(
     :type complete_conf: dict
     :param cache: Whether to cache the data sources/sinks and helper objects (cache lookup is done by model name and model version). If in doubt, leave at default.
     :type cache: optional bool, default: True
-    :param persist: Whether to store the trained model in the location configured by `model_cache:`. This parameter exists mainly for making debugging and testing your model's code easier.
+    :param persist: Whether to store the trained model in the location configured by `model_cache:`. This parameter exists mainly for making debugging and unit testing your model's code easier.
     :type persist: optional bool, default: True
-    :param test: Whether to test the model after training. This parameter exists mainly for making debugging and testing your model's code easier.
+    :param test: Whether to test the model after training. This parameter exists mainly for making debugging and unit testing your model's code easier.
     :type test: optional bool, default: True
-    :param model: Use this model as previous model instead trying to load it from `model_store`. This parameter exists mainly for making debugging and testing your model's code easier.
+    :param model: Use this model as previous model instead trying to load it from `model_store`. This parameter exists mainly for making debugging and unit testing your model's code easier.
     :type model: optional object implementing ModelInterface, default: None
 
     :return: Tuple of (object implementing ModelInterface, metrics)
@@ -144,9 +144,9 @@ def retest(
     :type complete_conf: dict
     :param cache: Whether to cache the data sources/sinks and helper objects (cache lookup is done by model name and model version). If in doubt, leave at default.
     :type cache: optional bool, default: True
-    :param persist: Whether to update the model in `model_cache:` with the test metrics. This parameter exists mainly for making debugging and testing your model's code easier.
+    :param persist: Whether to update the model in `model_cache:` with the test metrics. This parameter exists mainly for making debugging and unit testing your model's code easier.
     :type persist: optional bool, default: True
-    :param model: Test this model instead of loading it from `model_store`. This parameter exists mainly for making debugging and testing your model's code easier.
+    :param model: Test this model instead of loading it from `model_store`. This parameter exists mainly for making debugging and unit testing your model's code easier.
     :type model: optional object implementing ModelInterface, default: None
 
     :return: test_metrics
@@ -199,9 +199,9 @@ def predict(
     :type cache: optional bool, default: True
     :param arg_dict: Arguments dict for the prediction (analogous to what it would get from a web API)
     :type arg_dict: optional Dict, default: None
-    :param model: Test this model instead of loading it from `model_store`. This parameter exists mainly for making debugging and testing your model's code easier.
+    :param model: Test this model instead of loading it from `model_store`. This parameter exists mainly for making debugging and unit testing your model's code easier.
     :type model: optional object implementing ModelInterface, default: None
-    :param use_live_code: Use the current `predict` function instead of the one persisted with the model in the `model_store`. This parameter exists mainly for making debugging and testing your model's code easier.
+    :param use_live_code: Use the current `predict` function instead of the one persisted with the model in the `model_store`. This parameter exists mainly for making debugging and unit testing your model's code easier.
     :type use_live_code: optional bool, default: False
 
     :return: model's prediction output
