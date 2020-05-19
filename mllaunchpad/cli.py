@@ -161,4 +161,4 @@ if __name__ == "__main__":
     # is being changed by Click at runtime. Disable the warning.
     sys.exit(
         main()  # pylint: disable=no-value-for-parameter; # pragma: no cover
-    ) 
+    )
