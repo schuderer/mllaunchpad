@@ -7,6 +7,7 @@ Example:
 
 # Stdlib imports
 import logging
+from typing import Dict, Optional
 
 # Third-party imports
 from flask import Flask
@@ -21,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 # In order to be able to generate API docs automatically, it is unfortunately
 # necessary to wrap the preparatory code in a try:except: statement.
+conf: Optional[Dict]
 try:
     conf = config.get_validated_config()
 except FileNotFoundError:

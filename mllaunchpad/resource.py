@@ -564,6 +564,29 @@ class FileDataSource(DataSource):
             expires: 0    # generic parameter, see documentation on DataSources
             tags: [train] # generic parameter, see documentation on DataSources and DataSinks
             options: {}   # used as **kwargs when fetching the data using `fh.read`
+
+    Using the raw formats `binary_file` and `text_file`, you can read arbitrary data, as long as
+    it can be represented as a `bytes` or a `str` object, respectively. Please note that while possible, it is not
+    recommended to persist `DataFrame`s this way, because by adding format-specific code to your
+    model, you're giving up your code's independence from the type of `DataSource`/`DataSink`.
+    Here's an example for unpickling an arbitrary object::
+
+        # config fragment:
+        datasources:
+          # ...
+          my_pickle_datasource:
+            type: binary_file
+            path: /some/file.pickle
+            tags: [train]
+            options: {}
+
+        # code fragment:
+        import pickle
+        # ...
+        # in predict/test/train code:
+        my_pickle = data_sources["my_pickle_datasource"].get_raw()
+        my_object = pickle.loads(my_pickle)
+
     """
 
     serves = SUPPORTED_FILE_TYPES
@@ -715,6 +738,28 @@ class FileDataSink(DataSink):
             path: /some/file.txt  # Can be URL
             tags: [train] # generic parameter, see documentation on DataSources and DataSinks
             options: {}   # used as **kwargs when writing the data using `fh.write`
+
+    Using the raw formats `binary_file` and `text_file`, you can persist arbitrary data, as long as
+    it can be represented as a `bytes` or a `str` object, respectively. Please note that while possible, it is not
+    recommended to persist `DataFrame`s this way, because by adding format-specific code to your
+    model, you're giving up your code's independence from the type of `DataSource`/`DataSink`.
+    Here's an example for pickling an arbitrary object::
+
+        # config fragment:
+        datasinks:
+          # ...
+          my_pickle_datasink:
+            type: binary_file
+            path: /some/file.pickle
+            tags: [train]
+            options: {}
+
+        # code fragment:
+        import pickle
+        # ...
+        # in predict/test/train code:
+        my_pickle = pickle.dumps(my_object)
+        data_sinks["my_pickle_datasink"].put_raw(my_pickle)
     """
 
     serves = SUPPORTED_FILE_TYPES

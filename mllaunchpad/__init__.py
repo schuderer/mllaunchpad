@@ -4,7 +4,7 @@
 import pkg_resources
 
 # Project imports
-from mllaunchpad.config import get_validated_config
+from mllaunchpad.config import get_validated_config, get_validated_config_str
 from mllaunchpad.model_actions import predict, retest, train_model
 from mllaunchpad.model_interface import ModelInterface, ModelMakerInterface
 from mllaunchpad.resource import order_columns
@@ -19,6 +19,7 @@ __all__ = [
     "retest",
     "predict",
     "get_validated_config",
+    "get_validated_config_str",
     "ModelInterface",
     "ModelMakerInterface",
     "order_columns",

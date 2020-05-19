@@ -5,9 +5,16 @@ import os
 import yaml
 
 
-class Loader(yaml.SafeLoader):
+class SafeIncludeLoader(yaml.SafeLoader):
+    """A subclass of SafeLoader which supports !include file references."""
+
     def __init__(self, stream):
-        self._root = os.path.split(stream.name)[0]
+        if isinstance(stream, str) or isinstance(stream, bytes):
+            # Loading config from string
+            self._root = "."
+        else:
+            # Loading config from file
+            self._root = os.path.split(stream.name)[0]
 
         super().__init__(stream)
 
@@ -17,7 +24,7 @@ class Loader(yaml.SafeLoader):
         with open(filename, "r") as f:
             # Normally, one should use safe_load(), but our Loader
             # is a subclass of yaml.SafeLoader
-            return yaml.load(f, Loader)  # nosec
+            return yaml.load(f, Loader=SafeIncludeLoader)  # nosec
 
 
-Loader.add_constructor("!include", Loader.include)
+SafeIncludeLoader.add_constructor("!include", SafeIncludeLoader.include)

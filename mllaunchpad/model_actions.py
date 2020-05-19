@@ -3,7 +3,7 @@
 # Stdlib imports
 import logging
 import sys
-from typing import Dict
+from typing import Dict, Optional
 
 # Project imports
 from mllaunchpad import resource
@@ -25,43 +25,69 @@ suppress_order_columns_not_used_warning = (
 )
 
 
-def train_model(complete_conf, cache=True):
+def train_model(
+    complete_conf: Dict,
+    cache: bool = True,
+    persist: bool = True,
+    test: bool = True,
+    model: Optional[ModelInterface] = None,
+):
     """Train and test a model as specified in the configuration and persist
-    it in the model store
+    it in the model store.
 
-    Params:
-        complete_conf: configuration dict
-        cache:         (default: True) whether to cache the data sources/sinks and helper objects (cache lookup is done by model name and model version). If in doubt, leave at default.
+    :param complete_conf: configuration dict
+    :type complete_conf: dict
+    :param cache: Whether to cache the data sources/sinks and helper objects (cache lookup is done by model name and model version). If in doubt, leave at default.
+    :type cache: optional bool, default: True
+    :param persist: Whether to store the trained model in the location configured by `model_cache:`. This parameter exists mainly for making debugging and unit testing your model's code easier.
+    :type persist: optional bool, default: True
+    :param test: Whether to test the model after training. This parameter exists mainly for making debugging and unit testing your model's code easier.
+    :type test: optional bool, default: True
+    :param model: Use this model as previous model instead trying to load it from `model_store`. This parameter exists mainly for making debugging and unit testing your model's code easier.
+    :type model: optional object implementing ModelInterface, default: None
 
-    Returns:
-        (model, metrics) tuple
+    :return: Tuple of (object implementing ModelInterface, metrics)
     """
+    # if persist and not test:
+    #     raise ValueError("If you set `test` to False, you have to set `persist` to False, too. "
+    #                      "A model cannot be persisted without any test metrics")
+
     logger.debug("Creating trained model...")
     user_mm = _get_model_maker(complete_conf, cache=cache)
 
-    dso, dsi = _get_data_sources_and_sinks(
-        complete_conf, tags=["train", "test"], cache=cache
-    )
-
     model_conf = complete_conf["model"]
 
-    try:
-        logger.debug("Trying to load old model...")
-        old_model_wrapper, _ = _get_model(complete_conf, cache=cache)
-        old_inner_model = old_model_wrapper.contents
-        # logger.info('Loaded old model %s %s', meta['name'], meta['version'])
-    except FileNotFoundError:
-        logger.info("No old model to load")
-        old_inner_model = None
+    if model:
+        old_inner_model = model.contents
+    else:
+        try:
+            logger.debug("Trying to load old model...")
+            old_model_wrapper, _ = _get_model(complete_conf, cache=cache)
+            old_inner_model = old_model_wrapper.contents
+        except FileNotFoundError:
+            logger.info("No old model to load")
+            old_inner_model = None
+        except AttributeError as e:
+            if "module '{}'".format(model_conf["module"]) in str(e):
+                logger.info(
+                    "No model loaded. Model class appears to have been renamed since last training"
+                )
+                old_inner_model = None
+            else:
+                raise e
+
+    dso_train, dsi_train = _get_data_sources_and_sinks(
+        complete_conf, tags=["train"], cache=cache
+    )
 
     inner_model = user_mm.create_trained_model(
-        model_conf, dso, dsi, old_model=old_inner_model
+        model_conf, dso_train, dsi_train, old_model=old_inner_model
     )
     m_cls = _get_model_class(complete_conf, cache=cache)
     model_wrapper: ModelInterface = m_cls(contents=inner_model)
 
     if resource._order_columns_called:
-        model_wrapper.__ordered_columns = True
+        model_wrapper.have_columns_been_ordered = True
     elif (
         "order_columns_not_used_warning" not in model_conf
         or model_conf["order_columns_not_used_warning"] == "always"
@@ -77,17 +103,26 @@ def train_model(complete_conf, cache=True):
             model_wrapper,
         )
 
-    logger.debug("Testing trained model...")
-    metrics = user_mm.test_trained_model(model_conf, dso, dsi, inner_model)
-    _check_ordered_columns(
-        complete_conf, model_wrapper, "testing code", times=2
-    )
+    metrics = {}
+    if test:
+        logger.debug("Testing trained model...")
+        dso_test, dsi_test = _get_data_sources_and_sinks(
+            complete_conf, tags=["test"], cache=cache
+        )
+        metrics = user_mm.test_trained_model(
+            model_conf, dso_test, dsi_test, inner_model
+        )
+        _check_ordered_columns(
+            complete_conf, model_wrapper, "testing code", times=2
+        )
 
-    model_store = _get_model_store(complete_conf, cache=cache)
-    model_store.dump_trained_model(complete_conf, model_wrapper, metrics)
+    if persist:
+        model_store = _get_model_store(complete_conf, cache=cache)
+        model_store.dump_trained_model(complete_conf, model_wrapper, metrics)
 
     logger.info(
-        "Created and stored trained model %s, version %s, metrics %s",
+        "Created%s trained model %s, version %s, metrics %s",
+        " and stored" if persist else "",
         model_conf["name"],
         model_conf["version"],
         metrics,
@@ -96,35 +131,48 @@ def train_model(complete_conf, cache=True):
     return model_wrapper, metrics
 
 
-def retest(complete_conf, cache=True):
+def retest(
+    complete_conf: Dict,
+    cache: bool = True,
+    persist: bool = True,
+    model: Optional[ModelInterface] = None,
+):
     """Retest a model as specified in the configuration and persist its
-    test metrics in the model store
+    test metrics in the model store.
 
-    Params:
-        complete_conf: configuration dict
-        cache:         (default: True) whether to cache the data sources/sinks and helper objects (cache lookup is done by model name and model version). If in doubt, leave at default.
+    :param complete_conf: configuration dict
+    :type complete_conf: dict
+    :param cache: Whether to cache the data sources/sinks and helper objects (cache lookup is done by model name and model version). If in doubt, leave at default.
+    :type cache: optional bool, default: True
+    :param persist: Whether to update the model in `model_cache:` with the test metrics. This parameter exists mainly for making debugging and unit testing your model's code easier.
+    :type persist: optional bool, default: True
+    :param model: Test this model instead of loading it from `model_store`. This parameter exists mainly for making debugging and unit testing your model's code easier.
+    :type model: optional object implementing ModelInterface, default: None
 
-    Returns:
-        test_metrics
+    :return: test_metrics
     """
     logger.debug("Retesting existing trained model...")
-    user_mm = _get_model_maker(complete_conf, cache=cache)
-
     dso, dsi = _get_data_sources_and_sinks(
-        complete_conf, tags="test", cache=cache
+        complete_conf, tags=["test"], cache=cache
     )
+    user_mm = _get_model_maker(complete_conf, cache=cache)
+    model_conf = complete_conf["model"]
 
-    model_wrapper, _ = _get_model(complete_conf, cache=cache)
+    if model:
+        model_wrapper = model
+    else:
+        model_wrapper, _ = _get_model(complete_conf, cache=cache)
+
     inner_model = model_wrapper.contents
 
-    model_conf = complete_conf["model"]
     test_metrics = user_mm.test_trained_model(
         model_conf, dso, dsi, inner_model
     )
     _check_ordered_columns(complete_conf, model_wrapper, "retesting code")
 
-    model_store = _get_model_store(complete_conf, cache=cache)
-    model_store.update_model_metrics(model_conf, test_metrics)
+    if persist:
+        model_store = _get_model_store(complete_conf, cache=cache)
+        model_store.update_model_metrics(model_conf, test_metrics)
 
     logger.info(
         "Retested existing model %s, version %s, new metrics %s",
@@ -136,27 +184,48 @@ def retest(complete_conf, cache=True):
     return test_metrics
 
 
-def predict(complete_conf, arg_dict=None, cache=True):
-    """Carry out prediction for the model specified in the configuration
+def predict(
+    complete_conf: Dict,
+    arg_dict: Optional[Dict] = None,
+    cache: bool = True,
+    model: Optional[ModelInterface] = None,
+    use_live_code: bool = False,
+):
+    """Carry out prediction for the model specified in the configuration.
 
-    Params:
-        complete_conf: configuration dict
-        arg_dict:      arguments dict for the prediction (analogous to what it would get from a web API)
-        cache:         (default: True) whether to cache the data sources/sinks and helper objects (cache lookup is done by model name and model version). If in doubt, leave at default.
+    :param complete_conf: configuration dict
+    :type complete_conf: dict
+    :param cache: Whether to cache the data sources/sinks and helper objects (cache lookup is done by model name and model version). If in doubt, leave at default.
+    :type cache: optional bool, default: True
+    :param arg_dict: Arguments dict for the prediction (analogous to what it would get from a web API)
+    :type arg_dict: optional Dict, default: None
+    :param model: Test this model instead of loading it from `model_store`. This parameter exists mainly for making debugging and unit testing your model's code easier.
+    :type model: optional object implementing ModelInterface, default: None
+    :param use_live_code: Use the current `predict` function instead of the one persisted with the model in the `model_store`. This parameter exists mainly for making debugging and unit testing your model's code easier.
+    :type use_live_code: optional bool, default: False
 
-    Returns:
-        model's prediction output
+    :return: model's prediction output
     """
     logger.debug("Applying model for prediction...")
 
     dso, dsi = _get_data_sources_and_sinks(
-        complete_conf, tags="predict", cache=cache
+        complete_conf, tags=["predict"], cache=cache
     )
+    model_conf = complete_conf["model"]
 
-    model_wrapper, _ = _get_model(complete_conf, cache=cache)
+    if model:
+        model_wrapper = model
+    else:
+        model_wrapper, _ = _get_model(complete_conf, cache=cache)
+
     inner_model = model_wrapper.contents
 
-    model_conf = complete_conf["model"]
+    if use_live_code:
+        # Create a fresh model object from current code and transplant existing contents
+        m_cls = _get_model_class(complete_conf, cache=cache)
+        curr_model_wrapper: ModelInterface = m_cls(contents=inner_model)
+        model_wrapper = curr_model_wrapper
+
     output = model_wrapper.predict(
         model_conf, dso, dsi, inner_model, arg_dict or {}
     )
@@ -206,7 +275,6 @@ def _find_subclass(module_name, superclass):
     __import__(module_name)
 
     classes = superclass.__subclasses__()
-    print(classes)
     if len(classes) != 1:
         raise ValueError(
             "The configured model module (.py file) must contain "
@@ -324,7 +392,7 @@ def _get_model(complete_conf, cache=True):
 def _get_data_sources_and_sinks(complete_conf, tags=None, cache=True):
     global _cached_data_source_sink_tuples
 
-    key = _model_key(complete_conf["model"])
+    key = _model_key(complete_conf["model"]) + str(tags)
 
     ds_tuple = _cached_data_source_sink_tuples.get(key)
     if ds_tuple is None:
@@ -353,7 +421,7 @@ def _check_ordered_columns(complete_conf, model_wrapper, what: str, times=1):
         and complete_conf["model"]["order_columns_not_used_warning"] == "never"
     ):
         return
-    if hasattr(model_wrapper, "__ordered_columns"):
+    if model_wrapper.have_columns_been_ordered:
         if resource._order_columns_called < times:
             logger.warning(
                 "Model has been trained on ordered columns, but "

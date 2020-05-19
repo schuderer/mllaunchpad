@@ -86,6 +86,7 @@ class ModelInterface(abc.ABC):
                       method as the "model" parameter for convenience.
         """
         self.contents = contents
+        self.have_columns_been_ordered = False
 
     @abc.abstractmethod
     def predict(self, model_conf, data_sources, data_sinks, model, args_dict):

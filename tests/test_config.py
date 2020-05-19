@@ -36,11 +36,9 @@ def test_get_config():
     with mock.patch("builtins.open", mo, create=True):
         cfg = config.get_validated_config("lalala")
         assert cfg["api"]["name"] == "my_api"
-        assert cfg["api"]["name"] == "my_api"
 
 
 def test_get_config_default_warning(caplog):
-    """Test Config loading."""
     mo = mock.mock_open(read_data=test_file_valid)
     mo.return_value.name = "./foobar.yml"
     with mock.patch("builtins.open", mo, create=True):
@@ -66,6 +64,11 @@ def test_get_config_invalid():
     with mock.patch("builtins.open", mo, create=True):
         with pytest.raises(ValueError, match="Missing key"):
             _ = config.get_validated_config("lalala")
+
+
+def test_get_validated_config_str(caplog):
+    cfg = config.get_validated_config_str(test_file_valid)
+    assert cfg["api"]["name"] == "my_api"
 
 
 test = b"""
