@@ -31,8 +31,8 @@ provide you with different kinds of connections. In the following sections, you 
 lists of built-in and external :class:`DataSources <mllaunchpad.resource.DataSource>`
 and :class:`DataSinks <mllaunchpad.resource.DataSink>`.
 
-Each subclass of :class:`DataSources <mllaunchpad.resource.DataSource>` (e.g. :class:`~mllaunchpad.resource.FileDataSource`,
-:class:`~mllaunchpad.resource.OracleDataSource`)
+Each subclass of :class:`DataSources <mllaunchpad.resource.DataSource>` (e.g. :class:`~mllaunchpad.datasources.FileDataSource`,
+:class:`~mllaunchpad.datasources.OracleDataSource`)
 serves one or several ``types`` (e.g. ``csv``, ``euro_csv``, ``dbms.oracle``).
 You specify the ``type`` in your DataSource's :doc:`configuration <config>`.
 The same ``type`` can even be served by several different
@@ -40,7 +40,7 @@ The same ``type`` can even be served by several different
 :doc:`last-imported plugin <config>`.
 
 Here is an example for a configured
-:class:`~mllaunchpad.resource.FileDataSource`::
+:class:`~mllaunchpad.datasources.FileDataSource`::
 
     datasources:
       my_datasource:
@@ -56,13 +56,13 @@ Where the parts of this examples are:
 * ``datasources`` (or ``datasinks``; optional): Can contain
   as many child elements (configured DataSources or DataSinks) as you like.
 * ``my_datasource``: The name by which you want to refer to a specific configured DataSource.
-  Used to get data, e.g.: :meth:`data_sources["my_datasource"].get_dataframe() <mllaunchpad.resource.FileDataSource.get_dataframe>`.
+  Used to get data, e.g.: :meth:`data_sources["my_datasource"].get_dataframe() <mllaunchpad.datasources.FileDataSource.get_dataframe>`.
   This name is up to you to choose.
 * ``type`` (required in every DataSource): the ``type`` that a DataSource needs to
   serve in order to be chosen for you. In this case, when ML Launchpad looks up
   which DataSources serve the ``csv`` type, it finds
-  :class:`~mllaunchpad.resource.FileDataSource` and will use it.
-* ``path`` (specific to :class:`~mllaunchpad.resource.FileDataSource`):
+  :class:`~mllaunchpad.datasources.FileDataSource` and will use it.
+* ``path`` (specific to :class:`~mllaunchpad.datasources.FileDataSource`):
   The path of the file. Every DataSource has its own specific properties
   which are part of the DataSource's documentation (see the next section for built-ins).
 * ``expires`` (required in every DataSource): This controls caching of the data.
@@ -70,7 +70,7 @@ Where the parts of this examples are:
   number specifies the number of seconds after the cached data expires and
   should be gotten afresh from the source. Note that data is cached specifically
   for each unique combination of ``params`` passed to
-  :meth:`~mllaunchpad.resource.FileDataSource.get_dataframe`, up to the maximum
+  :meth:`~mllaunchpad.datasources.FileDataSource.get_dataframe`, up to the maximum
   cache size.
 * ``cache_size`` (optional, default: 32, DataSources only): Maximum number of items to cache.
 * ``tags`` (required in every DataSource): a combination of one or several of
@@ -93,7 +93,7 @@ of the DataSources that correspond with those tables, but configure a
 connection only once. For this, you specify a separate ``dbms:`` section in your
 configuration where you give each connection a name (e.g. ``my_connection``) which
 you can refer to in your ``datasource`` config by a type like e.g. ``dmbs.my_connection``.
-See :class:`~mllaunchpad.resource.OracleDataSource` below for an example.
+See :class:`~mllaunchpad.datasources.OracleDataSource` below for an example.
 
 Built-in DataSources and DataSinks
 ------------------------------------------------------------------------------
@@ -103,25 +103,25 @@ any ``plugins: []`` in the :doc:`config`.
 
 Their documentation follows hereunder.
 
-.. autoclass:: mllaunchpad.resource.FileDataSource
+.. autoclass:: mllaunchpad.datasources.FileDataSource
    :noindex:
    :members:
    :inherited-members:
    :undoc-members:
 
-.. autoclass:: mllaunchpad.resource.FileDataSink
+.. autoclass:: mllaunchpad.datasources.FileDataSink
    :noindex:
    :members:
    :inherited-members:
    :undoc-members:
 
-.. autoclass:: mllaunchpad.resource.OracleDataSource
+.. autoclass:: mllaunchpad.datasources.OracleDataSource
    :noindex:
    :members:
    :inherited-members:
    :undoc-members:
 
-.. autoclass:: mllaunchpad.resource.OracleDataSink
+.. autoclass:: mllaunchpad.datasources.OracleDataSink
    :noindex:
    :members:
    :inherited-members:

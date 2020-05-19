@@ -157,4 +157,8 @@ def cli_generate_raml(settings, datasource_name):
 
 
 if __name__ == "__main__":
-    sys.exit(main())  # pragma: no cover
+    # PyLint (used by Codacity) does not know that the signature of `main()`
+    # is being changed by Click at runtime. Disable the warning.
+    sys.exit(
+        main()  # pylint: disable=no-value-for-parameter; # pragma: no cover
+    )
