@@ -117,7 +117,7 @@ the previous ones.
 
 For example, if several :doc:`DataSource <datasources>` plugins offer to serve the
 same type (e.g. ``csv``), the last one in the ``plugins:`` list will be chosen as the
-designated ``csv`` handler, overruling both the built-in :class:`~mllaunchpad.resource.FileDataSource`
+designated ``csv`` handler, overruling both the built-in :class:`~mllaunchpad.datasources.FileDataSource`
 as well as any other ``csv``-serving DataSources listed before the one in question.
 
 RAML API Definition
