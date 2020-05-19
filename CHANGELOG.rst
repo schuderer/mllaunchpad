@@ -25,6 +25,11 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ------------------------------------------------------------------------------
 
+* |Enhancement| Added functionality to better support unit testing in model development
+  (added optional parameters to :meth:`mllaunchpad.train_model`, :meth:`mllaunchpad.retest`
+  and :meth:`mllaunchpad.predict`, added :meth:`mllaunchpad.get_validated_config_str`),
+  `issue #116 <https://github.com/schuderer/mllaunchpad/issues/116>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Fixed| Readthedocs now shows the up-to-date :doc:`API docs <mllaunchpad>`,
   `issue #110 <https://github.com/schuderer/mllaunchpad/issues/110>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
@@ -39,7 +44,7 @@ Unreleased
   `issue #77 <https://github.com/schuderer/mllaunchpad/issues/77>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Enhancement| DataSource caching overhaul: data cached separately for different
-  :meth:`params <mllaunchpad.resource.FileDataSource.get_dataframe>`,
+  :meth:`params <mllaunchpad.datasources.FileDataSource.get_dataframe>`,
   configurable ``cache_size``,
   `issue #97 <https://github.com/schuderer/mllaunchpad/issues/97>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
