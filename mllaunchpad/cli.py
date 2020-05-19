@@ -160,5 +160,5 @@ if __name__ == "__main__":
     # PyLint (used by Codacity) does not know that the signature of `main()`
     # is being changed by Click at runtime. Disable the warning.
     sys.exit(
-        main()
-    )  # pylint: disable=no-value-for-parameter; # pragma: no cover
+        main()  # pylint: disable=no-value-for-parameter; # pragma: no cover
+    ) 
