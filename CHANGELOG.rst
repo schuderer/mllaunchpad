@@ -25,6 +25,13 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ------------------------------------------------------------------------------
 
+* |Enhancement| Added ``chunksize`` parameter for piecemeal data reading to builtin DataSources,
+  `issue #120 <https://github.com/schuderer/mllaunchpad/issues/120>`_,
+* |Fixed| ``mllaunchpad --verbose`` now correctly logs DEBUG information,
+  `issue #119 <https://github.com/schuderer/mllaunchpad/issues/119>`_,
+* |Fixed| Fixed an issue where builtin DataSources could not be found when configured,
+  `issue #118 <https://github.com/schuderer/mllaunchpad/issues/118>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Enhancement| Added functionality to better support unit testing in model development
   (added optional parameters to :meth:`mllaunchpad.train_model`, :meth:`mllaunchpad.retest`
   and :meth:`mllaunchpad.predict`, added :meth:`mllaunchpad.get_validated_config_str`),
