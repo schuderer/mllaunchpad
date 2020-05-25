@@ -32,7 +32,7 @@ def init_logging(filename=LOG_CONF_FILENAME_ENV, verbose=False):
         loaded_logging_config = None
         logging.basicConfig(
             format="%(asctime)s %(levelname)s %(name)s: %(message)s",
-            level=logging.INFO,
+            level=logging.DEBUG if verbose else logging.INFO,
         )
 
     logging.captureWarnings(True)
