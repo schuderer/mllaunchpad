@@ -1,7 +1,6 @@
 # Stdlib imports
 import logging
-import os
-from typing import Dict, Generator, Iterable, Optional, Union, cast
+from typing import Dict, Generator, Optional, Union, cast
 
 # Third-party imports
 import numpy as np
