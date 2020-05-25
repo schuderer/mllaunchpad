@@ -83,6 +83,6 @@ def test_impaladatasource_notimplemented(impaladatasource_cfg_and_data):
 
     ds = imp.ImpalaDataSource("bla", cfg, dbms_cfg)
     with pytest.raises(NotImplementedError):
-        ds.get_dataframe(buffer=True)
+        ds.get_dataframe(chunksize=True)
     with pytest.raises(NotImplementedError, match="get_dataframe"):
         ds.get_raw()

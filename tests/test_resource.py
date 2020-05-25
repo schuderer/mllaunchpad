@@ -130,11 +130,11 @@ def datasource_expires_config():
 class MockDataSource(r.DataSource):
     serves = ["mock"]
 
-    def get_dataframe(self, params=None, buffer=False):
+    def get_dataframe(self, params=None, chunksize=None):
         df = pd.DataFrame(params)
         return df
 
-    def get_raw(self, params=None, buffer=False):
+    def get_raw(self, params=None, chunksize=False):
         raw = params
         return raw
 
@@ -162,6 +162,20 @@ def test_datasource_expires_df(
     df3 = ds.get_dataframe(params=args.copy())
     pd.testing.assert_frame_equal(df3, pd.DataFrame(args))
     assert (df3 is df1) == expected_cached
+
+
+def test_datasource_expires_chunksize_error(datasource_expires_config):
+    """chunksize must not be used with expires != 0"""
+    ds1 = MockDataSource("mock", datasource_expires_config(-1))
+    with pytest.raises(ValueError, match="incompatible"):
+        _ = ds1.get_dataframe(chunksize=5)
+    ds2 = MockDataSource("mock", datasource_expires_config(20000))
+    with pytest.raises(ValueError, match="incompatible"):
+        _ = ds2.get_dataframe(chunksize=5)
+    ds3 = MockDataSource("mock", datasource_expires_config(0))
+    _ = ds3.get_dataframe(chunksize=5)
+    ds4 = MockDataSource("mock", datasource_expires_config(20000))
+    _ = ds4.get_dataframe()
 
 
 @pytest.mark.parametrize(

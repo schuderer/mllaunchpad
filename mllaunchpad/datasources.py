@@ -1,6 +1,6 @@
 # Stdlib imports
 import logging
-from typing import Dict, cast
+from typing import Dict, Generator, Optional, Union, cast
 
 # Third-party imports
 import numpy as np
@@ -79,8 +79,8 @@ class OracleDataSource(DataSource):
         self.connection = _get_oracle_connection(dbms_config)
 
     def get_dataframe(
-        self, params: Dict = None, buffer: bool = False
-    ) -> pd.DataFrame:
+        self, params: Dict = None, chunksize: Optional[int] = None
+    ) -> Union[pd.DataFrame, Generator]:
         """Get the data as pandas dataframe.
 
         Example::
@@ -89,32 +89,43 @@ class OracleDataSource(DataSource):
 
         :param params: Query parameters to fill in query (e.g. replace query's `:id` parameter with value `387`)
         :type params: optional dict
-        :param buffer: Currently not implemented
-        :type buffer: optional bool
+        :param chunksize: Return an iterator where chunksize is the number of rows to include in each chunk.
+        :type chunksize: optional int
 
         :return: DataFrame object, possibly cached according to config value of `expires:`
         """
-        if buffer:
-            raise NotImplementedError("Buffered reading not supported yet")
-
         # TODO: maybe want to open/close connection on every method call (shouldn't happen often)
         query = self.config["query"]
         params = params or {}
         kw_options = self.options
 
         logger.debug(
-            "Fetching query {} with params {} and options {}...".format(
-                query, params, kw_options
+            "Fetching query {} with params {}, chunksize {}, and options {}...".format(
+                query, params, chunksize, kw_options
             )
         )
         df = pd.read_sql(
-            query, con=self.connection, params=params, **kw_options
+            query,
+            con=self.connection,
+            params=params,
+            chunksize=chunksize,
+            **kw_options
         )
-        df.fillna(np.nan, inplace=True)
+        if chunksize:
 
-        return df
+            def wrapped_iterator(data):
+                for partial_df in data:
+                    partial_df.fillna(np.nan, inplace=True)
+                    yield partial_df
 
-    def get_raw(self, params: Dict = None, buffer: bool = False) -> Raw:
+            return wrapped_iterator(df)
+        else:
+            df.fillna(np.nan, inplace=True)
+            return df
+
+    def get_raw(
+        self, params: Dict = None, chunksize: Optional[int] = None
+    ) -> Raw:
         """Not implemented.
 
         :raises NotImplementedError: Raw/blob format currently not supported.
@@ -192,8 +203,8 @@ class FileDataSource(DataSource):
         self.path = datasource_config["path"]
 
     def get_dataframe(
-        self, params: Dict = None, buffer: bool = False
-    ) -> pd.DataFrame:
+        self, params: Dict = None, chunksize: Optional[int] = None
+    ) -> Union[pd.DataFrame, Generator]:
         """Get data as a pandas dataframe.
 
         Example::
@@ -202,25 +213,31 @@ class FileDataSource(DataSource):
 
         :param params: Currently not implemented
         :type params: optional dict
-        :param buffer: Currently not implemented
-        :type buffer: optional bool
+        :param chunksize: Return an iterator where chunksize is the number of rows to include in each chunk.
+        :type chunksize: optional int
 
         :return: DataFrame object, possibly cached according to config value of `expires:`
         """
-        if buffer:
-            raise NotImplementedError("Buffered reading not supported yet")
+        if params:
+            raise NotImplementedError("Parameters not supported yet")
 
         kw_options = self.options
 
         logger.debug(
-            "Loading type {} file {} with options {}...".format(
-                self.type, self.path, kw_options
+            "Loading type {} file {} with chunksize {} and options {}...".format(
+                self.type, self.path, chunksize, kw_options
             )
         )
         if self.type == "csv":
-            df = pd.read_csv(self.path, **kw_options)
+            df = pd.read_csv(self.path, chunksize=chunksize, **kw_options)
         elif self.type == "euro_csv":
-            df = pd.read_csv(self.path, sep=";", decimal=",", **kw_options)
+            df = pd.read_csv(
+                self.path,
+                sep=";",
+                decimal=",",
+                chunksize=chunksize,
+                **kw_options
+            )
         else:
             raise TypeError(
                 'Can only read csv files as dataframes. Use method "get_raw" for raw data'
@@ -228,7 +245,9 @@ class FileDataSource(DataSource):
 
         return df
 
-    def get_raw(self, params: Dict = None, buffer: bool = False) -> Raw:
+    def get_raw(
+        self, params: Dict = None, chunksize: Optional[int] = None
+    ) -> Raw:
         """Get data as raw (unstructured) data.
 
         Example::
@@ -237,13 +256,15 @@ class FileDataSource(DataSource):
 
         :param params: Currently not implemented
         :type params: optional dict
-        :param buffer: Currently not implemented
-        :type buffer: optional bool
+        :param chunksize: Currently not implemented
+        :type chunksize: optional bool
 
         :return: The file's bytes (binary) or string (text) contents, possibly cached according to config value of `expires:`
         :rtype: bytes or str
         """
-        if buffer:
+        if params:
+            raise NotImplementedError("Parameters not supported yet")
+        if chunksize:
             raise NotImplementedError("Buffered reading not supported yet")
 
         kw_options = self.options
@@ -333,7 +354,7 @@ class FileDataSink(DataSink):
         self,
         dataframe: pd.DataFrame,
         params: Dict = None,
-        buffer: bool = False,
+        chunksize: Optional[int] = None,
     ) -> None:
         """Write a pandas dataframe to file.
         The default is not to save the dataframe's row index.
@@ -347,10 +368,12 @@ class FileDataSink(DataSink):
         :type dataframe: pandas DataFrame
         :param params: Currently not implemented
         :type params: optional dict
-        :param buffer: Currently not implemented
-        :type buffer: optional bool
+        :param chunksize: Currently not implemented
+        :type chunksize: optional bool
         """
-        if buffer:
+        if params:
+            raise NotImplementedError("Parameters not supported yet")
+        if chunksize:
             raise NotImplementedError("Buffered writing not supported yet")
 
         kw_options = self.options
@@ -372,7 +395,10 @@ class FileDataSink(DataSink):
             )
 
     def put_raw(
-        self, raw_data: Raw, params: Dict = None, buffer: bool = False,
+        self,
+        raw_data: Raw,
+        params: Dict = None,
+        chunksize: Optional[int] = None,
     ) -> None:
         """Write raw (unstructured) data to file.
 
@@ -384,10 +410,12 @@ class FileDataSink(DataSink):
         :type raw_data: bytes or str
         :param params: Currently not implemented
         :type params: optional dict
-        :param buffer: Currently not implemented
-        :type buffer: optional bool
+        :param chunksize: Currently not implemented
+        :type chunksize: optional bool
         """
-        if buffer:
+        if params:
+            raise NotImplementedError("Parameters not supported yet")
+        if chunksize:
             raise NotImplementedError("Buffered writing not supported yet")
 
         kw_options = self.options
@@ -460,7 +488,7 @@ class OracleDataSink(DataSink):
         self,
         dataframe: pd.DataFrame,
         params: Dict = None,
-        buffer: bool = False,
+        chunksize: Optional[int] = None,
     ) -> None:
         """Store the pandas dataframe as a table.
         The default is not to store the dataframe's row index.
@@ -474,10 +502,10 @@ class OracleDataSink(DataSink):
         :type dataframe: pandas DataFrame
         :param params: Currently not implemented
         :type params: optional dict
-        :param buffer: Currently not implemented
-        :type buffer: optional bool
+        :param chunksize: Currently not implemented
+        :type chunksize: optional bool
         """
-        if buffer:
+        if chunksize:
             raise NotImplementedError("Buffered storing not supported yet")
 
         # TODO: maybe want to open/close connection on every method call (shouldn't happen often)
@@ -494,7 +522,7 @@ class OracleDataSink(DataSink):
         dataframe.to_sql(table, con=self.connection, **kw_options)
 
     def put_raw(
-        self, raw_data, params: str = None, buffer: bool = False
+        self, raw_data, params: Dict = None, chunksize: Optional[int] = None
     ) -> None:
         """Not implemented.
 
