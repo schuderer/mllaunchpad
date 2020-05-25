@@ -189,7 +189,10 @@ def _tags_match(tags, other_tags) -> bool:
 
 
 def _get_all_classes(config, the_type: Type[DS]) -> Dict[str, Type[DS]]:
-    modules = [__name__]  # find built_in types using same mechanism
+    modules = [
+        __name__,
+        "mllaunchpad.datasources",
+    ]  # find built_in types using same mechanism
     if "plugins" in config:
         logger.info("Loading %s plugins", the_type)
         # Append plugins so they can replace builtin types
