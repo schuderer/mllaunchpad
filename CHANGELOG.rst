@@ -25,6 +25,9 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ------------------------------------------------------------------------------
 
+* |Fixed| Fixed an issue where builtin DataSources could not be found when configured,
+  (no issue),
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Enhancement| Added functionality to better support unit testing in model development
   (added optional parameters to :meth:`mllaunchpad.train_model`, :meth:`mllaunchpad.retest`
   and :meth:`mllaunchpad.predict`, added :meth:`mllaunchpad.get_validated_config_str`),
