@@ -26,7 +26,7 @@ Unreleased
 ------------------------------------------------------------------------------
 
 * |Fixed| ``mllaunchpad --verbose`` now correctly logs DEBUG information,
-  (no issue),
+  `issue #119 <https://github.com/schuderer/mllaunchpad/issues/119>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Enhancement| Added functionality to better support unit testing in model development
   (added optional parameters to :meth:`mllaunchpad.train_model`, :meth:`mllaunchpad.retest`
