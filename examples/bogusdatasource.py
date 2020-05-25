@@ -16,7 +16,7 @@ class BogusDataSource(DataSource):
     # def __init__(self, identifier, datasource_config):
     #     super().__init__(identifier, datasource_config)
 
-    def get_dataframe(self, params=None, buffer=False):
+    def get_dataframe(self, params=None, chunksize=None):
         """Get some pandas dataframe.
 
         Params:
@@ -26,14 +26,14 @@ class BogusDataSource(DataSource):
         Returns:
             DataFrame object, possibly cached according to expires-config
         """
-        if buffer:
+        if chunksize:
             raise NotImplementedError("Buffered reading not supported yet")
 
         kw_options = self.options
 
         return pd.DataFrame({"a": [3, 4, 5], "b": [6, 7, 8]}, **kw_options)
 
-    def get_raw(self, params=None, buffer=False):
+    def get_raw(self, params=None, chunksize=None):
         """Not implemented.
 
         Params:
