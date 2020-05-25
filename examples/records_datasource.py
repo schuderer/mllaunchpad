@@ -78,7 +78,7 @@ class RecordsDbDataSource(DataSource):
         connection_string = f"{dbtype}://{user}:{pw}@{host}{port}{service_name}"
         self.db = records.Database(connection_string, **kwargs)
 
-    def get_dataframe(self, params=None, buffer=False):
+    def get_dataframe(self, params=None, chunksize=None):
         """Get data as a pandas dataframe.
 
         Example::
@@ -87,12 +87,12 @@ class RecordsDbDataSource(DataSource):
 
         :param params: Query parameters to fill in query (e.g. `:id` with value 387)
         :type params: optional dict
-        :param buffer: Currently not implemented
-        :type buffer: optional bool
+        :param chunksize: Currently not implemented
+        :type chunksize: optional bool
 
         :return: DataFrame object, possibly cached according to expires-config
         """
-        if buffer:
+        if chunksize:
             raise NotImplementedError("Buffered reading not supported yet")
             # the resulting `rows` of a query provides a nice way to do this, though
 
@@ -109,13 +109,13 @@ class RecordsDbDataSource(DataSource):
 
         return df
 
-    def get_raw(self, params=None, buffer=False):
+    def get_raw(self, params=None, chunksize=None):
         """Not implemented.
 
         :param params: Query parameters to fill in query (e.g. `:id` with value 387)
         :type params: optional dict
-        :param buffer: Currently not implemented
-        :type buffer: optional bool
+        :param chunksize: Currently not implemented
+        :type chunksize: optional bool
 
         :raises NotImplementedError:
 

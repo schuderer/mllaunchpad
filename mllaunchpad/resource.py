@@ -13,6 +13,7 @@ from time import time
 from typing import (
     Any,
     Dict,
+    Generator,
     Iterable,
     List,
     Optional,
@@ -347,13 +348,25 @@ class CachedDataSource(type):
     def cached(mcs, func):
         """This decorator is automatically applied to `get_dataframe` and `get_raw` methods to enable caching."""
 
-        def wrapper(self, params: Dict = None, buffer: bool = False):
-            key = (func.__name__, json.dumps(params, sort_keys=True), buffer)
+        def wrapper(
+            self, params: Dict = None, chunksize: Optional[int] = None
+        ):
+            if self.expires != 0 and chunksize is not None:
+                raise ValueError(
+                    'The "chunksize" parameter is incompatible with caching. '
+                    'To be able to use "chunksize", please set "expires: 0" '
+                    "in the datasource configuration."
+                )
+            key = (
+                func.__name__,
+                json.dumps(params, sort_keys=True),
+                chunksize,
+            )
             item = self._get_cached(key)
             if item is not None:
                 return item
             else:
-                result = func(self, params, buffer)
+                result = func(self, params, chunksize)
                 self._to_cache(key, result)
                 return result
 
@@ -387,12 +400,14 @@ class DataSource(metaclass=CachedDataSource):
 
     @abc.abstractmethod
     def get_dataframe(
-        self, params: Dict = None, buffer: bool = False
-    ) -> pd.DataFrame:
+        self, params: Dict = None, chunksize: Optional[int] = None
+    ) -> Union[pd.DataFrame, Generator]:
         ...
 
     @abc.abstractmethod
-    def get_raw(self, params: Dict = None, buffer: bool = False) -> Raw:
+    def get_raw(
+        self, params: Dict = None, chunksize: Optional[int] = None
+    ) -> Raw:
         ...
 
     def _get_cached(self, key) -> Any:
@@ -438,12 +453,20 @@ class DataSink:
 
     @abc.abstractmethod
     def put_dataframe(
-        self, dataframe: pd.DataFrame, params=None, buffer=False
+        self,
+        dataframe: pd.DataFrame,
+        params: Dict = None,
+        chunksize: Optional[int] = None,
     ) -> None:
         ...
 
     @abc.abstractmethod
-    def put_raw(self, raw_data: Raw, params=None, buffer=False) -> None:
+    def put_raw(
+        self,
+        raw_data: Raw,
+        params: Dict = None,
+        chunksize: Optional[int] = None,
+    ) -> None:
         ...
 
     def __del__(self):

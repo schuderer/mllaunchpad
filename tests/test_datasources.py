@@ -57,6 +57,17 @@ def test_filedatasource_df(file_type, filedatasource_cfg_and_file):
     assert df["b"][0] == "ad"
 
 
+def test_filedatasource_df_chunksize(filedatasource_cfg_and_file):
+    cfg, file = filedatasource_cfg_and_file("csv")
+    cfg["path"] = BytesIO(file)  # sort-of mocking the file for pandas to open
+    ds = mllp_ds.FileDataSource("bla", cfg)
+    df_iter = ds.get_dataframe(chunksize=1)
+    df1, df2 = df_iter
+    assert not isinstance(df_iter, pd.DataFrame)
+    assert isinstance(df1, pd.DataFrame)
+    assert isinstance(df2, pd.DataFrame)
+
+
 @pytest.mark.parametrize("file_type", ["text_file", "binary_file"])
 def test_filedatasource_raw(file_type, filedatasource_cfg_and_file):
     cfg, file = filedatasource_cfg_and_file(file_type)
@@ -77,14 +88,14 @@ def test_filedatasource_notimplemented(filedatasource_cfg_and_file):
     cfg, _ = filedatasource_cfg_and_file("csv")
     ds = mllp_ds.FileDataSource("bla", cfg)
     with pytest.raises(NotImplementedError):
-        ds.get_dataframe(buffer=True)
+        ds.get_dataframe(params={"a": "hallo"})
     with pytest.raises(TypeError, match="get_dataframe"):
         ds.get_raw()
 
     cfg, _ = filedatasource_cfg_and_file("text_file")
     ds = mllp_ds.FileDataSource("bla", cfg)
     with pytest.raises(NotImplementedError):
-        ds.get_raw(buffer=True)
+        ds.get_raw(params={"a": "hallo"})
     with pytest.raises(TypeError, match="get_raw"):
         ds.get_dataframe()
 
@@ -156,14 +167,14 @@ def test_filedatasink_notimplemented(filedatasink_cfg_and_data):
     cfg, data = filedatasink_cfg_and_data("csv")
     ds = mllp_ds.FileDataSink("bla", cfg)
     with pytest.raises(NotImplementedError):
-        ds.put_dataframe(data, buffer=True)
+        ds.put_dataframe(data, params={"a": "hallo"})
     with pytest.raises(TypeError, match="put_dataframe"):
         ds.put_raw(data)
 
     cfg, data = filedatasink_cfg_and_data("text_file")
     ds = mllp_ds.FileDataSink("bla", cfg)
     with pytest.raises(NotImplementedError):
-        ds.put_raw(data, buffer=True)
+        ds.put_raw(data, params={"a": "hallo"})
     with pytest.raises(TypeError, match="put_raw"):
         ds.put_dataframe(data)
 
@@ -217,82 +228,25 @@ def test_oracledatasource_df(user_pw, pd_read, oracledatasource_cfg_and_data):
     del sys.modules["cx_Oracle"]
 
 
-@pytest.mark.parametrize(
-    "values, expected",
-    [
-        (
-            pd.DataFrame(
-                {
-                    "a": [1, 2, 3, 4, 5, 6, 7],
-                    "b": [3, 2, 7, None, 5, 7, 3],
-                    "c": [1, 6, np.nan, 5, 7, None, 0],
-                }
-            ),
-            pd.DataFrame(
-                {
-                    "a": [1, 2, 3, 4, 5, 6, 7],
-                    "b": [3, 2, 7, np.nan, 5, 7, 3],
-                    "c": [1, 6, np.nan, 5, 7, np.nan, 0],
-                }
-            ),
-        ),
-        (
-            pd.DataFrame(
-                {
-                    "a": [1, 2, "3", None, 5, 6, 7],
-                    "b": [3, 2, 7, None, "4", 7, 3],
-                    "c": [1, 6, np.nan, 5, 7, "0", 0],
-                }
-            ),
-            pd.DataFrame(
-                {
-                    "a": [1, 2, "3", np.nan, 5, 6, 7],
-                    "b": [3, 2, 7, np.nan, "4", 7, 3],
-                    "c": [1, 6, np.nan, 5, 7, "0", 0],
-                }
-            ),
-        ),
-        (
-            pd.DataFrame(
-                {
-                    "a": [1, 2, "x", 4, 5, 6, 7],
-                    "b": [3, 2, 7, None, "y", 7, 3],
-                    "c": [1, 6, np.nan, 5, 7, "z", 0],
-                }
-            ),
-            pd.DataFrame(
-                {
-                    "a": [1, 2, "x", 4, 5, 6, 7],
-                    "b": [3, 2, 7, np.nan, "y", 7, 3],
-                    "c": [1, 6, np.nan, 5, 7, "z", 0],
-                }
-            ),
-        ),
-    ],
-)
 @mock.patch("pandas.read_sql")
 @mock.patch(
     "{}.get_user_pw".format(mllp_ds.__name__), return_value=("foo", "bar")
 )
-def test_regression_oracle_nas_issue86(
-    user_pw, pd_read, values, expected, oracledatasource_cfg_and_data
+def test_oracledatasource_df_chunksize(
+    user_pw, pd_read, oracledatasource_cfg_and_data
 ):
-    """
-    OracleDataSource should connect, read dataframe and return it unaltered
-    with the exception of None values --> they should be converted to np.nan.
-    """
-    cfg, dbms_cfg, _ = oracledatasource_cfg_and_data()
+    """OracleDataSource with chunksize should return generator."""
+    cfg, dbms_cfg, full_data = oracledatasource_cfg_and_data()
+    iter_data = [full_data.iloc[:2, :].copy(), full_data.iloc[2:, :].copy()]
     ora_mock = mock.MagicMock()
     sys.modules["cx_Oracle"] = ora_mock
-    pd_read.return_value = values
+    pd_read.return_value = iter_data
 
     ds = mllp_ds.OracleDataSource("bla", cfg, dbms_cfg)
-    df = ds.get_dataframe()
+    df_gen = ds.get_dataframe(chunksize=2)
 
-    pd.testing.assert_frame_equal(df, expected)
-    # assert df == expected
-    ora_mock.connect.assert_called_once()
-    pd_read.assert_called_once()
+    for df, orig in zip(df_gen, iter_data):
+        pd.testing.assert_frame_equal(df, orig)
 
     del sys.modules["cx_Oracle"]
 
@@ -308,8 +262,6 @@ def test_oracledatasource_notimplemented(
     sys.modules["cx_Oracle"] = ora_mock
 
     ds = mllp_ds.OracleDataSource("bla", cfg, dbms_cfg)
-    with pytest.raises(NotImplementedError):
-        ds.get_dataframe(buffer=True)
     with pytest.raises(NotImplementedError, match="get_dataframe"):
         ds.get_raw()
 
@@ -429,7 +381,7 @@ def test_oracledatasink_notimplemented(user_pw, oracledatasource_cfg_and_data):
 
     ds = mllp_ds.OracleDataSink("bla", cfg, dbms_cfg)
     with pytest.raises(NotImplementedError):
-        ds.put_dataframe(data, buffer=True)
+        ds.put_dataframe(data, chunksize=7)
     with pytest.raises(NotImplementedError, match="put_dataframe"):
         ds.put_raw(data)
 
