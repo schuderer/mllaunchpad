@@ -347,6 +347,104 @@ class OracleDataSource(DataSource):
             self.connection.close()
 
 
+class OracleDataSink(DataSink):
+    """DataSink for Oracle database connections.
+
+    Creates a long-living connection on initialization.
+
+    Configuration example::
+
+        dbms:
+          # ... (other connections)
+          my_connection:  # NOTE: You can use the same connection for several datasources and datasinks
+            type: oracle
+            host: host.example.com
+            port: 1251
+            user_var: MY_USER_ENV_VAR
+            password_var: MY_PW_ENV_VAR  # optional
+            service_name: servicename.example.com
+            options: {}  # used as **kwargs when initializing the DB connection
+        # ...
+        datasinks:
+          # ... (other datasinks)
+          my_datasink:
+            type: dbms.my_connection
+            table: somewhere.my_table
+            tags: [train] # generic parameter, see documentation on DataSources and DataSinks
+            options: {}   # used as **kwargs when fetching the query using `pandas.to_sql`
+    """
+
+    serves = ["dbms.oracle"]
+
+    def __init__(
+        self, identifier: str, datasink_config: Dict, dbms_config: Dict
+    ):
+        super().__init__(identifier, datasink_config)
+
+        self.dbms_config = dbms_config
+
+        logger.info(
+            "Establishing Oracle database connection for datasource {}...".format(
+                self.id
+            )
+        )
+
+        self.connection = _get_oracle_connection(dbms_config)
+
+    def put_dataframe(
+        self,
+        dataframe: pd.DataFrame,
+        params: Dict = None,
+        chunksize: Optional[int] = None,
+    ) -> None:
+        """Store the pandas dataframe as a table.
+        The default is not to store the dataframe's row index.
+        Configure the DataSink's options dict to pass keyword arguments to `df.o_sql`.
+
+        Example::
+
+            data_sinks["my_datasink"].put_dataframe(my_df)
+
+        :param dataframe: The pandas dataframe to store
+        :type dataframe: pandas DataFrame
+        :param params: Currently not implemented
+        :type params: optional dict
+        :param chunksize: Currently not implemented
+        :type chunksize: optional bool
+        """
+        if chunksize:
+            raise NotImplementedError("Buffered storing not supported yet")
+
+        # TODO: maybe want to open/close connection on every method call (shouldn't happen often)
+        table = self.config["table"]
+        kw_options = self.options
+        if "index" not in kw_options:
+            kw_options["index"] = False
+
+        logger.debug(
+            "Storing data in table {} with options {}...".format(
+                table, kw_options
+            )
+        )
+        dataframe.to_sql(table, con=self.connection, **kw_options)
+
+    def put_raw(
+        self, raw_data, params: Dict = None, chunksize: Optional[int] = None
+    ) -> None:
+        """Not implemented.
+
+        :raises NotImplementedError: Raw/blob format currently not supported.
+        """
+        raise NotImplementedError(
+            "OracleDataSink currently does not not support raw format/blobs. "
+            'Use method "put_dataframe" for raw data'
+        )
+
+    def __del__(self):
+        if hasattr(self, "connection"):
+            self.connection.close()
+
+
 class FileDataSource(DataSource):
     """DataSource for fetching data from files.
 
@@ -645,101 +743,3 @@ class FileDataSink(DataSink):
                 "Can only write binary data or text strings as raw file. "
                 + 'Use method "put_dataframe" for dataframes'
             )
-
-
-class OracleDataSink(DataSink):
-    """DataSink for Oracle database connections.
-
-    Creates a long-living connection on initialization.
-
-    Configuration example::
-
-        dbms:
-          # ... (other connections)
-          my_connection:  # NOTE: You can use the same connection for several datasources and datasinks
-            type: oracle
-            host: host.example.com
-            port: 1251
-            user_var: MY_USER_ENV_VAR
-            password_var: MY_PW_ENV_VAR  # optional
-            service_name: servicename.example.com
-            options: {}  # used as **kwargs when initializing the DB connection
-        # ...
-        datasinks:
-          # ... (other datasinks)
-          my_datasink:
-            type: dbms.my_connection
-            table: somewhere.my_table
-            tags: [train] # generic parameter, see documentation on DataSources and DataSinks
-            options: {}   # used as **kwargs when fetching the query using `pandas.to_sql`
-    """
-
-    serves = ["dbms.oracle"]
-
-    def __init__(
-        self, identifier: str, datasink_config: Dict, dbms_config: Dict
-    ):
-        super().__init__(identifier, datasink_config)
-
-        self.dbms_config = dbms_config
-
-        logger.info(
-            "Establishing Oracle database connection for datasource {}...".format(
-                self.id
-            )
-        )
-
-        self.connection = _get_oracle_connection(dbms_config)
-
-    def put_dataframe(
-        self,
-        dataframe: pd.DataFrame,
-        params: Dict = None,
-        chunksize: Optional[int] = None,
-    ) -> None:
-        """Store the pandas dataframe as a table.
-        The default is not to store the dataframe's row index.
-        Configure the DataSink's options dict to pass keyword arguments to `df.o_sql`.
-
-        Example::
-
-            data_sinks["my_datasink"].put_dataframe(my_df)
-
-        :param dataframe: The pandas dataframe to store
-        :type dataframe: pandas DataFrame
-        :param params: Currently not implemented
-        :type params: optional dict
-        :param chunksize: Currently not implemented
-        :type chunksize: optional bool
-        """
-        if chunksize:
-            raise NotImplementedError("Buffered storing not supported yet")
-
-        # TODO: maybe want to open/close connection on every method call (shouldn't happen often)
-        table = self.config["table"]
-        kw_options = self.options
-        if "index" not in kw_options:
-            kw_options["index"] = False
-
-        logger.debug(
-            "Storing data in table {} with options {}...".format(
-                table, kw_options
-            )
-        )
-        dataframe.to_sql(table, con=self.connection, **kw_options)
-
-    def put_raw(
-        self, raw_data, params: Dict = None, chunksize: Optional[int] = None
-    ) -> None:
-        """Not implemented.
-
-        :raises NotImplementedError: Raw/blob format currently not supported.
-        """
-        raise NotImplementedError(
-            "OracleDataSink currently does not not support raw format/blobs. "
-            'Use method "put_dataframe" for raw data'
-        )
-
-    def __del__(self):
-        if hasattr(self, "connection"):
-            self.connection.close()
