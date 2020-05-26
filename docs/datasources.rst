@@ -115,6 +115,18 @@ Their documentation follows hereunder.
    :inherited-members:
    :undoc-members:
 
+.. autoclass:: mllaunchpad.datasources.SqlDataSource
+   :noindex:
+   :members:
+   :inherited-members:
+   :undoc-members:
+
+.. autoclass:: mllaunchpad.datasources.SqlDataSink
+   :noindex:
+   :members:
+   :inherited-members:
+   :undoc-members:
+
 .. autoclass:: mllaunchpad.datasources.OracleDataSource
    :noindex:
    :members:

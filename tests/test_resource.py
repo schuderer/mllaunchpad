@@ -31,6 +31,9 @@ def modelstore_config():
             "train_options": {},
             "predict_options": {},
         },
+        "api": {
+            "name": "tree"
+        }
     }
 # fmt: on
 
@@ -53,7 +56,10 @@ def test_modelstore_create(makedirs, path_exists, modelstore_config):
 @mock.patch("{}.os.path.exists".format(r.__name__), return_value=False)
 @mock.patch("{}.os.makedirs".format(r.__name__))
 @mock.patch("{}.shutil.copy".format(r.__name__))
-def test_modelstore_dump(copy, makedirs, path_exists, modelstore_config):
+@mock.patch(
+    "{}.glob.glob".format(r.__name__), return_value=["old.pkl", "old.json"]
+)
+def test_modelstore_dump(glob, copy, makedirs, path_exists, modelstore_config):
     with mock.patch(
         "{}.open".format(r.__name__), mock.mock_open(), create=True
     ) as mo:
@@ -110,6 +116,43 @@ def test_modelstore_update_model_metrics(dump, load, modelstore_config):
     assert len(hist) == 2
     del hist["0123"]
     assert hist.popitem()[1] == new_metrics
+
+
+def test___get_all_classes():
+    """Retrieve a type which subclasses the given type"""
+    config = {"plugins": ["tests.mock_plugin"]}
+    classes = r._get_all_classes(config, r.DataSource)
+    assert "food" in classes
+    classes = r._get_all_classes(config, r.DataSink)
+    assert "food" in classes
+
+
+def test_create_data_sources_and_sinks():
+    conf = {
+        "plugins": ["tests.mock_plugin"],
+        "datasources": {
+            "bla": {"type": "food", "path": "some/path", "tags": "train"},
+        },
+        "datasinks": {
+            "foo": {"type": "food", "path": "some/path"},
+            "blargh": {
+                "type": "food",
+                "path": "some/path",
+                "tags": "weirdtag",
+            },
+        },
+    }
+    src, snk = r.create_data_sources_and_sinks(conf, tags=["weirdtag"])
+    assert "bla" not in src
+    assert "foo" in snk
+    assert "blargh" in snk
+    src, snk = r.create_data_sources_and_sinks(conf)
+    assert "bla" in src
+    assert "foo" in snk
+    assert "blargh" in snk
+    with pytest.raises(ValueError, match="available"):
+        conf["datasources"]["bla"]["type"] = "will_not_be_found"
+        r.create_data_sources_and_sinks(conf)
 
 
 # Test DataSource caching

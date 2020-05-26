@@ -25,28 +25,31 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ------------------------------------------------------------------------------
 
-* |Enhancement| Added ``chunksize`` parameter for piecemeal data reading to builtin DataSources,
-  `issue #120 <https://github.com/schuderer/mllaunchpad/issues/120>`_,
 * |Fixed| ``mllaunchpad --verbose`` now correctly logs DEBUG information,
   `issue #119 <https://github.com/schuderer/mllaunchpad/issues/119>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Fixed| Fixed an issue where builtin DataSources could not be found when configured,
   `issue #118 <https://github.com/schuderer/mllaunchpad/issues/118>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
-* |Enhancement| Added functionality to better support unit testing in model development
+* |Fixed| Readthedocs now shows the up-to-date :doc:`API docs <mllaunchpad>`,
+  `issue #110 <https://github.com/schuderer/mllaunchpad/issues/110>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
+* |Enhancement| Added ``chunksize`` parameter for piecemeal data reading to builtin DataSources,
+  `issue #120 <https://github.com/schuderer/mllaunchpad/issues/120>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
+* |Feature| Added functionality to better support unit testing in model development
   (added optional parameters to :meth:`mllaunchpad.train_model`, :meth:`mllaunchpad.retest`
   and :meth:`mllaunchpad.predict`, added :meth:`mllaunchpad.get_validated_config_str`),
   `issue #116 <https://github.com/schuderer/mllaunchpad/issues/116>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
-* |Fixed| Readthedocs now shows the up-to-date :doc:`API docs <mllaunchpad>`,
-  `issue #110 <https://github.com/schuderer/mllaunchpad/issues/110>`_,
+* |Feature| Added generic SqlDataSource for RedShift, Postgres, MySQL, SQLite, Oracle,
+  Microsoft SQL (ODBC), and their dialects,
+  `issue #121 <https://github.com/schuderer/mllaunchpad/issues/121>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
 
 1.0.0rc1 (2020-04-29)
 ------------------------------------------------------------------------------
 
-* |Removed| Removed 'api:version:' (deprecated since 0.1.0) from  configuration
-  ('model:version:' is now the only location to specify both the model and the API version),
-  `issue #66 <https://github.com/schuderer/mllaunchpad/issues/66>`_,
 * |Enhancement| New command line interface (usage changes only slightly, see issue),
   `issue #77 <https://github.com/schuderer/mllaunchpad/issues/77>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
@@ -55,6 +58,9 @@ Unreleased
   configurable ``cache_size``,
   `issue #97 <https://github.com/schuderer/mllaunchpad/issues/97>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
+* |Removed| Removed 'api:version:' (deprecated since 0.1.0) from  configuration
+  ('model:version:' is now the only location to specify both the model and the API version),
+  `issue #66 <https://github.com/schuderer/mllaunchpad/issues/66>`_,
 
 0.1.2 (2020-04-23)
 ------------------------------------------------------------------------------
@@ -75,9 +81,13 @@ Unreleased
 0.1.0 (2020-04-02)
 ------------------------------------------------------------------------------
 
-* |Enhancement| Add Impala DataSource (in examples),
-  `issue #4 <https://github.com/schuderer/mllaunchpad/issues/4>`_,
-  by `Elisa Partodikromo <https://github.com/planeetjupyter>`_.
+* |Fixed| Fix misleading error message at WSGI entry point if model could
+  not be loaded,
+  `issue #61 <https://github.com/schuderer/mllaunchpad/issues/61>`_,
+  by `Bob Platte <https://github.com/bobplatte>`_.
+* |Fixed| Use correct reference to werkzeug's FileStorage,
+  `issue #63 <https://github.com/schuderer/mllaunchpad/issues/63>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Enhancement| Document DataSources and DataSinks,
   `issue #88 <https://github.com/schuderer/mllaunchpad/issues/88>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
@@ -88,19 +98,15 @@ Unreleased
   data column order between data sources and API parameters,
   `issue #37 <https://github.com/schuderer/mllaunchpad/issues/37>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
-* |Deprecated| 'api:version:' to be removed from  configuration ('model:version:'
-  will be the only location to specify both the model and the API version),
-  `issue #66 <https://github.com/schuderer/mllaunchpad/issues/66>`_,
-  by `Andreas Schuderer <https://github.com/schuderer>`_.
-* |Fixed| Fix misleading error message at WSGI entry point if model could
-  not be loaded,
-  `issue #61 <https://github.com/schuderer/mllaunchpad/issues/61>`_,
-  by `Bob Platte <https://github.com/bobplatte>`_.
 * |Enhancement| Config file is now being checked for omitted required keys,
   `PR #65 <https://github.com/schuderer/mllaunchpad/pull/65>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
-* |Fixed| Use correct reference to werkzeug's FileStorage,
-  `issue #63 <https://github.com/schuderer/mllaunchpad/issues/63>`_,
+* |Feature| Add Impala DataSource (in examples),
+  `issue #4 <https://github.com/schuderer/mllaunchpad/issues/4>`_,
+  by `Elisa Partodikromo <https://github.com/planeetjupyter>`_.
+* |Deprecated| 'api:version:' to be removed from  configuration ('model:version:'
+  will be the only location to specify both the model and the API version),
+  `issue #66 <https://github.com/schuderer/mllaunchpad/issues/66>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
 
 0.0.7 (2020-01-28)
@@ -108,6 +114,12 @@ Unreleased
 
 * |Fixed| Fix examples which could not be run on Windows,
   `issue #34 <https://github.com/schuderer/mllaunchpad/issues/34>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
+* |Fixed| Correcting variable names in TEMPLATE_cfg.yml,
+  `issue #43 <https://github.com/schuderer/mllaunchpad/issues/43>`_,
+  by `Bart Driessen <https://github.com/Bart92>`_.
+* |Fixed| Changed config fallback file name to the more ugly ./LAUNCHPAD_CFG.yml,
+  `direct commit <https://github.com/schuderer/mllaunchpad/commit/c012ee6a27f2da0cd9a7b57ab5aebf3257a71ffa>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Fixed| Migrate from ``pipenv`` to ``pip`` with ``requirements/*.txt``,
   `issue #36 <https://github.com/schuderer/mllaunchpad/issues/36>`_,
@@ -119,17 +131,11 @@ Unreleased
 * |Enhancement| Improve contribution documentation,
   `issue #35 <https://github.com/schuderer/mllaunchpad/issues/35>`_,
   by `Gosia Rorat <https://github.com/gosiarorat>`_.
-* |Fixed| Correcting variable names in TEMPLATE_cfg.yml,
-  `issue #43 <https://github.com/schuderer/mllaunchpad/issues/43>`_,
-  by `Bart Driessen <https://github.com/Bart92>`_.
-* |Feature| Added file upload support (multipart/form-data, experimental),
-  `PR #47 <https://github.com/schuderer/mllaunchpad/pull/47>`_,
-  by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Feature| Added funcionality to include sub-config support,
   `issue #28 <https://github.com/schuderer/mllaunchpad/issues/28>`_,
   by `Elisa Partodikromo <https://github.com/planeetjupyter>`_.
-* |Fixed| Changed config fallback file name to the more ugly ./LAUNCHPAD_CFG.yml,
-  `direct commit <https://github.com/schuderer/mllaunchpad/commit/c012ee6a27f2da0cd9a7b57ab5aebf3257a71ffa>`_,
+* |Feature| Added file upload support (multipart/form-data, experimental),
+  `PR #47 <https://github.com/schuderer/mllaunchpad/pull/47>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
 
 

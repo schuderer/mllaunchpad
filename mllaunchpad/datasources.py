@@ -37,12 +37,13 @@ def get_connection_args(dbms_config: Dict) -> Dict:
                 )
             else:
                 logger.warning(
-                    "Environment variable '%s' not set (from config key '%s'). Using '%s' as value",
+                    "Environment variable '%s' not set (from config key '%s'). Leaving it as is.",
                     value,
                     key,
-                    value,
                 )
                 new_options[key] = value
+        else:
+            new_options[key] = value
 
     return new_options
 
@@ -56,7 +57,7 @@ def _create_sqlalchemy_engine(dbms_config: Dict):
         import sqlalchemy
     except ModuleNotFoundError as e:
         logger.error(
-            "Please install the SQLAlchemy package to be able to use SQLDataSource."
+            "Please install the SQLAlchemy package to be able to use SqlDataSource."
         )
         raise e
     connection_string = dbms_config.get("connection_string")
@@ -87,27 +88,44 @@ def _create_sqlalchemy_engine(dbms_config: Dict):
     return engine
 
 
-class SQLDataSource(DataSource):
+def fill_nas(
+    df: pd.DataFrame, as_generator: bool = False
+) -> Union[pd.DataFrame, Generator]:
+    if as_generator:
+
+        def wrapped_iterator(data):
+            for partial_df in data:
+                partial_df.fillna(np.nan, inplace=True)
+                yield partial_df
+
+        return wrapped_iterator(df)
+    else:
+        df.fillna(np.nan, inplace=True)
+        return df
+
+
+class SqlDataSource(DataSource):
     """DataSource for RedShift, Postgres, MySQL, SQLite, Oracle, Microsoft SQL (ODBC), and their dialects.
 
     Uses `SQLAlchemy <https://docs.sqlalchemy.org/>`_ under the hood, and as such, manages a connection pool automatically.
 
-    Please configure the ``connection_string:``, which is a standard RFC-1738 URL with the syntax ``dialect[+driver]://[user:password@][host]/[dbname][?key=value..]``.
-    What parts this URL consists of is specific for the database dialect you want to connect to.
-    Find examples for all supported dialects `here <https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls>`_
+    Please configure the ``dbms:<name>:connection_string:``, which is a standard RFC-1738 URL with the syntax ``dialect[+driver]://[user:password@][host]/[dbname][?key=value..]``.
+    The exact URL is specific for the database you want to connect to.
+    Find examples for all supported database dialects `here <https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls>`_.
 
     Depending on the dialect you want to use, you might need to install additional drivers and packages.
-    For example, for connecting to a kerberized Impala instance via ODBC, you need to
+    For example, for connecting to a kerberized Impala instance via ODBC, you need to:
 
-    #. install Impala ODBC drivers for your OS from https://www.cloudera.com/downloads/connectors/impala/odbc/2-6-10.html
-    #. pip install winkerberos thrift_sasl pyodbc sqlalchemy  # use pykerberos for non-windows systems
+    #. Install `Impala ODBC drivers for your OS <https://www.cloudera.com/downloads/connectors/impala/odbc/2-6-10.html>`_,
+    #. ``pip install winkerberos thrift_sasl pyodbc sqlalchemy``  # use pykerberos for non-windows systems
 
     If you are tasked with connecting to a particular database system, and don't know where
     to start, researching on how to connect to it from SQLAlchemy will serve as a good starting point.
 
-    Other configuration (besides ``connection_string:``) is optional, but can be provided if deemed necessary:
+    Other configuration in the ``dbms:`` section (besides ``connection_string:``) is optional,
+    but can be provided if deemed necessary:
 
-    * Any dbms-level settings other than ``type:``, ``connection_string:`` and ``options:`` will be passed as additional
+    * Any ``dbms:``-level settings other than ``type:``, ``connection_string:`` and ``options:`` will be passed as additional
       keyword arguments to SQLAlchemy's `create_engine <https://docs.sqlalchemy.org/en/13/core/engines.html#sqlalchemy.create_engine>`_.
     * Any key-value pairs inside ``dbms:<name>:options: {}`` will be passed to SQLAlchemy as `connect_args <https://docs.sqlalchemy.org/en/13/core/engines.html#sqlalchemy.create_engine.params.connect_args>`_.
       If you append ``_var`` to the end of an argument key, its value will be interpreted as an
@@ -170,9 +188,8 @@ class SQLDataSource(DataSource):
 
         :return: DataFrame object, possibly cached according to config value of `expires:`
         """
-        from sqlalchemy import (
-            text,
-        )  # https://stackoverflow.com/questions/53793877/usage-error-in-pandas-read-sql-with-sqlalchemy#comment94441435_53793978
+        # https://stackoverflow.com/questions/53793877/usage-error-in-pandas-read-sql-with-sqlalchemy#comment94441435_53793978
+        from sqlalchemy import text
 
         query = self.config["query"]
         params = params or {}
@@ -191,17 +208,7 @@ class SQLDataSource(DataSource):
             **kw_options
         )
 
-        if chunksize:
-
-            def wrapped_iterator(data):
-                for partial_df in data:
-                    partial_df.fillna(np.nan, inplace=True)
-                    yield partial_df
-
-            return wrapped_iterator(df)
-        else:
-            df.fillna(np.nan, inplace=True)
-            return df
+        return fill_nas(df, as_generator=chunksize is not None)
 
     def get_raw(
         self, params: Dict = None, chunksize: Optional[int] = None
@@ -215,11 +222,121 @@ class SQLDataSource(DataSource):
             'Use method "get_dataframe" for dataframes'
         )
 
-    def __del__(self):
-        pass
-        # Apparently disposed of automatically
-        # if hasattr(self, "engine"):
-        #     self.engine.dispose()
+
+class SqlDataSink(DataSink):
+    """DataSink for RedShift, Postgres, MySQL, SQLite, Oracle, Microsoft SQL (ODBC), and their dialects.
+
+    Uses `SQLAlchemy <https://docs.sqlalchemy.org/>`_ under the hood, and as such, manages a connection pool automatically.
+
+    Please configure the ``dbms:<name>:connection_string:``, which is a standard RFC-1738 URL with the syntax ``dialect[+driver]://[user:password@][host]/[dbname][?key=value..]``.
+    The exact URL is specific for the database you want to connect to.
+    Find examples for all supported database dialects `here <https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls>`_.
+
+    Depending on the dialect you want to use, you might need to install additional drivers and packages.
+    For example, for connecting to a kerberized Impala instance via ODBC, you need to:
+
+    #. Install `Impala ODBC drivers for your OS <https://www.cloudera.com/downloads/connectors/impala/odbc/2-6-10.html>`_,
+    #. ``pip install winkerberos thrift_sasl pyodbc sqlalchemy``  # use pykerberos for non-windows systems
+
+    If you are tasked with connecting to a particular database system, and don't know where
+    to start, researching on how to connect to it from SQLAlchemy will serve as a good starting point.
+
+    Other configuration in the ``dbms:`` section (besides ``connection_string:``) is optional,
+    but can be provided if deemed necessary:
+
+    * Any ``dbms:``-level settings other than ``type:``, ``connection_string:`` and ``options:`` will be passed as additional
+      keyword arguments to SQLAlchemy's `create_engine <https://docs.sqlalchemy.org/en/13/core/engines.html#sqlalchemy.create_engine>`_.
+    * Any key-value pairs inside ``dbms:<name>:options: {}`` will be passed to SQLAlchemy as `connect_args <https://docs.sqlalchemy.org/en/13/core/engines.html#sqlalchemy.create_engine.params.connect_args>`_.
+      If you append ``_var`` to the end of an argument key, its value will be interpreted as an
+      environment variable name which ML Launchpad will attempt to get a value from.
+      This can be useful for information like passwords which you do not want to store in the configuration file.
+
+    Configuration example::
+
+        dbms:
+          # ... (other connections)
+          # Example for connecting to a kerberized Impala instance via ODBC:
+          my_connection:  # NOTE: You can use the same connection for several datasources and datasinks
+            type: sql
+            connection_string: mssql+pyodbc:///default?&driver=Cloudera+ODBC+Driver+for+Impala&host=servername.somedomain.com&port=21050&authmech=1&krbservicename=impala&ssl=1&usesasl=1&ignoretransactions=1&usesystemtruststore=1
+            # pyodbc alternative: mssql+pyodbc:///?odbc_connect=DRIVER%3D%7BCloudera+ODBC+Driver+for+Impala%7D%3BHOST%3Dservername.somedomain.com%3BPORT%3D21050%3BAUTHMECH%3D1%3BKRBSERVICENAME%3Dimpala%3BSSL%3D1%3BUSESASL%3D1%3BIGNORETRANSACTIONS%3D1%3BUSESYSTEMTRUSTSTORE%3D1
+            echo: True  # example for an additional SQLAlchemy keyword argument (logs the SQL) -- these are optional
+            options: {}  # used as `connect_args` when creating the SQLAlchemy engine
+        # ...
+        datasinks:
+          # ... (other datasinks)
+          my_datasink:
+            type: dbms.my_connection
+            table: somewhere.my_table
+            tags: [train] # generic parameter, see documentation on DataSources and DataSinks
+            options: {}   # used as **kwargs when storing the table using `my_df.to_sql`
+    """
+
+    serves = ["dbms.sql"]
+
+    def __init__(
+        self, identifier: str, datasource_config: Dict, dbms_config: Dict
+    ):
+        super().__init__(identifier, datasource_config)
+
+        self.dbms_config = dbms_config
+
+        logger.info(
+            "Creating database connection engine for datasource {}...".format(
+                self.id
+            )
+        )
+        self.engine = _create_sqlalchemy_engine(dbms_config)
+
+    def put_dataframe(
+        self,
+        dataframe: pd.DataFrame,
+        params: Dict = None,
+        chunksize: Optional[int] = None,
+    ) -> None:
+        """Store the pandas dataframe as a table.
+        The default is not to store the dataframe's row index.
+        Configure the DataSink's options dict to pass keyword arguments to `df.to_sql`.
+
+        Example::
+
+            data_sinks["my_datasink"].put_dataframe(my_df)
+
+        :param dataframe: The pandas dataframe to store
+        :type dataframe: pandas DataFrame
+        :param params: Currently not implemented
+        :type params: optional dict
+        :param chunksize: Currently not implemented
+        :type chunksize: optional bool
+        """
+        if params:
+            raise NotImplementedError("Parameters not supported yet")
+        if chunksize:
+            raise NotImplementedError("Buffered storing not supported yet")
+
+        table = self.config["table"]
+        kw_options = self.options
+        if "index" not in kw_options:
+            kw_options["index"] = False
+
+        logger.debug(
+            "Storing data in table {} with options {}...".format(
+                table, kw_options
+            )
+        )
+        dataframe.to_sql(table, con=self.engine, **kw_options)
+
+    def put_raw(
+        self, raw_data, params: Dict = None, chunksize: Optional[int] = None
+    ) -> None:
+        """Not implemented.
+
+        :raises NotImplementedError: Raw/blob format currently not supported.
+        """
+        raise NotImplementedError(
+            "SqlDataSink currently does not not support raw format/blobs. "
+            'Use method "put_dataframe" for raw data'
+        )
 
 
 def _get_oracle_connection(dbms_config: Dict):
@@ -290,6 +407,8 @@ class OracleDataSource(DataSource):
     ) -> Union[pd.DataFrame, Generator]:
         """Get the data as pandas dataframe.
 
+        Null values are replaced by ``numpy.nan``.
+
         Example::
 
             data_sources["my_datasource"].get_dataframe({"id": 387})
@@ -318,17 +437,7 @@ class OracleDataSource(DataSource):
             chunksize=chunksize,
             **kw_options
         )
-        if chunksize:
-
-            def wrapped_iterator(data):
-                for partial_df in data:
-                    partial_df.fillna(np.nan, inplace=True)
-                    yield partial_df
-
-            return wrapped_iterator(df)
-        else:
-            df.fillna(np.nan, inplace=True)
-            return df
+        return fill_nas(df, as_generator=chunksize is not None)
 
     def get_raw(
         self, params: Dict = None, chunksize: Optional[int] = None
@@ -371,7 +480,7 @@ class OracleDataSink(DataSink):
             type: dbms.my_connection
             table: somewhere.my_table
             tags: [train] # generic parameter, see documentation on DataSources and DataSinks
-            options: {}   # used as **kwargs when fetching the query using `pandas.to_sql`
+            options: {}   # used as **kwargs when storing the table using `my_df.to_sql`
     """
 
     serves = ["dbms.oracle"]
@@ -399,7 +508,7 @@ class OracleDataSink(DataSink):
     ) -> None:
         """Store the pandas dataframe as a table.
         The default is not to store the dataframe's row index.
-        Configure the DataSink's options dict to pass keyword arguments to `df.o_sql`.
+        Configure the DataSink's options dict to pass keyword arguments to `df.to_sql`.
 
         Example::
 
@@ -412,6 +521,8 @@ class OracleDataSink(DataSink):
         :param chunksize: Currently not implemented
         :type chunksize: optional bool
         """
+        if params:
+            raise NotImplementedError("Parameters not supported yet")
         if chunksize:
             raise NotImplementedError("Buffered storing not supported yet")
 

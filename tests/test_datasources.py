@@ -96,6 +96,8 @@ def test_filedatasource_notimplemented(filedatasource_cfg_and_file):
     ds = mllp_ds.FileDataSource("bla", cfg)
     with pytest.raises(NotImplementedError):
         ds.get_raw(params={"a": "hallo"})
+    with pytest.raises(NotImplementedError):
+        ds.get_raw(chunksize=5)
     with pytest.raises(TypeError, match="get_raw"):
         ds.get_dataframe()
 
@@ -168,6 +170,8 @@ def test_filedatasink_notimplemented(filedatasink_cfg_and_data):
     ds = mllp_ds.FileDataSink("bla", cfg)
     with pytest.raises(NotImplementedError):
         ds.put_dataframe(data, params={"a": "hallo"})
+    with pytest.raises(NotImplementedError):
+        ds.put_dataframe(data, chunksize=5)
     with pytest.raises(TypeError, match="put_dataframe"):
         ds.put_raw(data)
 
@@ -175,12 +179,17 @@ def test_filedatasink_notimplemented(filedatasink_cfg_and_data):
     ds = mllp_ds.FileDataSink("bla", cfg)
     with pytest.raises(NotImplementedError):
         ds.put_raw(data, params={"a": "hallo"})
+    with pytest.raises(NotImplementedError):
+        ds.put_raw(data, chunksize=5)
     with pytest.raises(TypeError, match="put_raw"):
         ds.put_dataframe(data)
 
     cfg["type"] = "sausage"
     with pytest.raises(TypeError, match="file type"):
         mllp_ds.FileDataSink("bla", cfg)
+
+
+# OracleDataSource
 
 
 @pytest.fixture()
@@ -381,8 +390,199 @@ def test_oracledatasink_notimplemented(user_pw, oracledatasource_cfg_and_data):
 
     ds = mllp_ds.OracleDataSink("bla", cfg, dbms_cfg)
     with pytest.raises(NotImplementedError):
+        ds.put_dataframe(data, params={"a": "hallo"})
+    with pytest.raises(NotImplementedError):
         ds.put_dataframe(data, chunksize=7)
     with pytest.raises(NotImplementedError, match="put_dataframe"):
         ds.put_raw(data)
 
     del sys.modules["cx_Oracle"]
+
+
+# SqlDataSource
+
+
+@mock.patch("os.environ.get")
+def test_get_connection_args(env_get):
+    """Should look up any _var-suffixed properties of the `options` subdict"""
+    dbms_config = {
+        "hello": "bla",
+        "notlookedup_var": "NEVER_LOOKED_UP",
+        "options": {
+            "lookedup_var": "SOME_ENV_VAR",
+            "notlookedup": "original_value",
+        },
+    }
+    env_get.return_value = "replaced_value"
+    assert mllp_ds.get_connection_args(dbms_config) == {
+        "lookedup": "replaced_value",
+        "notlookedup": "original_value",
+    }
+
+
+@mock.patch("os.environ.get")
+def test_get_connection_args_no_options(env_get):
+    """Return empty dict if there is no options subdict"""
+    assert mllp_ds.get_connection_args({"no": "options dict"}) == {}
+
+    dbms_config = {
+        "hello": "bla",
+        "notlookedup_var": "NEVER_LOOKED_UP",
+        "options": {},
+    }
+    assert mllp_ds.get_connection_args(dbms_config) == {}
+    env_get.assert_not_called()
+
+
+@mock.patch("os.environ.get")
+def test_get_connection_args_missing_env_var(env_get, caplog):
+    """Warn if _var specified, but no env var present"""
+    dbms_config = {
+        "hello": "bla",
+        "options": {
+            "lookedup_var": "NONEXISTING_ENV_VAR",
+            "notlookedup": "original_value",
+        },
+    }
+    env_get.return_value = None
+    assert mllp_ds.get_connection_args(dbms_config) == {
+        "lookedup_var": "NONEXISTING_ENV_VAR",
+        "notlookedup": "original_value",
+    }
+    assert "not set" in caplog.text.lower()
+
+
+@pytest.fixture()
+def sqldatasource_cfg_and_data():
+    def _inner(options=None):
+        options = {} if options is None else options
+        cfg = {
+            "type": "dbms.my_connection",
+            "query": "blabla",
+            "tags": ["train"],
+            "options": options,
+        }
+        dbms_cfg = {
+            "type": "sql",
+            "connection_string": "bla+blu:host.example.com/?asdf=asfd",
+            "port": 1234,
+            "options": options,
+        }
+        return cfg, dbms_cfg, pd.DataFrame({"a": [1, 2, 3], "b": [3, 4, 5]})
+
+    return _inner
+
+
+@mock.patch("pandas.read_sql")
+def test_sqldatasource_df(pd_read, sqldatasource_cfg_and_data):
+    """SqlDataSource should connect, read dataframe and return it unaltered."""
+    cfg, dbms_cfg, data = sqldatasource_cfg_and_data()
+    sqla_mock = mock.MagicMock()
+    sys.modules["sqlalchemy"] = sqla_mock
+    pd_read.return_value = data
+
+    ds = mllp_ds.SqlDataSource("bla", cfg, dbms_cfg)
+    df = ds.get_dataframe()
+
+    pd.testing.assert_frame_equal(df, data)
+    sqla_mock.create_engine.assert_called_once_with(
+        dbms_cfg["connection_string"], connect_args={}, port=1234
+    )
+    pd_read.assert_called_once()
+
+    del sys.modules["sqlalchemy"]
+
+
+@mock.patch("pandas.read_sql")
+def test_sqldatasource_df_chunksize(pd_read, sqldatasource_cfg_and_data):
+    """OracleDataSource with chunksize should return generator."""
+    cfg, dbms_cfg, full_data = sqldatasource_cfg_and_data()
+    iter_data = [full_data.iloc[:2, :].copy(), full_data.iloc[2:, :].copy()]
+    sqla_mock = mock.MagicMock()
+    sys.modules["sqlalchemy"] = sqla_mock
+    pd_read.return_value = iter_data
+
+    ds = mllp_ds.SqlDataSource("bla", cfg, dbms_cfg)
+    df_gen = ds.get_dataframe(chunksize=2)
+
+    for df, orig in zip(df_gen, iter_data):
+        pd.testing.assert_frame_equal(df, orig)
+
+    del sys.modules["sqlalchemy"]
+
+
+def test_sqldatasource_notimplemented(sqldatasource_cfg_and_data):
+    cfg, dbms_cfg, _ = sqldatasource_cfg_and_data()
+    sqla_mock = mock.MagicMock()
+    sys.modules["sqlalchemy"] = sqla_mock
+
+    ds = mllp_ds.SqlDataSource("bla", cfg, dbms_cfg)
+    with pytest.raises(NotImplementedError, match="get_dataframe"):
+        ds.get_raw()
+
+    del sys.modules["sqlalchemy"]
+
+
+def test_sqldatasource_url_instead_of_connection_string(
+    sqldatasource_cfg_and_data,
+):
+    cfg, dbms_cfg, _ = sqldatasource_cfg_and_data()
+    dbms_cfg["url"] = dbms_cfg["connection_string"]
+    del dbms_cfg["connection_string"]
+    sqla_mock = mock.MagicMock()
+    sys.modules["sqlalchemy"] = sqla_mock
+
+    mllp_ds.SqlDataSource("bla", cfg, dbms_cfg)
+    sqla_mock.create_engine.assert_called_once_with(
+        dbms_cfg["url"], connect_args={}, port=1234
+    )
+
+    del sys.modules["sqlalchemy"]
+
+
+def test_sqldatasource_double_url(sqldatasource_cfg_and_data):
+    cfg, dbms_cfg, _ = sqldatasource_cfg_and_data()
+    dbms_cfg["url"] = "the presence of `url` conflicts with connection_string"
+    sqla_mock = mock.MagicMock()
+    sys.modules["sqlalchemy"] = sqla_mock
+
+    with pytest.raises(ValueError, match="connection_string"):
+        mllp_ds.SqlDataSource("bla", cfg, dbms_cfg)
+
+    del sys.modules["sqlalchemy"]
+
+
+@mock.patch("pandas.DataFrame.to_sql")
+def test_sqldatasink_df(df_write, sqldatasource_cfg_and_data):
+    cfg, dbms_cfg, data = sqldatasource_cfg_and_data()
+    del cfg["query"]
+    cfg["table"] = "blabla"
+    sqla_mock = mock.MagicMock()
+    sys.modules["sqlalchemy"] = sqla_mock
+    df_write.return_value = data
+
+    ds = mllp_ds.SqlDataSink("bla", cfg, dbms_cfg)
+    ds.put_dataframe(data)
+
+    sqla_mock.create_engine.assert_called_once()
+    df_write.assert_called_once()
+
+    del sys.modules["sqlalchemy"]
+
+
+def test_sqldatasink_notimplemented(sqldatasource_cfg_and_data):
+    cfg, dbms_cfg, data = sqldatasource_cfg_and_data()
+    del cfg["query"]
+    cfg["table"] = "blabla"
+    sqla_mock = mock.MagicMock()
+    sys.modules["sqlalchemy"] = sqla_mock
+
+    ds = mllp_ds.SqlDataSink("bla", cfg, dbms_cfg)
+    with pytest.raises(NotImplementedError):
+        ds.put_dataframe(data, params={"a": "hallo"})
+    with pytest.raises(NotImplementedError):
+        ds.put_dataframe(data, chunksize=7)
+    with pytest.raises(NotImplementedError, match="put_dataframe"):
+        ds.put_raw(data)
+
+    del sys.modules["sqlalchemy"]
