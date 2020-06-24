@@ -9,21 +9,22 @@ Why ML Launchpad?
 ------------------------------------------------------------------------------
 
 ML Launchpad is an extensible Python package which makes
-it easy to publish Machine Learning models as
-RESTful APIs.
+it easy to publish machine learning models as
+RESTful APIs or microservices.
 
-It separates the Machine Learning side
-(how to train, test and to predict) from the
-environment-specific aspects (local or cloud deployment of the API,
+It separates the machine learning code
+(training, testing and predicting) from the
+environment-specific aspects (local or cloud deployment, API,
 database connections, format validation, model storage, etc.)
 
-Configure and deploy ML Launchpad *once*, and the model developer
-can publish an unlimited number of different Machine Learning
-algorithms as they
-are needed, relieving them of having to deal with
-deployment specifics.
+As Data Scientist, you can focus on the machine learning
+part of the problem, and don't have to deal with
+deployment specifics. As a DevOps Engineer, you set up
+deployment *once*, and the uniformity
+of ML Launchpad applications makes it easy to re-use that
+setup for a broad variety of machine learning solutions.
 
-While most approaches for streamlining Machine Learning solutions
+While most approaches for streamlining machine learning solutions
 force you to select a particular set of machine learning libraries
 and/or a particular platform, ML Launchpad is agnostic to those,
 retaining the flexibility to choose any algorithm and any
@@ -143,7 +144,7 @@ ML Launchpad is designed with extensibility in mind.
 
 The ML Launchpad package does not come with the whole kitchen sink,
 but still contains enough functionality to be able to deploy a
-complete Machine Learning API.
+complete machine learning API.
 
 If the functionality which is provided is not sufficient,
 it can be extended in two major ways:
@@ -180,7 +181,7 @@ Python packages, which are automatically installed with
 ``pip install mllaunchpad``. We recommend using a Python virtual
 environment such as `venv <https://docs.python.org/3/library/venv.html>`_.
 
-For running an actual Machine Learning model in ML Launchpad, you
+For running an actual machine learning model in ML Launchpad, you
 need, as a minimum:
 
 * Training data and test data for your model (in a format and location
