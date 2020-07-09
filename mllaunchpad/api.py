@@ -450,8 +450,7 @@ def generate_raml(
     param_hints = """# can be false if optional, then provide a default here or be prepared to deal with missing values in your prediction
         #default: {}  # only makes sense for required: false
         #minimum: 0  # optional, maximum, minLength and others are also possible."""
-    output = f"""
-#%RAML 0.8
+    output = f"""#%RAML 0.8
 ---
 title: Put title of your {api_name} API here
 baseUri: https://{{host}}/{api_name}/{{version}}

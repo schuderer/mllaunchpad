@@ -28,7 +28,9 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ------------------------------------------------------------------------------
 
-* No contributions yet. :doc:`Be the first to add one! <contributing>` :)
+* |Fixed| Keep generated RAML files free of command line messages,
+  `issue #126 <https://github.com/schuderer/mllaunchpad/issues/126>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
 
 1.0.0 (2020-06-08)
 ------------------------------------------------------------------------------

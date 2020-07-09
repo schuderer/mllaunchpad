@@ -35,7 +35,9 @@ class AliasedGroup(click.Group):
         if not matches:
             return None
         elif len(matches) == 1:
-            click.echo("Command {} matches {}".format(cmd_name, matches[0]))
+            click.echo(
+                "Command {} matches {}".format(cmd_name, matches[0]), err=True
+            )
             return click.Group.get_command(self, ctx, matches[0])
         ctx.fail(
             "Command {} is ambiguous: {}".format(
