@@ -1,5 +1,0 @@
-"Columnname","Types"
-naam,str
-leeftijd,int64
-ras,str
-geboortejaar,datetime

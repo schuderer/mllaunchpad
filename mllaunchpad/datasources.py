@@ -617,6 +617,7 @@ class FileDataSource(DataSource):
 
         self.type = ds_type
         self.path = datasource_config["path"]
+        self.dtypes = datasource_config.get("dtypes")
 
     def get_dataframe(
         self, params: Dict = None, chunksize: Optional[int] = None
@@ -641,9 +642,16 @@ class FileDataSource(DataSource):
 
         logger.debug(
             "Loading type {} file {} with chunksize {} and options {}...".format(
-                self.type, self.path, chunksize, kw_options
+                self.type, self.path, self.dtypes, chunksize, kw_options
             )
         )
+        if self.dtypes is not None:
+            input_dtypes = pd.read_csv(self.dtypes).set_index('Columnname')
+            kw_options["dtype"] = {item: input_dtypes.loc[item]['Types'] for item in input_dtypes.index
+                                   if input_dtypes.loc[item]['Types'] != 'datetime'}
+            kw_options["parse_dates"] = [item for item in input_dtypes.index
+                                         if input_dtypes.loc[item]['Types'] == 'datetime']
+
         if self.type == "csv":
             df = pd.read_csv(self.path, chunksize=chunksize, **kw_options)
         elif self.type == "euro_csv":
@@ -654,6 +662,7 @@ class FileDataSource(DataSource):
                 chunksize=chunksize,
                 **kw_options
             )
+
         else:
             raise TypeError(
                 'Can only read csv files as dataframes. Use method "get_raw" for raw data'
