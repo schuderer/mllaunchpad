@@ -99,7 +99,7 @@ d,float64"""
 
 
 @pytest.mark.parametrize("file_type", ["csv", "euro_csv"])
-def test_filedatasource_df_dtypes(file_type, filedatasource_cfg_and_file):
+def test_filedatasource_df_dtypes(file_type, filedatasource_cfg_dtypes_and_file):
     cfg, file, dt = filedatasource_cfg_dtypes_and_file(file_type)
     cfg["path"] = BytesIO(file)  # sort-of mocking the file for pandas to open
     cfg["dtypes"] = BytesIO(dt)
