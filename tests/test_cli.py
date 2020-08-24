@@ -16,7 +16,7 @@ def runner_cfg_logcfg():
     """Click runner with config and log config file"""
     cfg_file = "test_cfg.yml"
     log_cfg_file = "log_cfg.yml"
-    r = CliRunner()
+    r = CliRunner(mix_stderr=False)
     with r.isolated_filesystem():
         with open(cfg_file, "w") as f:
             f.write("my: config")
@@ -150,7 +150,8 @@ def test_generate_raml(config, raml, runner_cfg_logcfg):
     result = runner.invoke(
         cli.main, ["--config", cfg, "gen", "some_data_source"]
     )  # abbreviated on purpose to test short commands
-    print(result.output)
+    print("stdout='" + result.stdout.strip() + "'")
+    # print("stderr='"+result.stderr.strip()+"'")
     assert result.exit_code == 0
     raml.assert_called()
-    assert "my_raml" in result.output
+    assert result.stdout.strip() == "my_raml"

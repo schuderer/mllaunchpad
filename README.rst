@@ -40,7 +40,7 @@ Quick Start
 
 
 ML Launchpad lets you easily make Machine Learning models available as
-REST API. It also offers lightweight model life cycle
+REST API (or any kind of microservice). It also offers lightweight model life cycle
 management functionality.
 
 It creates a separation between machine learning

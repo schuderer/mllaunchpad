@@ -22,7 +22,17 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 .. |Deprecated| replace:: :raw-html:`<span style="font-family: Sans-Serif; font-size: 0.6em; color: white; font-weight: bold; padding: 0.05em; border-radius: 0.2em; display: inline-block; background-color: orange">&nbsp;DEPRECATED&nbsp;</span>`
 .. |Removed| replace:: :raw-html:`<span style="font-family: Sans-Serif; font-size: 0.6em; color: white; font-weight: bold; padding: 0.05em; border-radius: 0.2em; display: inline-block; background-color: black">&nbsp;REMOVED&nbsp;</span>`
 
+.. Placeholder for empty Unreleased section:
+   * No contributions yet. :doc:`Be the first to add one! <contributing>`_ :)
+
 Unreleased
+------------------------------------------------------------------------------
+
+* |Fixed| Keep generated RAML files free of command line messages,
+  `issue #126 <https://github.com/schuderer/mllaunchpad/issues/126>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
+
+1.0.0 (2020-06-08)
 ------------------------------------------------------------------------------
 
 * |Fixed| ``mllaunchpad --verbose`` now correctly logs DEBUG information,
@@ -46,10 +56,6 @@ Unreleased
   Microsoft SQL (ODBC), and their dialects,
   `issue #121 <https://github.com/schuderer/mllaunchpad/issues/121>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
-
-1.0.0rc1 (2020-04-29)
-------------------------------------------------------------------------------
-
 * |Enhancement| New command line interface (usage changes only slightly, see issue),
   `issue #77 <https://github.com/schuderer/mllaunchpad/issues/77>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
@@ -61,6 +67,7 @@ Unreleased
 * |Removed| Removed 'api:version:' (deprecated since 0.1.0) from  configuration
   ('model:version:' is now the only location to specify both the model and the API version),
   `issue #66 <https://github.com/schuderer/mllaunchpad/issues/66>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
 
 0.1.2 (2020-04-23)
 ------------------------------------------------------------------------------
