@@ -641,16 +641,22 @@ class FileDataSource(DataSource):
         kw_options = self.options
 
         logger.debug(
-            "Loading type {} file {} with chunksize {} and options {}...".format(
+            "Loading type {} file {} with dtypes {}  and chunksize {} and options {}...".format(
                 self.type, self.path, self.dtypes, chunksize, kw_options
             )
         )
         if self.dtypes is not None:
-            input_dtypes = pd.read_csv(self.dtypes).set_index('Columnname')
-            kw_options["dtype"] = {item: input_dtypes.loc[item]['Types'] for item in input_dtypes.index
-                                   if input_dtypes.loc[item]['Types'] != 'datetime'}
-            kw_options["parse_dates"] = [item for item in input_dtypes.index
-                                         if input_dtypes.loc[item]['Types'] == 'datetime']
+            input_dtypes = pd.read_csv(self.dtypes).set_index("Columnname")
+            kw_options["dtype"] = {
+                item: input_dtypes.loc[item]["Types"]
+                for item in input_dtypes.index
+                if input_dtypes.loc[item]["Types"] != "datetime"
+            }
+            kw_options["parse_dates"] = [
+                item
+                for item in input_dtypes.index
+                if input_dtypes.loc[item]["Types"] == "datetime"
+            ]
 
         if self.type == "csv":
             df = pd.read_csv(self.path, chunksize=chunksize, **kw_options)

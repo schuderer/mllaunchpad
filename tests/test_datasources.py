@@ -1,8 +1,8 @@
 # Stdlib imports
+import datetime
 import sys
 from io import BytesIO
 from unittest import mock
-import datetime
 
 # Third-party imports
 import numpy as np
@@ -72,34 +72,38 @@ d,float64"""
             "expires": 0,
             "tags": ["train"],
             "options": {},
-            "dtypes": "berendbotje"
+            "dtypes": "berendbotje",
         }
-        if file_type == "euro_csv" and cfg['dtypes'] is not None:
+        if file_type == "euro_csv" and cfg["dtypes"] is not None:
             return (
                 cfg,
                 b"""
 "a";"b";"c";"d"
 "ab";1;"17-01-1993";1,1
 "bc";2;"20-12-2012";2,3
-""", test_dtypes,
-
+""",
+                test_dtypes,
             )
-        elif file_type == "csv" and cfg['dtypes'] is not None:
+        elif file_type == "csv" and cfg["dtypes"] is not None:
             return (
                 cfg,
                 b"""
 "a","b","c","d"
 "ab",1,"17-01-1993",1.1
 "bc",2,"20-12-2012",2.3
-""", test_dtypes,
+""",
+                test_dtypes,
             )
         else:
             raise AssertionError
+
     return _inner
 
 
 @pytest.mark.parametrize("file_type", ["csv", "euro_csv"])
-def test_filedatasource_df_dtypes(file_type, filedatasource_cfg_dtypes_and_file):
+def test_filedatasource_df_dtypes(
+    file_type, filedatasource_cfg_dtypes_and_file
+):
     cfg, file, dt = filedatasource_cfg_dtypes_and_file(file_type)
     cfg["path"] = BytesIO(file)  # sort-of mocking the file for pandas to open
     cfg["dtypes"] = BytesIO(dt)
@@ -107,10 +111,10 @@ def test_filedatasource_df_dtypes(file_type, filedatasource_cfg_dtypes_and_file)
     df = ds.get_dataframe()
     assert str(df["d"].dtype) == "float64"
     assert str(df["b"].dtype) == "int64"
-    assert str(df["c"].dtype).startswith('datetime')
+    assert str(df["c"].dtype).startswith("datetime")
     assert str(df["a"].dtype) == "object"
     assert df["a"][0] == "ab"
-    assert df["c"][1] == datetime.datetime.strptime("20-12-2012", '%d-%m-%Y')
+    assert df["c"][1] == datetime.datetime.strptime("20-12-2012", "%d-%m-%Y")
     assert df["d"][1] == 2.3
 
 
