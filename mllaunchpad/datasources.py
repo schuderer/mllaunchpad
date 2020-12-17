@@ -571,12 +571,14 @@ class FileDataSource(DataSource):
             expires: 0    # generic parameter, see documentation on DataSources
             tags: [train] # generic parameter, see documentation on DataSources and DataSinks
             options: {}   # used as **kwargs when fetching the data using `pandas.read_csv`
+             dtypes:       #optional parameter to specificaly set dtypes for columns
           my_raw_datasource:
             type: text_file  # raw files can also be of type `binary_file`
             path: /some/file.txt  # Can be URL
             expires: 0    # generic parameter, see documentation on DataSources
             tags: [train] # generic parameter, see documentation on DataSources and DataSinks
             options: {}   # used as **kwargs when fetching the data using `fh.read`
+            dtypes:       #optional parameter to specificaly set dtypes for columns
 
     Using the raw formats `binary_file` and `text_file`, you can read arbitrary data, as long as
     it can be represented as a `bytes` or a `str` object, respectively. Please note that while possible, it is not
@@ -632,7 +634,6 @@ class FileDataSource(DataSource):
         :type params: optional dict
         :param chunksize: Return an iterator where chunksize is the number of rows to include in each chunk.
         :type chunksize: optional int
-
         :return: DataFrame object, possibly cached according to config value of `expires:`
         """
         if params:
@@ -780,6 +781,7 @@ class FileDataSink(DataSink):
 
         self.type = ds_type
         self.path = datasink_config["path"]
+        self.dtypes =datasink_config.get("dtypes")
 
     def put_dataframe(
         self,
@@ -813,16 +815,24 @@ class FileDataSink(DataSink):
 
         logger.debug(
             "Writing dataframe to type {} file {} with options {}...".format(
-                self.type, self.path, kw_options
+                self.type, self.path,  kw_options, self.dtypes
             )
         )
-        if self.type == "csv":
+        if self.type == "csv" and self.dtypes is not None:
+            dtypes_file = pd.DataFrame(dataframe.dtypes, columns=["Types"]).rename_axis('Columnname')
+            dtypes_file.loc[dtypes_file["Types"] == "object", "Types"] = "str"
+            dtypes_file.loc[dtypes_file["Types"] == "datetime64[ns]", "Types"] = "datetime"
+            dtypes_file.to_csv(self.path, **kw_options)
             dataframe.to_csv(self.path, **kw_options)
-        elif self.type == "euro_csv":
+        elif self.type == "euro_csv": # and self.dtypes is not None:
+            dtypes_file = pd.DataFrame(dataframe.dtypes, columns=["Types"]).rename_axis('Columnname')
+            dtypes_file.loc[dtypes_file["Types"] == "object", "Types"] = "str"
+            dtypes_file.loc[dtypes_file["Types"] == "datetime64[ns]", "Types"] = "datetime"
+            dtypes_file.to_csv(self.path, **kw_options)
             dataframe.to_csv(self.path, sep=";", decimal=",", **kw_options)
         else:
             raise TypeError(
-                'Can only write dataframes to csv file. Use method "put_raw" for raw data'
+                'Can only write dataframes to csv file. Use method put_raw for raw data'
             )
 
     def put_raw(
