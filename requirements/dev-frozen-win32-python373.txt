@@ -20,7 +20,7 @@ idna==2.8
 imagesize==1.1.0
 importlib-metadata==0.18
 itsdangerous==1.1.0
-Jinja2==2.10.1
+Jinja2==2.11.3
 jsonref==0.2
 markdown2==2.3.8
 MarkupSafe==1.1.1
