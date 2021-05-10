@@ -9,7 +9,7 @@ autopep8==1.5
 Babel==2.8.0
 backcall==0.1.0
 bandit==1.6.2
-bleach==3.1.4
+bleach==3.3.0
 bumpversion==0.5.3
 certifi==2019.11.28
 chardet==3.0.4
@@ -36,7 +36,7 @@ ipython-genutils==0.2.0
 isort==4.3.21
 itsdangerous==1.1.0
 jedi==0.15.2
-Jinja2==2.11.1
+Jinja2==2.11.3
 jsonref==0.2
 jupyter-client==6.0.0
 jupyter-core==4.6.3
@@ -60,11 +60,11 @@ pkginfo==1.5.0.1
 pluggy==0.13.1
 prompt-toolkit==3.0.3
 ptyprocess==0.6.0
-py==1.8.1
+py==1.10.0
 pycodestyle==2.5.0
 pydocstyle==5.0.2
 pyflakes==2.1.1
-Pygments==2.5.2
+Pygments==2.7.4
 pylint==2.4.4
 pyparsing==2.4.6
 pytest==5.3.5
@@ -74,7 +74,7 @@ python-dateutil==2.8.1
 python-jsonrpc-server==0.3.4
 python-language-server==0.31.8
 pytz==2019.3
-PyYAML==5.3
+PyYAML==5.4
 pyzmq==18.1.1
 ramlfications==0.1.9
 readme-renderer==24.0
