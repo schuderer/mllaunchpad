@@ -24,6 +24,10 @@ logger = logging.getLogger(__name__)
 # necessary to wrap the preparatory code in a try:except: statement.
 conf: Optional[Dict]
 try:
+    logger.debug(
+        "Attempting to load config set in environment variable or "
+        "from default file name..."
+    )
     conf = config.get_validated_config()
 except FileNotFoundError:
     logger.error(
