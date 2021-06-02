@@ -22,7 +22,7 @@ importlib-metadata==0.18
 itsdangerous==1.1.0
 Jinja2==2.11.3
 jsonref==0.2
-markdown2==2.3.8
+markdown2==2.4.0
 MarkupSafe==1.1.1
 -e git+https://github.com/schuderer/mllaunchpad.git@4e46b636649ab513cfdde4c17706ded2287be9f4#egg=mllaunchpad
 more-itertools==7.2.0
