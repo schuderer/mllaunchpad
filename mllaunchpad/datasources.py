@@ -106,34 +106,25 @@ def fill_nas(
 
 class SqlDataSource(DataSource):
     """DataSource for RedShift, Postgres, MySQL, SQLite, Oracle, Microsoft SQL (ODBC), and their dialects.
-
     Uses `SQLAlchemy <https://docs.sqlalchemy.org/>`_ under the hood, and as such, manages a connection pool automatically.
-
     Please configure the ``dbms:<name>:connection_string:``, which is a standard RFC-1738 URL with the syntax ``dialect[+driver]://[user:password@][host]/[dbname][?key=value..]``.
     The exact URL is specific for the database you want to connect to.
     Find examples for all supported database dialects `here <https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls>`_.
-
     Depending on the dialect you want to use, you might need to install additional drivers and packages.
     For example, for connecting to a kerberized Impala instance via ODBC, you need to:
-
     #. Install `Impala ODBC drivers for your OS <https://www.cloudera.com/downloads/connectors/impala/odbc/2-6-10.html>`_,
     #. ``pip install winkerberos thrift_sasl pyodbc sqlalchemy``  # use pykerberos for non-windows systems
-
     If you are tasked with connecting to a particular database system, and don't know where
     to start, researching on how to connect to it from SQLAlchemy will serve as a good starting point.
-
     Other configuration in the ``dbms:`` section (besides ``connection_string:``) is optional,
     but can be provided if deemed necessary:
-
     * Any ``dbms:``-level settings other than ``type:``, ``connection_string:`` and ``options:`` will be passed as additional
       keyword arguments to SQLAlchemy's `create_engine <https://docs.sqlalchemy.org/en/13/core/engines.html#sqlalchemy.create_engine>`_.
     * Any key-value pairs inside ``dbms:<name>:options: {}`` will be passed to SQLAlchemy as `connect_args <https://docs.sqlalchemy.org/en/13/core/engines.html#sqlalchemy.create_engine.params.connect_args>`_.
       If you append ``_var`` to the end of an argument key, its value will be interpreted as an
       environment variable name which ML Launchpad will attempt to get a value from.
       This can be useful for information like passwords which you do not want to store in the configuration file.
-
     Configuration example::
-
         dbms:
           # ... (other connections)
           # Example for connecting to a kerberized Impala instance via ODBC:
@@ -174,18 +165,13 @@ class SqlDataSource(DataSource):
         self, params: Dict = None, chunksize: Optional[int] = None
     ) -> Union[pd.DataFrame, Generator]:
         """Get the data as pandas dataframe.
-
         Null values are replaced by ``numpy.nan``.
-
         Example::
-
             my_df = data_sources["my_datasource"].get_dataframe({"id": 387})
-
         :param params: Query parameters to fill in query (e.g. replace query's `:id` parameter with value `387`)
         :type params: optional dict
         :param chunksize: Return an iterator where chunksize is the number of rows to include in each chunk.
         :type chunksize: optional int
-
         :return: DataFrame object, possibly cached according to config value of `expires:`
         """
         # https://stackoverflow.com/questions/53793877/usage-error-in-pandas-read-sql-with-sqlalchemy#comment94441435_53793978
@@ -214,7 +200,6 @@ class SqlDataSource(DataSource):
         self, params: Dict = None, chunksize: Optional[int] = None
     ) -> Raw:
         """Not implemented.
-
         :raises NotImplementedError: Raw/blob format currently not supported.
         """
         raise NotImplementedError(
@@ -225,34 +210,25 @@ class SqlDataSource(DataSource):
 
 class SqlDataSink(DataSink):
     """DataSink for RedShift, Postgres, MySQL, SQLite, Oracle, Microsoft SQL (ODBC), and their dialects.
-
     Uses `SQLAlchemy <https://docs.sqlalchemy.org/>`_ under the hood, and as such, manages a connection pool automatically.
-
     Please configure the ``dbms:<name>:connection_string:``, which is a standard RFC-1738 URL with the syntax ``dialect[+driver]://[user:password@][host]/[dbname][?key=value..]``.
     The exact URL is specific for the database you want to connect to.
     Find examples for all supported database dialects `here <https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls>`_.
-
     Depending on the dialect you want to use, you might need to install additional drivers and packages.
     For example, for connecting to a kerberized Impala instance via ODBC, you need to:
-
     #. Install `Impala ODBC drivers for your OS <https://www.cloudera.com/downloads/connectors/impala/odbc/2-6-10.html>`_,
     #. ``pip install winkerberos thrift_sasl pyodbc sqlalchemy``  # use pykerberos for non-windows systems
-
     If you are tasked with connecting to a particular database system, and don't know where
     to start, researching on how to connect to it from SQLAlchemy will serve as a good starting point.
-
     Other configuration in the ``dbms:`` section (besides ``connection_string:``) is optional,
     but can be provided if deemed necessary:
-
     * Any ``dbms:``-level settings other than ``type:``, ``connection_string:`` and ``options:`` will be passed as additional
       keyword arguments to SQLAlchemy's `create_engine <https://docs.sqlalchemy.org/en/13/core/engines.html#sqlalchemy.create_engine>`_.
     * Any key-value pairs inside ``dbms:<name>:options: {}`` will be passed to SQLAlchemy as `connect_args <https://docs.sqlalchemy.org/en/13/core/engines.html#sqlalchemy.create_engine.params.connect_args>`_.
       If you append ``_var`` to the end of an argument key, its value will be interpreted as an
       environment variable name which ML Launchpad will attempt to get a value from.
       This can be useful for information like passwords which you do not want to store in the configuration file.
-
     Configuration example::
-
         dbms:
           # ... (other connections)
           # Example for connecting to a kerberized Impala instance via ODBC:
@@ -297,11 +273,8 @@ class SqlDataSink(DataSink):
         """Store the pandas dataframe as a table.
         The default is not to store the dataframe's row index.
         Configure the DataSink's options dict to pass keyword arguments to `df.to_sql`.
-
         Example::
-
             data_sinks["my_datasink"].put_dataframe(my_df)
-
         :param dataframe: The pandas dataframe to store
         :type dataframe: pandas DataFrame
         :param params: Currently not implemented
@@ -330,7 +303,6 @@ class SqlDataSink(DataSink):
         self, raw_data, params: Dict = None, chunksize: Optional[int] = None
     ) -> None:
         """Not implemented.
-
         :raises NotImplementedError: Raw/blob format currently not supported.
         """
         raise NotImplementedError(
@@ -360,11 +332,8 @@ def _get_oracle_connection(dbms_config: Dict):
 
 class OracleDataSource(DataSource):
     """DataSource for Oracle database connections.
-
     Creates a long-living connection on initialization.
-
     Configuration example::
-
         dbms:
           # ... (other connections)
           my_connection:  # NOTE: You can use the same connection for several datasources and datasinks
@@ -406,18 +375,13 @@ class OracleDataSource(DataSource):
         self, params: Dict = None, chunksize: Optional[int] = None
     ) -> Union[pd.DataFrame, Generator]:
         """Get the data as pandas dataframe.
-
         Null values are replaced by ``numpy.nan``.
-
         Example::
-
             data_sources["my_datasource"].get_dataframe({"id": 387})
-
         :param params: Query parameters to fill in query (e.g. replace query's `:id` parameter with value `387`)
         :type params: optional dict
         :param chunksize: Return an iterator where chunksize is the number of rows to include in each chunk.
         :type chunksize: optional int
-
         :return: DataFrame object, possibly cached according to config value of `expires:`
         """
         # TODO: maybe want to open/close connection on every method call (shouldn't happen often)
@@ -443,7 +407,6 @@ class OracleDataSource(DataSource):
         self, params: Dict = None, chunksize: Optional[int] = None
     ) -> Raw:
         """Not implemented.
-
         :raises NotImplementedError: Raw/blob format currently not supported.
         """
         raise NotImplementedError(
@@ -458,11 +421,8 @@ class OracleDataSource(DataSource):
 
 class OracleDataSink(DataSink):
     """DataSink for Oracle database connections.
-
     Creates a long-living connection on initialization.
-
     Configuration example::
-
         dbms:
           # ... (other connections)
           my_connection:  # NOTE: You can use the same connection for several datasources and datasinks
@@ -509,11 +469,8 @@ class OracleDataSink(DataSink):
         """Store the pandas dataframe as a table.
         The default is not to store the dataframe's row index.
         Configure the DataSink's options dict to pass keyword arguments to `df.to_sql`.
-
         Example::
-
             data_sinks["my_datasink"].put_dataframe(my_df)
-
         :param dataframe: The pandas dataframe to store
         :type dataframe: pandas DataFrame
         :param params: Currently not implemented
@@ -543,7 +500,6 @@ class OracleDataSink(DataSink):
         self, raw_data, params: Dict = None, chunksize: Optional[int] = None
     ) -> None:
         """Not implemented.
-
         :raises NotImplementedError: Raw/blob format currently not supported.
         """
         raise NotImplementedError(
@@ -558,11 +514,8 @@ class OracleDataSink(DataSink):
 
 class FileDataSource(DataSource):
     """DataSource for fetching data from files.
-
     See :attr:`serves` for the available types.
-
     Configuration example::
-
         datasources:
           # ... (other datasources)
           my_datasource:
@@ -579,13 +532,11 @@ class FileDataSource(DataSource):
             tags: [train] # generic parameter, see documentation on DataSources and DataSinks
             options: {}   # used as **kwargs when fetching the data using `fh.read`
             dtypes:       #optional parameter to specificaly set dtypes for columns
-
     Using the raw formats `binary_file` and `text_file`, you can read arbitrary data, as long as
     it can be represented as a `bytes` or a `str` object, respectively. Please note that while possible, it is not
     recommended to persist `DataFrame`s this way, because by adding format-specific code to your
     model, you're giving up your code's independence from the type of `DataSource`/`DataSink`.
     Here's an example for unpickling an arbitrary object::
-
         # config fragment:
         datasources:
           # ...
@@ -594,14 +545,12 @@ class FileDataSource(DataSource):
             path: /some/file.pickle
             tags: [train]
             options: {}
-
         # code fragment:
         import pickle
         # ...
         # in predict/test/train code:
         my_pickle = data_sources["my_pickle_datasource"].get_raw()
         my_object = pickle.loads(my_pickle)
-
     """
 
     serves = SUPPORTED_FILE_TYPES
@@ -625,11 +574,8 @@ class FileDataSource(DataSource):
         self, params: Dict = None, chunksize: Optional[int] = None
     ) -> Union[pd.DataFrame, Generator]:
         """Get data as a pandas dataframe.
-
         Example::
-
             data_sources["my_datasource"].get_dataframe()
-
         :param params: Currently not implemented
         :type params: optional dict
         :param chunksize: Return an iterator where chunksize is the number of rows to include in each chunk.
@@ -681,16 +627,12 @@ class FileDataSource(DataSource):
         self, params: Dict = None, chunksize: Optional[int] = None
     ) -> Raw:
         """Get data as raw (unstructured) data.
-
         Example::
-
             data_sources["my_raw_datasource"].get_raw()
-
         :param params: Currently not implemented
         :type params: optional dict
         :param chunksize: Currently not implemented
         :type chunksize: optional bool
-
         :return: The file's bytes (binary) or string (text) contents, possibly cached according to config value of `expires:`
         :rtype: bytes or str
         """
@@ -725,11 +667,8 @@ class FileDataSource(DataSource):
 
 class FileDataSink(DataSink):
     """DataSink for putting data into files.
-
     See :attr:`serves` for the available types.
-
     Configuration example::
-
         datasinks:
           # ... (other datasinks)
           my_datasink:
@@ -742,13 +681,11 @@ class FileDataSink(DataSink):
             path: /some/file.txt  # Can be URL
             tags: [train] # generic parameter, see documentation on DataSources and DataSinks
             options: {}   # used as **kwargs when writing the data using `fh.write`
-
     Using the raw formats `binary_file` and `text_file`, you can persist arbitrary data, as long as
     it can be represented as a `bytes` or a `str` object, respectively. Please note that while possible, it is not
     recommended to persist `DataFrame`s this way, because by adding format-specific code to your
     model, you're giving up your code's independence from the type of `DataSource`/`DataSink`.
     Here's an example for pickling an arbitrary object::
-
         # config fragment:
         datasinks:
           # ...
@@ -757,7 +694,6 @@ class FileDataSink(DataSink):
             path: /some/file.pickle
             tags: [train]
             options: {}
-
         # code fragment:
         import pickle
         # ...
@@ -781,7 +717,7 @@ class FileDataSink(DataSink):
 
         self.type = ds_type
         self.path = datasink_config["path"]
-        self.dtypes =datasink_config.get("dtypes")
+        self.dtypes = datasink_config.get("dtypes")
 
     def put_dataframe(
         self,
@@ -792,11 +728,8 @@ class FileDataSink(DataSink):
         """Write a pandas dataframe to file.
         The default is not to save the dataframe's row index.
         Configure the DataSink's `options` dict to pass keyword arguments to `my_df.to_csv`.
-
         Example::
-
             data_sinks["my_datasink"].put_dataframe(my_df)
-
         :param dataframe: The pandas dataframe to save
         :type dataframe: pandas DataFrame
         :param params: Currently not implemented
@@ -818,17 +751,17 @@ class FileDataSink(DataSink):
                 self.type, self.path,  kw_options, self.dtypes
             )
         )
-        if self.type == "csv" and self.dtypes is not None:
+        if self.dtypes is not None:
             dtypes_file = pd.DataFrame(dataframe.dtypes, columns=["Types"]).rename_axis('Columnname')
             dtypes_file.loc[dtypes_file["Types"] == "object", "Types"] = "str"
             dtypes_file.loc[dtypes_file["Types"] == "datetime64[ns]", "Types"] = "datetime"
             dtypes_file.to_csv(self.path, **kw_options)
             dataframe.to_csv(self.path, **kw_options)
-        elif self.type == "euro_csv": # and self.dtypes is not None:
-            dtypes_file = pd.DataFrame(dataframe.dtypes, columns=["Types"]).rename_axis('Columnname')
-            dtypes_file.loc[dtypes_file["Types"] == "object", "Types"] = "str"
-            dtypes_file.loc[dtypes_file["Types"] == "datetime64[ns]", "Types"] = "datetime"
-            dtypes_file.to_csv(self.path, **kw_options)
+
+        elif self.type == "csv" and self.dtypes is None:
+            dataframe.to_csv(self.path, **kw_options)
+
+        elif self.type == "euro_csv"  and self.dtypes is None:
             dataframe.to_csv(self.path, sep=";", decimal=",", **kw_options)
         else:
             raise TypeError(
@@ -842,11 +775,8 @@ class FileDataSink(DataSink):
         chunksize: Optional[int] = None,
     ) -> None:
         """Write raw (unstructured) data to file.
-
         Example::
-
             data_sinks["my_raw_datasink"].put_raw(my_data)
-
         :param raw_data: The data to save (bytes for binary, string for text file)
         :type raw_data: bytes or str
         :param params: Currently not implemented

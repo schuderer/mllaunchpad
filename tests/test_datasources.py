@@ -115,13 +115,34 @@ def filedatasink_cfg_and_data():
             "path": "blabla",
             "tags": ["train"],
             "options": options,
-        }
+            }
         if file_type == "text_file":
             return cfg, "Hello world!"
         elif file_type == "binary_file":
             return cfg, b"Hello world!"
         else:
             return cfg, pd.DataFrame({"a": [1, 2, 3], "b": [3, 4, 5]})
+
+    return _inner
+
+
+@pytest.fixture()
+def filedatasink_cfg_and_dtypes_data():
+    def _inner(file_type, options=None):
+        options = {} if options is None else options
+        cfg = {
+            "type": file_type,
+            "path": "blabla",
+            "tags": ["train"],
+            "options": options,
+            "dtypes": "berendbotje_paasei"
+            }
+        if file_type == "text_file":
+            return cfg, "Hello world!"
+        elif file_type == "binary_file":
+            return cfg, b"Hello world!"
+        else:
+            return cfg, pd.DataFrame({"a": [1, 2, 3], "b": ["10-1993","11-1996", "12-2012"]})
 
     return _inner
 
@@ -135,21 +156,39 @@ def filedatasink_cfg_and_data():
 )
 @mock.patch("pandas.DataFrame.to_csv")
 def test_filedatasink_df(
-    read_sql_mock, file_type, to_csv_params, filedatasink_cfg_and_data
+    to_csv_mock, file_type, to_csv_params, filedatasink_cfg_and_data
 ):
     cfg, data = filedatasink_cfg_and_data(file_type)
     ds = mllp_ds.FileDataSink("bla", cfg)
     ds.put_dataframe(data)
-    read_sql_mock.assert_called_once_with(cfg["path"], **to_csv_params)
+    to_csv_mock.assert_called_once_with(cfg["path"], **to_csv_params)
+
+
+@pytest.mark.parametrize(
+    "file_type, to_csv_params",
+    [
+        ("csv", {"index": False}),
+        ("euro_csv", {"sep": ";", "decimal": ",", "index": False}),
+    ],
+)
+@mock.patch("pandas.DataFrame.to_csv")
+def test_filedatasink_df_dtypes(
+    to_csv_mock, file_type, to_csv_params, filedatasink_cfg_and_dtypes_data
+):
+    cfg, data = filedatasink_cfg_and_dtypes_data(file_type)
+    ds = mllp_ds.FileDataSink("csv", cfg)
+    ds.put_dataframe(data)
+    #to_csv_mock.assert_called_once_with(cfg["path"], **to_csv_params)
+    assert to_csv_mock.call_count == 2
 
 
 @mock.patch("pandas.DataFrame.to_csv")
-def test_filedatasink_df_options(read_sql_mock, filedatasink_cfg_and_data):
+def test_filedatasink_df_options(to_csv_mock, filedatasink_cfg_and_data):
     options = {"index": True, "sep": "?"}
     cfg, data = filedatasink_cfg_and_data("csv", options=options)
     ds = mllp_ds.FileDataSink("bla", cfg)
     ds.put_dataframe(data)
-    read_sql_mock.assert_called_once_with(cfg["path"], **options)
+    to_csv_mock.assert_called_once_with(cfg["path"], **options)
 
 
 @pytest.mark.parametrize(
