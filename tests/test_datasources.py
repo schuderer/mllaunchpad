@@ -115,7 +115,7 @@ def filedatasink_cfg_and_data():
             "path": "blabla",
             "tags": ["train"],
             "options": options,
-            }
+        }
         if file_type == "text_file":
             return cfg, "Hello world!"
         elif file_type == "binary_file":
@@ -135,14 +135,19 @@ def filedatasink_cfg_and_dtypes_data():
             "path": "blabla",
             "tags": ["train"],
             "options": options,
-            "dtypes": "berendbotje_paasei"
-            }
+            "dtypes": "dtypes_example.dtypes",
+        }
         if file_type == "text_file":
             return cfg, "Hello world!"
         elif file_type == "binary_file":
             return cfg, b"Hello world!"
         else:
-            return cfg, pd.DataFrame({"a": [1, 2, 3], "b": ["10-1993","11-1996", "12-2012"]})
+            return (
+                cfg,
+                pd.DataFrame(
+                    {"a": [1, 2, 3], "b": ["10-1993", "11-1996", "12-2012"]}
+                ),
+            )
 
     return _inner
 
@@ -178,7 +183,7 @@ def test_filedatasink_df_dtypes(
     cfg, data = filedatasink_cfg_and_dtypes_data(file_type)
     ds = mllp_ds.FileDataSink("csv", cfg)
     ds.put_dataframe(data)
-    #to_csv_mock.assert_called_once_with(cfg["path"], **to_csv_params)
+
     assert to_csv_mock.call_count == 2
 
 

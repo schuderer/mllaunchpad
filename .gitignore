@@ -37,7 +37,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-docs/_static/examples.zip
+
 
 MANIFEST
 
