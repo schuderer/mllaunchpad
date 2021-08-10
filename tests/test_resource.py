@@ -64,7 +64,9 @@ def test_modelstore_dump(glob, copy, makedirs, path_exists, modelstore_config):
         "{}.open".format(r.__name__), mock.mock_open(), create=True
     ) as mo:
         ms = r.ModelStore(modelstore_config)
-        ms.dump_trained_model(modelstore_config, {"hi": 1}, {"there": 2})
+        ms.dump_trained_model(
+            modelstore_config, {"pseudo_model": 1}, {"pseudo_metrics": 2}
+        )
 
     model_conf = modelstore_config["model"]
     base_name = os.path.join(
@@ -76,6 +78,33 @@ def test_modelstore_dump(glob, copy, makedirs, path_exists, modelstore_config):
         mock.call("{}.json".format(base_name), "w"),
     ]
     mo.assert_has_calls(calls, any_order=True)
+
+
+@mock.patch("{}.os.path.exists".format(r.__name__), return_value=True)
+@mock.patch("{}.pickle.dump".format(r.__name__))
+@mock.patch("{}.json.dump".format(r.__name__))
+def test_modelstore_dump_extra_model_keys(
+    jsond, pickled, path_exists, modelstore_config
+):
+    modelstore_config["model"]["extraparam"] = 42
+    modelstore_config["model"]["anotherparam"] = 23
+    modelstore_config["model"]["created"] = "colliding keys should not occur"
+    with mock.patch(
+        "{}.open".format(r.__name__), mock.mock_open(), create=True
+    ) as _:
+        ms = r.ModelStore(modelstore_config)
+        ms.dump_trained_model(
+            modelstore_config, {"pseudo_model": 1}, {"pseudo_metrics": 2}
+        )
+
+    dumped = jsond.call_args[0][0]
+    print(modelstore_config)
+    print(dumped)
+    assert "extraparam" in dumped
+    assert dumped["extraparam"] == 42
+    assert "anotherparam" in dumped
+    assert dumped["anotherparam"] == 23
+    assert dumped["created"] != "colliding keys should not occur"
 
 
 @mock.patch("{}.pickle.load".format(r.__name__), return_value="pickle")

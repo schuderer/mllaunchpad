@@ -136,6 +136,11 @@ class ModelStore:
         if "api" in complete_conf:  # API is optional
             meta["api_name"] = complete_conf["api"]["name"]
 
+        # Add all extra and non-colliding keys in model: section
+        for key, val in model_conf.items():
+            if key not in meta:
+                meta[key] = val
+
         self._dump_metadata(base_name, meta)
 
     def load_trained_model(self, model_conf):
