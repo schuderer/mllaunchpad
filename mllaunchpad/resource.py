@@ -30,6 +30,9 @@ import dill as pickle  # nosec
 import numpy as np
 import pandas as pd
 
+# Project imports
+import mllaunchpad as mllp
+
 
 DS = TypeVar("DS", "DataSource", "DataSink")
 Raw = Union[str, bytes]
@@ -56,6 +59,9 @@ class ModelStore:
             config: configuration dict
         """
         self.location = config["model_store"]["location"]
+        self.train_report = {"mllaunchpad_version": mllp.__version__}
+
+    def _ensure_location(self):
         if not os.path.exists(self.location):
             os.makedirs(self.location)
 
@@ -114,6 +120,7 @@ class ModelStore:
         """
         model_conf = complete_conf["model"]
         base_name = self._get_model_base_name(model_conf)
+        self._ensure_location()
 
         # Check if exists and backup if it does
         self._backup_old_model(base_name)
@@ -129,6 +136,7 @@ class ModelStore:
             "version": model_conf["version"],
             "created": datetime.now().strftime(DATE_FORMAT),
             "created_by": getpass.getuser(),
+            "train_report": self.train_report,
             "metrics": metrics,
             "metrics_history": {datetime.now().strftime(DATE_FORMAT): metrics},
             "config_snapshot": model_conf,
@@ -176,6 +184,10 @@ class ModelStore:
         meta["metrics"] = metrics
         meta["metrics_history"][datetime.now().strftime(DATE_FORMAT)] = metrics
         self._dump_metadata(base_name, meta)
+
+    def add_to_train_report(self, name: str, value):
+        plain_val = to_plain_python_obj(value)
+        self.train_report[name] = plain_val
 
 
 def _tags_match(tags, other_tags) -> bool:

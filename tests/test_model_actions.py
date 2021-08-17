@@ -358,20 +358,53 @@ def test__get_model_caching(ms_class, config):
 def test__check_ordered_columns(caplog):
     from mllaunchpad.resource import order_columns
 
-    dummy_config = {"model": {}}
-    mock_wrapper = MockModelClass()
+    with caplog.at_level(logging.INFO):
+        dummy_config = {"model": {}}
+        mock_wrapper = MockModelClass()
 
-    ma._check_ordered_columns(dummy_config, mock_wrapper, "never_ordered")
-    assert "never_ordered".lower() not in caplog.text.lower()
+        ma._check_ordered_columns(dummy_config, mock_wrapper, "never_ordered")
+        assert "never_ordered".lower() not in caplog.text.lower()
 
-    mock_wrapper.have_columns_been_ordered = True
-    ma._check_ordered_columns(
-        dummy_config, mock_wrapper, "ordered_only_in_train"
-    )
-    assert "ordered_only_in_train does not call".lower() in caplog.text.lower()
+        mock_wrapper.have_columns_been_ordered = True
+        ma._check_ordered_columns(
+            dummy_config, mock_wrapper, "ordered_only_in_train"
+        )
+        assert (
+            "ordered_only_in_train does not call".lower()
+            in caplog.text.lower()
+        )
 
-    order_columns({"a": 1})
-    ma._check_ordered_columns(
-        dummy_config, mock_wrapper, "ordered_in_train_and_now"
-    )
-    assert "ordered_in_train_and_now".lower() not in caplog.text.lower()
+        order_columns({"a": 1})
+        ma._check_ordered_columns(
+            dummy_config, mock_wrapper, "ordered_in_train_and_now"
+        )
+        assert "ordered_in_train_and_now".lower() not in caplog.text.lower()
+
+
+def test_train_report_context(caplog):
+    with caplog.at_level(logging.INFO):
+        with ma.train_report() as tr:
+            ma._add_to_train_report("myname", "myvalue")
+            assert ma._current_train_report is tr
+
+        assert tr["myname"] == "myvalue"
+        assert "{}={}".format("myname", "myvalue") in caplog.text
+
+
+def test_train_report_uninitialized(caplog):
+    with caplog.at_level(logging.INFO):
+        ma._add_to_train_report("myname", "myvalue")
+        assert "Ignoring" in caplog.text
+
+        with ma.train_report():
+            pass
+
+        ma._add_to_train_report("myname", "myvalue")
+        assert "{}={}".format("myname", "myvalue") not in caplog.text
+
+
+def test_train_report_reentrant():
+    with ma.train_report():
+        with pytest.raises(RuntimeError):
+            with ma.train_report():
+                pass

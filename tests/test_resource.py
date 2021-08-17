@@ -41,7 +41,8 @@ def modelstore_config():
 @mock.patch("{}.os.path.exists".format(r.__name__), return_value=False)
 @mock.patch("{}.os.makedirs".format(r.__name__))
 def test_modelstore_create(makedirs, path_exists, modelstore_config):
-    _ = r.ModelStore(modelstore_config)
+    ms = r.ModelStore(modelstore_config)
+    ms._ensure_location()
     makedirs.assert_called_once_with(
         modelstore_config["model_store"]["location"]
     )
@@ -49,7 +50,8 @@ def test_modelstore_create(makedirs, path_exists, modelstore_config):
     path_exists.reset_mock()
     makedirs.reset_mock()
     path_exists.return_value = True
-    _ = r.ModelStore(modelstore_config)
+    ms = r.ModelStore(modelstore_config)
+    ms._ensure_location()
     assert not makedirs.called
 
 
@@ -105,6 +107,30 @@ def test_modelstore_dump_extra_model_keys(
     assert "anotherparam" in dumped
     assert dumped["anotherparam"] == 23
     assert dumped["created"] != "colliding keys should not occur"
+
+
+@mock.patch("{}.os.path.exists".format(r.__name__), return_value=True)
+@mock.patch("{}.pickle.dump".format(r.__name__))
+@mock.patch("{}.json.dump".format(r.__name__))
+def test_modelstore_train_report(
+    jsond, pickled, path_exists, modelstore_config
+):
+    with mock.patch(
+        "{}.open".format(r.__name__), mock.mock_open(), create=True
+    ) as _:
+        ms = r.ModelStore(modelstore_config)
+        ms.add_to_train_report("report_key", "report_val")
+        ms.dump_trained_model(
+            modelstore_config, {"pseudo_model": 1}, {"pseudo_metrics": 2}
+        )
+
+    dumped = jsond.call_args[0][0]
+    print(modelstore_config)
+    print(dumped)
+    assert "train_report" in dumped
+    assert "mllaunchpad_version" in dumped["train_report"]
+    assert "report_key" in dumped["train_report"]
+    assert dumped["train_report"]["report_key"] == "report_val"
 
 
 @mock.patch("{}.pickle.load".format(r.__name__), return_value="pickle")
