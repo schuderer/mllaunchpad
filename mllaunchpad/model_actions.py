@@ -124,6 +124,7 @@ def train_model(
             model_store = _get_model_store(complete_conf, cache=cache)
             for name, val in report_dict.items():
                 model_store.add_to_train_report(name, val)
+            model_store.add_to_train_report("algorithm", inner_model)
             model_store.dump_trained_model(
                 complete_conf, model_wrapper, metrics
             )

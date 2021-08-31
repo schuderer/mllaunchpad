@@ -5,7 +5,10 @@ import glob
 import json
 import logging
 import os
+import platform
 import shutil
+import socket
+import subprocess  # nosec We are running a known process using its full path (python -m pip).
 import sys
 from collections import OrderedDict
 from datetime import datetime
@@ -59,7 +62,7 @@ class ModelStore:
             config: configuration dict
         """
         self.location = config["model_store"]["location"]
-        self.train_report = {"mllaunchpad_version": mllp.__version__}
+        self.train_report = {}
 
     def _ensure_location(self):
         if not os.path.exists(self.location):
@@ -136,10 +139,20 @@ class ModelStore:
             "version": model_conf["version"],
             "created": datetime.now().strftime(DATE_FORMAT),
             "created_by": getpass.getuser(),
+            "system": {
+                "mllaunchpad_version": mllp.__version__,
+                "platform": platform.platform(),
+                "host": socket.getfqdn(),
+                "host_ip": socket.gethostbyname(socket.getfqdn()),
+                "python": sys.version,
+                "packages": subprocess.getoutput(
+                    "{} -m pip freeze".format(sys.executable)
+                ).splitlines(),
+            },
             "train_report": self.train_report,
             "metrics": metrics,
             "metrics_history": {datetime.now().strftime(DATE_FORMAT): metrics},
-            "config_snapshot": model_conf,
+            "config_snapshot": complete_conf,
         }
         if "api" in complete_conf:  # API is optional
             meta["api_name"] = complete_conf["api"]["name"]

@@ -128,9 +128,13 @@ def test_modelstore_train_report(
     print(modelstore_config)
     print(dumped)
     assert "train_report" in dumped
-    assert "mllaunchpad_version" in dumped["train_report"]
     assert "report_key" in dumped["train_report"]
     assert dumped["train_report"]["report_key"] == "report_val"
+
+    assert "system" in dumped
+    assert "mllaunchpad_version" in dumped["system"]
+    assert "platform" in dumped["system"]
+    assert "packages" in dumped["system"]
 
 
 @mock.patch("{}.pickle.load".format(r.__name__), return_value="pickle")
