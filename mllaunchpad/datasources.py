@@ -175,18 +175,18 @@ class SqlDataSource(DataSource):
     ) -> Union[pd.DataFrame, Generator]:
         """Get the data as pandas dataframe.
 
-               Null values are replaced by ``numpy.nan``.
+        Null values are replaced by ``numpy.nan``.
 
-               Example::
+        Example::
 
-                   my_df = data_sources["my_datasource"].get_dataframe({"id": 387})
+            my_df = data_sources["my_datasource"].get_dataframe({"id": 387})
 
-               :param params: Query parameters to fill in query (e.g. replace query's `:id` parameter with value `387`)
-               :type params: optional dict
-               :param chunksize: Return an iterator where chunksize is the number of rows to include in each chunk.
-               :type chunksize: optional int
+        :param params: Query parameters to fill in query (e.g. replace query's `:id` parameter with value `387`)
+        :type params: optional dict
+        :param chunksize: Return an iterator where chunksize is the number of rows to include in each chunk.
+        :type chunksize: optional int
 
-               :return: DataFrame object, possibly cached according to config value of `expires:`
+       :return: DataFrame object, possibly cached according to config value of `expires:`
         """
         # https://stackoverflow.com/questions/53793877/usage-error-in-pandas-read-sql-with-sqlalchemy#comment94441435_53793978
         from sqlalchemy import text
@@ -215,7 +215,7 @@ class SqlDataSource(DataSource):
     ) -> Raw:
         """Not implemented.
 
-               :raises NotImplementedError: Raw/blob format currently not supported.
+        :raises NotImplementedError: Raw/blob format currently not supported.
         """
         raise NotImplementedError(
             "SqlDataSource currently does not not support raw format/blobs. "
@@ -668,7 +668,6 @@ class FileDataSource(DataSource):
                 chunksize=chunksize,
                 **kw_options
             )
-
         else:
             raise TypeError(
                 'Can only read csv files as dataframes. Use method "get_raw" for raw data'
@@ -830,12 +829,11 @@ class FileDataSink(DataSink):
 
         if self.type == "csv":
             dataframe.to_csv(self.path, **kw_options)
-
         elif self.type == "euro_csv":
             dataframe.to_csv(self.path, sep=";", decimal=",", **kw_options)
         else:
             raise TypeError(
-                "Can only write dataframes to csv file. Use method put_raw for raw data"
+                'Can only write dataframes to csv file. Use method "put_raw" for raw data'
             )
 
     def put_raw(
