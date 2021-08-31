@@ -124,7 +124,7 @@ def train_model(
             model_store = _get_model_store(complete_conf, cache=cache)
             for name, val in report_dict.items():
                 model_store.add_to_train_report(name, val)
-            model_store.add_to_train_report("algorithm", inner_model)
+            model_store.add_to_train_report("algorithm", repr(inner_model))
             model_store.dump_trained_model(
                 complete_conf, model_wrapper, metrics
             )
@@ -463,9 +463,27 @@ def _add_to_train_report(name: str, value) -> None:
     global _current_train_report
     if _current_train_report is None:
         logger.info(
-            "Ignoring attempt to add record to train report "
-            "(hint: 'mllaunchpad.report()' does nothing when re-testing)."
+            'Ignoring attempt to add record "{}" to train report '
+            "(hint: 'mllaunchpad.report()' does nothing when re-testing).".format(
+                name
+            )
         )
     else:
-        logger.info("Train report: {}={}".format(name, value))
-        _current_train_report[name] = value
+        import pandas as pd
+
+        if isinstance(value, pd.DataFrame):
+            data_dict = _current_train_report.get("data", {})
+            data_dict[name] = {
+                "nrows": value.shape[0],
+                "ncols": value.shape[1],
+                "colnames": list(value.columns),
+                "dtypes": [str(dt) for dt in value.dtypes],
+                "description": value.describe(),
+            }
+            logger.info(
+                "Train report data: {}={}".format(name, data_dict[name])
+            )
+            _current_train_report["data"] = data_dict
+        else:
+            logger.info("Train report: {}={}".format(name, value))
+            _current_train_report[name] = value

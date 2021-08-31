@@ -1,7 +1,7 @@
 import logging
 
 # Third-party imports
-from mllaunchpad import ModelInterface, ModelMakerInterface, order_columns
+from mllaunchpad import ModelInterface, ModelMakerInterface, order_columns, report
 import pandas as pd
 from sklearn import tree
 from sklearn.metrics import accuracy_score, confusion_matrix
@@ -42,12 +42,19 @@ class MyExampleModelMaker(ModelMakerInterface):
         my_tree = tree.DecisionTreeClassifier()
         my_tree.fit(X_ordered, y)
 
+        # We can add info (numbers, strings, dicts, lists) to be saved in the training report (JSON metadata):
+        report("meaning_of_life", 42)
+        report("train_data_used", df)  # If we pass dataframes, their summary will be added to the training report
+
         return my_tree
 
     def test_trained_model(self, model_conf, data_sources, data_sinks, model):
         df = data_sources["petals_test"].get_dataframe()
         X_test = order_columns(df.drop("variety", axis=1))
         y_test = df["variety"]
+
+        report("test_data_used", df)
+        report("awesomest_number", 300000)
 
         my_tree = model
 

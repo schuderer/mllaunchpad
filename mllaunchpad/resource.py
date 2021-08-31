@@ -155,11 +155,11 @@ class ModelStore:
             "config_snapshot": complete_conf,
         }
         if "api" in complete_conf:  # API is optional
-            meta["api_name"] = complete_conf["api"]["name"]
+            meta["api_base_url"] = mllp.api.get_api_base_url(complete_conf)
 
         # Add all extra and non-colliding keys in model: section
         for key, val in model_conf.items():
-            if key not in meta:
+            if key not in meta and key != "module":
                 meta[key] = val
 
         self._dump_metadata(base_name, meta)
