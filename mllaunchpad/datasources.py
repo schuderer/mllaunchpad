@@ -186,7 +186,7 @@ class SqlDataSource(DataSource):
         :param chunksize: Return an iterator where chunksize is the number of rows to include in each chunk.
         :type chunksize: optional int
 
-       :return: DataFrame object, possibly cached according to config value of `expires:`
+        :return: DataFrame object, possibly cached according to config value of `expires:`
         """
         # https://stackoverflow.com/questions/53793877/usage-error-in-pandas-read-sql-with-sqlalchemy#comment94441435_53793978
         from sqlalchemy import text
