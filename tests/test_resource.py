@@ -2,8 +2,10 @@
 
 # Stdlib imports
 import json
+import logging
 import os
 from collections import OrderedDict
+from random import random
 from unittest import mock
 
 # Third-party imports
@@ -135,6 +137,80 @@ def test_modelstore_train_report(
     assert "mllaunchpad_version" in dumped["system"]
     assert "platform" in dumped["system"]
     assert "packages" in dumped["system"]
+
+
+@mock.patch("{}.os.path.exists".format(r.__name__), return_value=True)
+@mock.patch(
+    "{}.ModelStore._load_metadata".format(r.__name__),
+    side_effect=lambda _: {"the_json": round(random() * 1000)},
+)
+def test_list_models(_load_metadata, path_exists, modelstore_config, caplog):
+    model_jsons = [
+        "mymodel_1.0.0.json",
+        "mymodel_1.1.0.json",
+        "anothermodel_0.0.1.json",
+    ]
+    backup_jsons = [
+        "mymodel_1.0.0_2021-08-01_18-00-00.json",
+        "mymodel_1.0.0_2021-07-31_12-00-00",
+    ]
+
+    def my_glob(pattern):
+        if "previous" in pattern.lower():
+            return backup_jsons
+        else:
+            return model_jsons
+
+    with mock.patch(
+        "{}.glob.glob".format(r.__name__), side_effect=my_glob,
+    ):
+        with caplog.at_level(logging.DEBUG):
+            ms = r.ModelStore(modelstore_config)
+            models = ms.list_models()
+
+    print(models)
+    assert (
+        len(models) == 2
+    )  # one model ID named "mymodel" and one named "anothermodel"
+    assert models["mymodel"]["latest"] == models["mymodel"]["1.1.0"]
+    assert len(models["mymodel"]["backups"]) == 2
+    assert models["anothermodel"]["backups"] == []
+    assert "ignoring" not in caplog.text.lower()
+
+
+@mock.patch("{}.os.path.exists".format(r.__name__), return_value=True)
+@mock.patch(
+    "{}.ModelStore._load_metadata".format(r.__name__),
+    side_effect=lambda _: {"the_json": round(random() * 1000)},
+)
+def test_list_models_ignore_obsolete_backups(
+    _load_metadata, path_exists, modelstore_config, caplog
+):
+    model_jsons = [
+        "mymodel_1.0.0.json",
+        "mymodel_1.1.0.json",
+        "anothermodel_0.0.1.json",
+    ]
+    backup_jsons = [
+        "mymodel_1.0.0_2021-08-01_18-00-00.json",
+        "OBSOLETE-IGNORED_1.0.0_2021-07-31_12-00-00",
+    ]
+
+    def my_glob(pattern):
+        if "previous" in pattern.lower():
+            return backup_jsons
+        else:
+            return model_jsons
+
+    with mock.patch(
+        "{}.glob.glob".format(r.__name__), side_effect=my_glob,
+    ):
+        with caplog.at_level(logging.DEBUG):
+            ms = r.ModelStore(modelstore_config)
+            models = ms.list_models()
+
+    print(models)
+    assert "ignoring" in caplog.text.lower()
 
 
 @mock.patch("{}.pickle.load".format(r.__name__), return_value="pickle")

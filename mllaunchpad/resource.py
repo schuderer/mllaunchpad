@@ -55,14 +55,17 @@ class ModelStore:
     best metrics which serves a particular API.'
     """
 
-    def __init__(self, config):
+    def __init__(self, config: Union[Dict, str]):
         """Get a model store based on the config settings
 
-        Params:
-            config: configuration dict
+        :param config: configuration dict containing the model store location, or model store location as string
+        :type complete_conf:  Union[Dict, str]
         """
-        self.location = config["model_store"]["location"]
-        self.train_report = {}
+        if isinstance(config, dict):
+            self.location = config["model_store"]["location"]
+        else:
+            self.location = str(config)
+        self.train_report: Dict[str, Any] = {}
 
     def _ensure_location(self):
         if not os.path.exists(self.location):
@@ -201,6 +204,74 @@ class ModelStore:
     def add_to_train_report(self, name: str, value):
         plain_val = to_plain_python_obj(value)
         self.train_report[name] = plain_val
+
+    def _get_infos_from_json_file(self, file):
+        base_name, _ = os.path.splitext(file)
+        fn = os.path.basename(base_name)
+        fn_parts = fn.split("_")  # there can be more than two
+        name = fn_parts[0]
+        version = fn_parts[1]
+        meta = self._load_metadata(base_name)
+        return name, version, meta
+
+    def list_models(self):
+        """Get information on all available versions of trained models.
+
+        Side note: This also includes backups of models that have been re-trained without changing
+        the version number (they reside in the subdirectory ``previous``).
+        Please note that these backed up models are just listed for information and are not available
+        for loading (one would have to restore them by moving them up a directory level from ``previous``.
+
+        Example::
+
+            ms = mllp.ModelStore("./model_store")
+            all_models = ms.list_models()
+
+            # An example of what a ``list_models()``'s result would look like:
+            {
+                iris: {
+                    1.0.0: { ... complete metadata of this version number ... },
+                    1.1.0: { ... },
+                    latest: { ... duplicate of metadata of highest available version number, here 1.1.0 ... },
+                    backups: [ {...}, {...}, ... ]
+                },
+                my_other_model: {
+                    1.0.1: { ... },
+                    2.0.0: { ... },
+                    latest: { ... },
+                    backups: []
+                }
+            }
+
+        :returns: Dict with information on all available trained models.
+        """
+
+        result = {}
+        store_pattern = os.path.join(self.location, "*.json")
+        for file in glob.glob(store_pattern):
+            name, version, meta = self._get_infos_from_json_file(file)
+            result[name] = result.get(name, {})
+            result[name][version] = meta
+
+        for name, versions in result.items():
+            latest_version_key = max(versions)
+            versions["latest"] = versions[latest_version_key]
+            result[name]["backups"] = []
+
+        backup_dir = os.path.join(self.location, "previous")
+        backup_pattern = os.path.join(backup_dir, "*.json")
+        for file in glob.glob(backup_pattern):
+            name, version, meta = self._get_infos_from_json_file(file)
+            if name in result:
+                result[name]["backups"].append(meta)
+            else:
+                logger.debug(
+                    "Ignoring backup for obsolete model %s_%s while collecting model directory",
+                    name,
+                    version,
+                )
+
+        return result
 
 
 def _tags_match(tags, other_tags) -> bool:
