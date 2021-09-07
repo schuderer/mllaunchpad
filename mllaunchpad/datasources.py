@@ -571,12 +571,19 @@ class FileDataSource(DataSource):
             expires: 0    # generic parameter, see documentation on DataSources
             tags: [train] # generic parameter, see documentation on DataSources and DataSinks
             options: {}   # used as **kwargs when fetching the data using `pandas.read_csv`
+            dtypes_path: ./some/file.dtypes # optional: location with the csv's column dtypes info
           my_raw_datasource:
             type: text_file  # raw files can also be of type `binary_file`
             path: /some/file.txt  # Can be URL
             expires: 0    # generic parameter, see documentation on DataSources
             tags: [train] # generic parameter, see documentation on DataSources and DataSinks
             options: {}   # used as **kwargs when fetching the data using `fh.read`
+
+    When loading `csv` or `euro_csv` type formats, you can use the setting `dtypes_path`
+    to specify a location with dtypes description for the csv (usually generated earlier
+    by using :class:`FileDataSink`'s `dtypes_path` setting). These dtypes will be enforced when
+    reading the csv, which helps avoid problems when `pandas.read_csv` interprets data differently than you do.
+    Use `dtypes_path` to enforce dtype parity between csv datasinks and datasources.
 
     Using the raw formats `binary_file` and `text_file`, you can read arbitrary data, as long as
     it can be represented as a `bytes` or a `str` object, respectively. Please note that while possible, it is not
@@ -617,7 +624,7 @@ class FileDataSource(DataSource):
 
         self.type = ds_type
         self.path = datasource_config["path"]
-        self.dtypes = datasource_config.get("dtypes")
+        self.dtypes_path = datasource_config.get("dtypes_path")
 
     def get_dataframe(
         self, params: Dict = None, chunksize: Optional[int] = None
@@ -641,21 +648,21 @@ class FileDataSource(DataSource):
         kw_options = self.options
 
         logger.debug(
-            "Loading type {} file {} with dtypes {}  and chunksize {} and options {}...".format(
-                self.type, self.path, self.dtypes, chunksize, kw_options
+            "Loading type {} file {} with dtypes_path {}, chunksize {} and options {}...".format(
+                self.type, self.path, self.dtypes_path, chunksize, kw_options
             )
         )
-        if self.dtypes is not None:
-            input_dtypes = pd.read_csv(self.dtypes).set_index("Columnname")
+        if self.dtypes_path is not None:
+            input_dtypes = pd.read_csv(self.dtypes_path).set_index("columns")
             kw_options["dtype"] = {
-                item: input_dtypes.loc[item]["Types"]
+                item: input_dtypes.loc[item]["dtypes"]
                 for item in input_dtypes.index
-                if input_dtypes.loc[item]["Types"] != "datetime"
+                if input_dtypes.loc[item]["dtypes"] != "datetime"
             }
             kw_options["parse_dates"] = [
                 item
                 for item in input_dtypes.index
-                if input_dtypes.loc[item]["Types"] == "datetime"
+                if input_dtypes.loc[item]["dtypes"] == "datetime"
             ]
 
         if self.type == "csv":
@@ -735,12 +742,18 @@ class FileDataSink(DataSink):
             path: /some/file.csv  # Can be URL, uses `df.to_csv` internally
             tags: [train] # generic parameter, see documentation on DataSources and DataSinks
             options: {}   # used as **kwargs when fetching the data using `df.to_csv`
-            dtypes: {} #optional dtypes configuration
+            dtypes_path: ./some/file.dtypes # optional: location for saving the csv's column dtypes info
           my_raw_datasink:
             type: text_file  # raw files can also be of type `binary_file`
             path: /some/file.txt  # Can be URL
             tags: [train] # generic parameter, see documentation on DataSources and DataSinks
             options: {}   # used as **kwargs when writing the data using `fh.write`
+
+    When saving `csv` or `euro_csv` type formats, you can use the setting `dtypes_path`
+    to specify a location where to save dtypes descriptions for the csv (that you can use later
+    with :class:`FileDataSource`'s `dtypes_path` setting). These dtypes will be enforced when
+    reading the csv, which helps avoid problems when `pandas.read_csv` interprets data differently than you do.
+    Use `dtypes_path` to enforce dtype parity between csv datasinks and datasources.
 
     Using the raw formats `binary_file` and `text_file`, you can persist arbitrary data, as long as
     it can be represented as a `bytes` or a `str` object, respectively. Please note that while possible, it is not
@@ -780,7 +793,7 @@ class FileDataSink(DataSink):
 
         self.type = ds_type
         self.path = datasink_config["path"]
-        self.dtypes = datasink_config.get("dtypes")
+        self.dtypes_path = datasink_config.get("dtypes_path")
 
     def put_dataframe(
         self,
@@ -813,19 +826,21 @@ class FileDataSink(DataSink):
             kw_options["index"] = False
 
         logger.debug(
-            "Writing dataframe to type {} file {} with options {} and dtypes {}...".format(
-                self.type, self.path, kw_options, self.dtypes
+            "Writing dataframe to type {} file {} with options {} and dtypes_path {}...".format(
+                self.type, self.path, kw_options, self.dtypes_path
             )
         )
-        if self.dtypes:
+        if self.dtypes_path:
             dtypes_file = pd.DataFrame(
-                dataframe.dtypes, columns=["Types"]
-            ).rename_axis("Columnname")
-            dtypes_file.loc[dtypes_file["Types"] == "object", "Types"] = "str"
+                dataframe.dtypes, columns=["dtypes"]
+            ).rename_axis("columns")
             dtypes_file.loc[
-                dtypes_file["Types"] == "datetime64[ns]", "Types"
+                dtypes_file["dtypes"] == "object", "dtypes"
+            ] = "str"
+            dtypes_file.loc[
+                dtypes_file["dtypes"] == "datetime64[ns]", "dtypes"
             ] = "datetime"
-            dtypes_file.to_csv(self.dtypes, **kw_options)
+            dtypes_file.to_csv(self.dtypes_path)
 
         if self.type == "csv":
             dataframe.to_csv(self.path, **kw_options)
