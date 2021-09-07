@@ -42,20 +42,20 @@ def list_models(model_store_location_or_config_dict: Union[Dict, str]):
         all_models = mllp.list_models(my_cfg)  # also accepts model store location string
 
         # An example of what a ``list_models()``'s result would look like:
-        {
-            iris: {
-                1.0.0: { ... complete metadata of this version number ... },
-                1.1.0: { ... },
-                latest: { ... duplicate of metadata of highest available version number, here 1.1.0 ... },
-                backups: [ {...}, {...}, ... ]
-            },
-            my_other_model: {
-                1.0.1: { ... },
-                2.0.0: { ... },
-                latest: { ... },
-                backups: []
-            }
-        }
+        # {
+        #     iris: {
+        #         1.0.0: { ... complete metadata of this version number ... },
+        #         1.1.0: { ... },
+        #         latest: { ... duplicate of metadata of highest available version number, here 1.1.0 ... },
+        #         backups: [ {...}, {...}, ... ]
+        #     },
+        #     my_other_model: {
+        #         1.0.1: { ... },
+        #         2.0.0: { ... },
+        #         latest: { ... },
+        #         backups: []
+        #     }
+        # }
 
     :returns: Dict with information on all available trained models.
     """
@@ -63,17 +63,16 @@ def list_models(model_store_location_or_config_dict: Union[Dict, str]):
     return ms.list_models()
 
 
-#
-# # Get rid of stupid pyflakes warning (be warned: redundancy warning):
-# __all__ = [
-#     "train_model",
-#     "retest",
-#     "predict",
-#     "get_validated_config",
-#     "get_validated_config_str",
-#     "ModelInterface",
-#     "ModelMakerInterface",
-#     "order_columns",
-#     "report",
-#     "list_models",
-# ]
+# Make it possible for Sphinx to find the relevant imports
+__all__ = [
+    "train_model",
+    "retest",
+    "predict",
+    "get_validated_config",
+    "get_validated_config_str",
+    "ModelInterface",
+    "ModelMakerInterface",
+    "order_columns",
+    "report",
+    "list_models",
+]

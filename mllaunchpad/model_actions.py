@@ -460,6 +460,24 @@ def train_report() -> Iterator[Dict[str, Any]]:
 
 
 def _add_to_train_report(name: str, value) -> None:
+    """Add a piece of information to the train report during training.
+
+    The train report is part of the model's metadata that is saved to the model store.
+    Use :func:`mllaunchpad.list_models` to query metadata from the model store.
+
+    This function is supposed to be called from your :func:`~mllaunchpad.ModelMakerInterface.create_trained_model` or
+    :func:`~mllaunchpad.ModelMakerInterface.test_trained_model` implementation. You can pass any values that are
+    JSON-able, same as with :func:`~mllaunchpad.ModelMakerInterface.test_trained_model`'s
+    returned metrics.
+
+    However, if the value is a DataFrame, it will be summarized (using `pd.describe()`). You can use this for example
+    to improve traceability of your trained models and for some basic sanity checks of training data distribution.
+
+    :param name: Key to save the information under (e.g. "meaning_of_life")
+    :type name: str
+    :param value: Value to save. Any JSON-able value or structure will work. Pandas DataFrames will be summarized instead of saved.
+    :type value: str, number, list, dict, Numpy Array or Pandas DataFrame
+    """
     global _current_train_report
     if _current_train_report is None:
         logger.info(

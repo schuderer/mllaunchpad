@@ -134,6 +134,10 @@ Besides through the command line, the main functionality is also made
 available through a Python convenience API.
 See :meth:`mllaunchpad.train_model`,
 :meth:`mllaunchpad.retest` and :meth:`mllaunchpad.predict`.
+To log additional data to the ``model_store`` when training,
+use :meth:`mllaunchpad.report` in your train and test code.
+To get all information on models available in the the model
+store, use :meth:`mllaunchpad.list_models`.
 
 .. _extending:
 
@@ -212,7 +216,8 @@ specialised on providing the missing features.
 
 Here's a by no means ideal, but relatively simple
 example scenario for an ML Launchpad production
-deployment of one model in a low to medium load setting:
+deployment of one model in a low to medium load setting
+(available as a template `here <https://github.com/schuderer/mllaunchpad-template>`_):
 
 * Deployment on a single Linux VM instance (for now),
   with its own user to run as,
