@@ -46,6 +46,11 @@ class MyModelMaker(ModelMakerInterface):
         my_tree = tree.DecisionTreeClassifier()
         my_tree.fit(X_train, y_train)
 
+        # just to demo that we can save some stuff, too (works throughout test/train/predict)
+        data_sinks["some_data_with_strict_types"].put_dataframe(
+            pd.DataFrame({"col_a": ["a", "b", "c"], "col_b": [1, 2, 3], "col_c": [1.1, 2.2, 3.3]})
+        )
+
         model = {"lame_pred": my_lame_predictor, "petal_pred": my_tree}
 
         return model
@@ -62,6 +67,9 @@ class MyModelMaker(ModelMakerInterface):
         acc = accuracy_score(y_test, y_predict)
         conf = confusion_matrix(y_test, y_predict).tolist()
         metrics = {"accuracy": acc, "confusion_matrix": conf}
+
+        # just to demo that we can load some dtyped data here as well:
+        print(data_sources["some_data_with_strict_types"].get_dataframe())
 
         return metrics
 

@@ -22,7 +22,7 @@ importlib-metadata==0.18
 itsdangerous==1.1.0
 Jinja2==2.11.3
 jsonref==0.2
-markdown2==2.3.8
+markdown2==2.4.0
 MarkupSafe==1.1.1
 -e git+https://github.com/schuderer/mllaunchpad.git@4e46b636649ab513cfdde4c17706ded2287be9f4#egg=mllaunchpad
 more-itertools==7.2.0
@@ -58,7 +58,7 @@ sphinxcontrib-serializinghtml==1.1.3
 termcolor==1.1.0
 tqdm==4.32.2
 twine==1.13.0
-urllib3==1.25.8
+urllib3==1.26.5
 virtualenv==16.7.0
 watchdog==0.9.0
 wcwidth==0.1.7

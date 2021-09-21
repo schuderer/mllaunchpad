@@ -14,34 +14,50 @@ import mllaunchpad.datasources as mllp_ds
 
 @pytest.fixture()
 def filedatasource_cfg_and_file():
-    def _inner(file_type):
+    def _inner(file_type, dtypes=None):
         cfg = {
             "type": file_type,
-            "path": "blabla",
+            "path": "some_filename",
             "expires": 0,
             "tags": ["train"],
             "options": {},
         }
+        return_tuple = None
         if file_type == "euro_csv":
-            return (
+            return_tuple = [
                 cfg,
                 b"""
-"a";"b";"c"
-1,1;"ad";f,afd
-2,3;"df";2.3
+"a";"b";"c";"d"
+1,1;"ad";f,afd;1
+2,3;"df";2.3,2
 """,
-            )
+            ]
         elif file_type == "csv":
-            return (
+            return_tuple = [
                 cfg,
                 b"""
-"a","b","c"
-1.1,"ad",f;afd
-2.3,"df","2,3"
+"a","b","c","d"
+1.1,"ad",f;afd,1
+2.3,"df","2,3",2
 """,
-            )
+            ]
         else:
-            return cfg, b"Hello world!"
+            return_tuple = cfg, b"Hello world!"
+        if dtypes is not None:
+            if file_type not in ["csv", "euro_csv"]:
+                raise ValueError(
+                    "Fixture's dtypes parameter only makes sense with CSVs"
+                )
+            cfg["dtypes_path"] = dtypes
+            return_tuple.append(
+                b"""columns,dtypes
+a,str
+b,str
+c,str
+d,float64
+"""
+            )
+        return return_tuple
 
     return _inner
 
@@ -50,11 +66,26 @@ def filedatasource_cfg_and_file():
 def test_filedatasource_df(file_type, filedatasource_cfg_and_file):
     cfg, file = filedatasource_cfg_and_file(file_type)
     cfg["path"] = BytesIO(file)  # sort-of mocking the file for pandas to open
-    ds = mllp_ds.FileDataSource("bla", cfg)
+    ds = mllp_ds.FileDataSource("some_datasource", cfg)
     df = ds.get_dataframe()
     assert str(df["a"].dtype) == "float64"
     assert df["a"][1] == 2.3
     assert df["b"][0] == "ad"
+
+
+@pytest.mark.parametrize("file_type", ["csv", "euro_csv"])
+def test_filedatasource_df_dtypes(file_type, filedatasource_cfg_and_file):
+    cfg, file, dtfile = filedatasource_cfg_and_file(
+        file_type, dtypes="some_filename.dtypes"
+    )
+    cfg["path"] = BytesIO(file)  # sort-of mocking the file for pandas to open
+    print(cfg["dtypes_path"])
+    cfg["dtypes_path"] = BytesIO(dtfile)
+    print(cfg["dtypes_path"])
+    ds = mllp_ds.FileDataSource("some_datasource", cfg)
+    df = ds.get_dataframe()
+    assert str(df["a"].dtype) == "object"
+    assert str(df["d"].dtype) == "float64"
 
 
 def test_filedatasource_df_chunksize(filedatasource_cfg_and_file):
@@ -108,20 +139,32 @@ def test_filedatasource_notimplemented(filedatasource_cfg_and_file):
 
 @pytest.fixture()
 def filedatasink_cfg_and_data():
-    def _inner(file_type, options=None):
+    def _inner(file_type, options=None, **extra):
         options = {} if options is None else options
         cfg = {
             "type": file_type,
-            "path": "blabla",
+            "path": "some_filename",
             "tags": ["train"],
             "options": options,
         }
+        for key, value in extra.items():
+            cfg[key] = value
+
         if file_type == "text_file":
             return cfg, "Hello world!"
         elif file_type == "binary_file":
             return cfg, b"Hello world!"
         else:
-            return cfg, pd.DataFrame({"a": [1, 2, 3], "b": [3, 4, 5]})
+            return (
+                cfg,
+                pd.DataFrame(
+                    {
+                        "a": [1, 2, 3],
+                        "b": [3, 4, 5],
+                        "c": ["10-1993", "11-1996", "12-2012"],
+                    }
+                ),
+            )
 
     return _inner
 
@@ -135,21 +178,35 @@ def filedatasink_cfg_and_data():
 )
 @mock.patch("pandas.DataFrame.to_csv")
 def test_filedatasink_df(
-    read_sql_mock, file_type, to_csv_params, filedatasink_cfg_and_data
+    to_csv_mock, file_type, to_csv_params, filedatasink_cfg_and_data
 ):
     cfg, data = filedatasink_cfg_and_data(file_type)
-    ds = mllp_ds.FileDataSink("bla", cfg)
+    ds = mllp_ds.FileDataSink("some_datasink", cfg)
     ds.put_dataframe(data)
-    read_sql_mock.assert_called_once_with(cfg["path"], **to_csv_params)
+    to_csv_mock.assert_called_once_with(cfg["path"], **to_csv_params)
+
+
+@pytest.mark.parametrize("file_type", ["csv", "euro_csv"])
+@mock.patch("pandas.DataFrame.to_csv")
+def test_filedatasink_df_dtypes(
+    to_csv_mock, file_type, filedatasink_cfg_and_data
+):
+    cfg, data = filedatasink_cfg_and_data(
+        file_type, dtypes_path="dtypes_example.dtypes"
+    )
+    ds = mllp_ds.FileDataSink("some_datasink", cfg)
+    ds.put_dataframe(data)
+
+    assert to_csv_mock.call_count == 2
 
 
 @mock.patch("pandas.DataFrame.to_csv")
-def test_filedatasink_df_options(read_sql_mock, filedatasink_cfg_and_data):
+def test_filedatasink_df_options(to_csv_mock, filedatasink_cfg_and_data):
     options = {"index": True, "sep": "?"}
     cfg, data = filedatasink_cfg_and_data("csv", options=options)
     ds = mllp_ds.FileDataSink("bla", cfg)
     ds.put_dataframe(data)
-    read_sql_mock.assert_called_once_with(cfg["path"], **options)
+    to_csv_mock.assert_called_once_with(cfg["path"], **options)
 
 
 @pytest.mark.parametrize(

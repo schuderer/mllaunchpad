@@ -42,7 +42,7 @@ jupyter-client==6.0.0
 jupyter-core==4.6.3
 keyring==21.1.0
 lazy-object-proxy==1.4.3
-markdown2==2.3.8
+markdown2==2.4.0
 MarkupSafe==1.1.1
 mccabe==0.6.1
 -e git+git@github.com:schuderer/mllaunchpad.git@c579f5123b3f50339a758426a73f90dca0d529aa#egg=mllaunchpad
@@ -99,7 +99,7 @@ traitlets==4.3.3
 twine==3.1.1
 typed-ast==1.4.1
 ujson==1.35
-urllib3==1.25.8
+urllib3==1.26.5
 virtualenv==20.0.5
 watchdog==0.10.2
 wcwidth==0.1.8
