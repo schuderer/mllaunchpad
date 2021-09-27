@@ -56,14 +56,21 @@ datasources:
   #   options: {}
   # data sources can also be instantiated/subclassed and registered in code
   # (e.g. in cases of complex auth, for image recognition from a camera, audio streams, ...)
+  some_data_with_strict_types:
+    type: csv
+    path: ./complex_model_dumped_data.csv
+    tags: test
+    dtypes_path: ./complex_model_dumped_data.dtypes
 
+datasinks:
+    some_data_with_strict_types:
+        type: csv
+        path: ./complex_model_dumped_data.csv
+        tags: train
+        dtypes_path: ./complex_model_dumped_data.dtypes
 
 model_store:
-  location: ./model_store  # TODO: maybe support sftp or other remote locations...
-
-
-# TODO: data sinks
-# TODO: configure that model output will be saved in a data sink automatically instead of returned via api???
+  location: ./model_store
 
 model:
   name: AwesomeModel

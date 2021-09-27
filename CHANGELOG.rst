@@ -32,6 +32,11 @@ Unreleased
   by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Fixed| Require ``flask<2.0.0`` as temporary workaround for `flask-restful issue #915 <https://github.com/flask-restful/flask-restful/pull/915>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
+* |Feature| Add support for typed CSVs (option ``dtypes_path`` of
+  :class:`FileDataSource <mllaunchpad.datasources.FileDataSource>` and
+  :class:`FileDataSink <mllaunchpad.datasources.FileDataSink>`),
+  `issue #127 <https://github.com/schuderer/mllaunchpad/issues/127>`_,
+  by `Elisa Partodikromo <https://github.com/planeetjupyter>`_.
 * |Fixed| Keep generated RAML files free of command line messages,
   `issue #126 <https://github.com/schuderer/mllaunchpad/issues/126>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
