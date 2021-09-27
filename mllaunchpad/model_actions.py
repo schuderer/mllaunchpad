@@ -3,7 +3,8 @@
 # Stdlib imports
 import logging
 import sys
-from typing import Dict, Optional
+from contextlib import contextmanager
+from typing import Any, Dict, Iterator, Optional
 
 # Project imports
 from mllaunchpad import resource
@@ -18,6 +19,7 @@ _cached_model_tuples: Dict = {}
 _cached_data_source_sink_tuples: Dict = {}
 _cached_model_makers: Dict = {}
 _cached_model_classes: Dict = {}
+_current_train_report: Optional[Dict[str, Any]] = None
 
 suppress_order_columns_not_used_warning = (
     "To adjust this warning, set model config's `order_columns_not_used_warning` "
@@ -80,45 +82,52 @@ def train_model(
         complete_conf, tags=["train"], cache=cache
     )
 
-    inner_model = user_mm.create_trained_model(
-        model_conf, dso_train, dsi_train, old_model=old_inner_model
-    )
-    m_cls = _get_model_class(complete_conf, cache=cache)
-    model_wrapper: ModelInterface = m_cls(contents=inner_model)
+    report_dict: Dict[str, Any]
+    with train_report() as report_dict:
+        inner_model = user_mm.create_trained_model(
+            model_conf, dso_train, dsi_train, old_model=old_inner_model
+        )
+        m_cls = _get_model_class(complete_conf, cache=cache)
+        model_wrapper: ModelInterface = m_cls(contents=inner_model)
 
-    if resource._order_columns_called:
-        model_wrapper.have_columns_been_ordered = True
-    elif (
-        "order_columns_not_used_warning" not in model_conf
-        or model_conf["order_columns_not_used_warning"] == "always"
-    ):
-        logger.warning(
-            "Training code does not call function order_columns. "
-            + suppress_order_columns_not_used_warning
-        )
+        if resource._order_columns_called:
+            model_wrapper.have_columns_been_ordered = True
+        elif (
+            "order_columns_not_used_warning" not in model_conf
+            or model_conf["order_columns_not_used_warning"] == "always"
+        ):
+            logger.warning(
+                "Training code does not call function order_columns. "
+                + suppress_order_columns_not_used_warning
+            )
 
-    if not isinstance(model_wrapper, ModelInterface):
-        logger.warning(
-            "Model's class is not a subclass of ModelInterface: %s",
-            model_wrapper,
-        )
+        if not isinstance(model_wrapper, ModelInterface):
+            logger.warning(
+                "Model's class is not a subclass of ModelInterface: %s",
+                model_wrapper,
+            )
 
-    metrics = {}
-    if test:
-        logger.debug("Testing trained model...")
-        dso_test, dsi_test = _get_data_sources_and_sinks(
-            complete_conf, tags=["test"], cache=cache
-        )
-        metrics = user_mm.test_trained_model(
-            model_conf, dso_test, dsi_test, inner_model
-        )
-        _check_ordered_columns(
-            complete_conf, model_wrapper, "testing code", times=2
-        )
+        metrics = {}
+        if test:
+            logger.debug("Testing trained model...")
+            dso_test, dsi_test = _get_data_sources_and_sinks(
+                complete_conf, tags=["test"], cache=cache
+            )
+            metrics = user_mm.test_trained_model(
+                model_conf, dso_test, dsi_test, inner_model
+            )
+            _check_ordered_columns(
+                complete_conf, model_wrapper, "testing code", times=2
+            )
 
-    if persist:
-        model_store = _get_model_store(complete_conf, cache=cache)
-        model_store.dump_trained_model(complete_conf, model_wrapper, metrics)
+        if persist:
+            model_store = _get_model_store(complete_conf, cache=cache)
+            for name, val in report_dict.items():
+                model_store.add_to_train_report(name, val)
+            model_store.add_to_train_report("algorithm", repr(inner_model))
+            model_store.dump_trained_model(
+                complete_conf, model_wrapper, metrics
+            )
 
     logger.info(
         "Created%s trained model %s, version %s, metrics %s",
@@ -418,7 +427,10 @@ def _get_data_sources_and_sinks(complete_conf, tags=None, cache=True):
 def _check_ordered_columns(complete_conf, model_wrapper, what: str, times=1):
     if (
         "order_columns_not_used_warning" in complete_conf["model"]
-        and complete_conf["model"]["order_columns_not_used_warning"] == "never"
+        and str(
+            complete_conf["model"]["order_columns_not_used_warning"]
+        ).lower()
+        == "never"
     ):
         return
     if model_wrapper.have_columns_been_ordered:
@@ -429,3 +441,67 @@ def _check_ordered_columns(complete_conf, model_wrapper, what: str, times=1):
                     what, suppress_order_columns_not_used_warning
                 )
             )
+
+
+@contextmanager
+def train_report() -> Iterator[Dict[str, Any]]:
+    # initialize
+    global _current_train_report
+    if _current_train_report is not None:
+        raise RuntimeError(
+            "Cannot initialize a train_report context within another train_report context."
+        )
+    _current_train_report = {}
+    try:
+        yield _current_train_report
+    finally:
+        # release
+        _current_train_report = None
+
+
+def _add_to_train_report(name: str, value) -> None:
+    """Add a piece of information to the train report during training.
+
+    The train report is part of the model's metadata that is saved to the model store.
+    Use :func:`mllaunchpad.list_models` to query metadata from the model store.
+
+    This function is supposed to be called from your :func:`~mllaunchpad.ModelMakerInterface.create_trained_model` or
+    :func:`~mllaunchpad.ModelMakerInterface.test_trained_model` implementation. You can pass any values that are
+    JSON-able, same as with :func:`~mllaunchpad.ModelMakerInterface.test_trained_model`'s
+    returned metrics.
+
+    However, if the value is a DataFrame, it will be summarized (using `pd.describe()`). You can use this for example
+    to improve traceability of your trained models and for some basic sanity checks of training data distribution.
+
+    :param name: Key to save the information under (e.g. "meaning_of_life")
+    :type name: str
+    :param value: Value to save. Any JSON-able value or structure will work. Pandas DataFrames will be summarized instead of saved.
+    :type value: str, number, list, dict, Numpy Array or Pandas DataFrame
+    """
+    global _current_train_report
+    if _current_train_report is None:
+        logger.info(
+            'Ignoring attempt to add record "{}" to train report '
+            "(hint: 'mllaunchpad.report()' does nothing when re-testing).".format(
+                name
+            )
+        )
+    else:
+        import pandas as pd
+
+        if isinstance(value, pd.DataFrame):
+            data_dict = _current_train_report.get("data", {})
+            data_dict[name] = {
+                "nrows": value.shape[0],
+                "ncols": value.shape[1],
+                "colnames": list(value.columns),
+                "dtypes": [str(dt) for dt in value.dtypes],
+                "description": value.describe(),
+            }
+            logger.info(
+                "Train report data: {}={}".format(name, data_dict[name])
+            )
+            _current_train_report["data"] = data_dict
+        else:
+            logger.info("Train report: {}={}".format(name, value))
+            _current_train_report[name] = value
