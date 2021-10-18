@@ -32,8 +32,8 @@ lists of built-in and external :class:`DataSources <mllaunchpad.resource.DataSou
 and :class:`DataSinks <mllaunchpad.resource.DataSink>`.
 
 Each subclass of :class:`DataSources <mllaunchpad.resource.DataSource>` (e.g. :class:`~mllaunchpad.datasources.FileDataSource`,
-:class:`~mllaunchpad.datasources.OracleDataSource`)
-serves one or several ``types`` (e.g. ``csv``, ``euro_csv``, ``dbms.oracle``).
+:class:`~mllaunchpad.datasources.SqlDataSource`)
+serves one or several ``types`` (e.g. ``csv``, ``euro_csv``, ``dbms.sql``).
 You specify the ``type`` in your DataSource's :doc:`configuration <config>`.
 The same ``type`` can even be served by several different
 :class:`~mllaunchpad.resource.DataSource` subclasses, in which case the
@@ -93,7 +93,7 @@ of the DataSources that correspond with those tables, but configure a
 connection only once. For this, you specify a separate ``dbms:`` section in your
 configuration where you give each connection a name (e.g. ``my_connection``) which
 you can refer to in your ``datasource`` config by a type like e.g. ``dmbs.my_connection``.
-See :class:`~mllaunchpad.datasources.OracleDataSource` below for an example.
+See :class:`~mllaunchpad.datasources.SqlDataSource`) below for an example.
 
 Built-in DataSources and DataSinks
 ------------------------------------------------------------------------------
