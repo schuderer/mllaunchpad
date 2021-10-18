@@ -81,7 +81,7 @@ def get_validated_config(filename: str = CONFIG_ENV) -> dict:
         )
     logger.info("Loading configuration file %s...", filename)
 
-    with open(filename) as f:
+    with open(filename, encoding="utf-8") as f:
         return get_validated_config_str(f)
 
 

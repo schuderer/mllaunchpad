@@ -586,7 +586,8 @@ class FileDataSource(DataSource):
     Use `dtypes_path` to enforce dtype parity between csv datasinks and datasources.
 
     Using the raw formats `binary_file` and `text_file`, you can read arbitrary data, as long as
-    it can be represented as a `bytes` or a `str` object, respectively. Please note that while possible, it is not
+    it can be represented as a `bytes` or a `str` object, respectively. `text_file` uses UTF-8
+    encoding. Please note that while possible, it is not
     recommended to persist `DataFrame`s this way, because by adding format-specific code to your
     model, you're giving up your code's independence from the type of `DataSource`/`DataSink`.
     Here's an example for unpickling an arbitrary object::
@@ -714,7 +715,7 @@ class FileDataSource(DataSource):
 
         raw: Raw
         if self.type == "text_file":
-            with open(self.path, "r") as txt_file:
+            with open(self.path, "r", encoding="utf-8") as txt_file:
                 raw = txt_file.read(**kw_options)
         elif self.type == "binary_file":
             with open(self.path, "rb") as bin_file:
@@ -756,7 +757,8 @@ class FileDataSink(DataSink):
     Use `dtypes_path` to enforce dtype parity between csv datasinks and datasources.
 
     Using the raw formats `binary_file` and `text_file`, you can persist arbitrary data, as long as
-    it can be represented as a `bytes` or a `str` object, respectively. Please note that while possible, it is not
+    it can be represented as a `bytes` or a `str` object, respectively. `text_file` uses UTF-8
+    encoding. Please note that while possible, it is not
     recommended to persist `DataFrame`s this way, because by adding format-specific code to your
     model, you're giving up your code's independence from the type of `DataSource`/`DataSink`.
     Here's an example for pickling an arbitrary object::
@@ -883,6 +885,8 @@ class FileDataSink(DataSink):
             )
         )
         if self.type == "text_file":
+            if "encoding" not in kw_options:
+                kw_options["encoding"] = "utf-8"
             with open(self.path, "w", **kw_options) as txt_file:
                 raw_str: str = cast(str, raw_data)
                 txt_file.write(raw_str)

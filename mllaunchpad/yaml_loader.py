@@ -21,7 +21,7 @@ class SafeIncludeLoader(yaml.SafeLoader):
     def include(self, node):
         filename = os.path.join(self._root, self.construct_scalar(node))
 
-        with open(filename, "r") as f:
+        with open(filename, "r", encoding="utf-8") as f:
             # Normally, one should use safe_load(), but our Loader
             # is a subclass of yaml.SafeLoader
             return yaml.load(f, Loader=SafeIncludeLoader)  # nosec

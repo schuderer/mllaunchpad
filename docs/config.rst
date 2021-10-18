@@ -45,7 +45,7 @@ Config File
 ------------------------------------------------------------------------------
 
 The configuration file is written in `YAML <https://camel.readthedocs.io/en/latest/yamlref.html>`_ (.yml) format (used internally as
-a Python ``dict``).
+a Python ``dict``). It uses UTF-8 encoding.
 
 Here's an example configuration with comments:
 

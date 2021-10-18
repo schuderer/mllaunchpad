@@ -219,7 +219,10 @@ def test_filedatasink_raw(file_type, mode, filedatasink_cfg_and_data):
     with mock.patch("builtins.open", mo, create=True):
         ds = mllp_ds.FileDataSink("bla", cfg)
         ds.put_raw(data)
-        mo.assert_called_once_with(cfg["path"], mode)
+        if mode == "w":
+            mo.assert_called_once_with(cfg["path"], mode, encoding="utf-8")
+        else:
+            mo.assert_called_once_with(cfg["path"], mode)
 
 
 def test_filedatasink_notimplemented(filedatasink_cfg_and_data):

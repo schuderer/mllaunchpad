@@ -42,6 +42,10 @@ Unreleased
 * |Fixed| Keep generated RAML files free of command line messages,
   `issue #126 <https://github.com/schuderer/mllaunchpad/issues/126>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
+* |Fixed| Change default text file encoding to UTF-8 for config files, text_file Data Sources/Sinks and JSON model metadata.
+  **NOTE:** If you have been using non-ASCII characters in any of the above, you will need to check that the encoding of the relevant existing file(s) is UTF-8.
+  `issue #128 <https://github.com/schuderer/mllaunchpad/issues/128>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
 
 1.0.0 (2020-06-08)
 ------------------------------------------------------------------------------

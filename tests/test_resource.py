@@ -79,7 +79,7 @@ def test_modelstore_dump(glob, copy, makedirs, path_exists, modelstore_config):
     )
     calls = [
         mock.call("{}.pkl".format(base_name), "wb"),
-        mock.call("{}.json".format(base_name), "w"),
+        mock.call("{}.json".format(base_name), "w", encoding="utf-8"),
     ]
     mo.assert_has_calls(calls, any_order=True)
 
@@ -229,7 +229,7 @@ def test_modelstore_load(json, pkl, modelstore_config):
     )
     calls = [
         mock.call("{}.pkl".format(base_name), "rb"),
-        mock.call("{}.json".format(base_name), "r"),
+        mock.call("{}.json".format(base_name), "r", encoding="utf-8"),
     ]
     mo.assert_has_calls(calls, any_order=True)
 

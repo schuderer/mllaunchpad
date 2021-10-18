@@ -26,8 +26,9 @@ def init_logging(filename=LOG_CONF_FILENAME_ENV, verbose=False):
         action="default", category=DeprecationWarning, module="mllaunchpad.*"
     )
     try:
-        loaded_logging_config = yaml.safe_load(open(filename))
-        logging.config.dictConfig(loaded_logging_config)
+        with open(filename, encoding="utf-8") as file:
+            loaded_logging_config = yaml.safe_load(file)
+            logging.config.dictConfig(loaded_logging_config)
     except FileNotFoundError:
         loaded_logging_config = None
         logging.basicConfig(

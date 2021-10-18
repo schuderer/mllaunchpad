@@ -80,7 +80,7 @@ class ModelStore:
     @staticmethod
     def _load_metadata(base_name):
         metadata_name = base_name + ".json"
-        with open(metadata_name, "r") as f:
+        with open(metadata_name, "r", encoding="utf-8") as f:
             meta = json.load(f)
 
         return meta
@@ -90,7 +90,7 @@ class ModelStore:
         metadata_name = base_name + ".json"
         metadata = to_plain_python_obj(raw_metadata)
         try:
-            with open(metadata_name, "w") as f:
+            with open(metadata_name, "w", encoding="utf-8") as f:
                 json.dump(metadata, f, indent=2)
         except TypeError as e:
             os.remove(metadata_name)
