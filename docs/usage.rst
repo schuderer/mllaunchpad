@@ -16,7 +16,7 @@ or Waitress) is used to run ``mllaunchpad.wsgi:application`` instead
 (the config file is then provided via an environment variable).
 
 All commands (``train``, ``retest``, ``predict``, ``api`` and ``generate-raml``) can
-be abbreviated, so you can use ``mllaunchpad t`` or ``mllaunchpad pred`` to save
+be abbreviated, so you can use e.g. ``mllaunchpad t`` or ``mllaunchpad pred`` to save
 some keystrokes.
 
 .. click:: mllaunchpad.cli:main
@@ -262,6 +262,12 @@ The three methods return the same things as our own functions:
   returns a prediction (usually a ``dict``, but
   can also contain ``lists``, numpy arrays or pandas DataFrames).
 
+**Sidenote**: To save additional information while training for traceability's sake,
+use :meth:`mllaunchpad.report` in your train and test code.
+The metadata thus saved resides in the model store together with the model. By default, it includes basic
+info such as the configuration (see below), some system info, and the test metrics.
+When done with training, you can retrieve metadata of all models in the model
+store from Python by using :meth:`mllaunchpad.list_models`.
 
 Next, we will configure some extra info about our model,
 as well as tell ML Launchpad where to find

@@ -2,8 +2,10 @@
 
 # Stdlib imports
 import json
+import logging
 import os
 from collections import OrderedDict
+from random import random
 from unittest import mock
 
 # Third-party imports
@@ -41,7 +43,8 @@ def modelstore_config():
 @mock.patch("{}.os.path.exists".format(r.__name__), return_value=False)
 @mock.patch("{}.os.makedirs".format(r.__name__))
 def test_modelstore_create(makedirs, path_exists, modelstore_config):
-    _ = r.ModelStore(modelstore_config)
+    ms = r.ModelStore(modelstore_config)
+    ms._ensure_location()
     makedirs.assert_called_once_with(
         modelstore_config["model_store"]["location"]
     )
@@ -49,7 +52,8 @@ def test_modelstore_create(makedirs, path_exists, modelstore_config):
     path_exists.reset_mock()
     makedirs.reset_mock()
     path_exists.return_value = True
-    _ = r.ModelStore(modelstore_config)
+    ms = r.ModelStore(modelstore_config)
+    ms._ensure_location()
     assert not makedirs.called
 
 
@@ -64,7 +68,9 @@ def test_modelstore_dump(glob, copy, makedirs, path_exists, modelstore_config):
         "{}.open".format(r.__name__), mock.mock_open(), create=True
     ) as mo:
         ms = r.ModelStore(modelstore_config)
-        ms.dump_trained_model(modelstore_config, {"hi": 1}, {"there": 2})
+        ms.dump_trained_model(
+            modelstore_config, {"pseudo_model": 1}, {"pseudo_metrics": 2}
+        )
 
     model_conf = modelstore_config["model"]
     base_name = os.path.join(
@@ -76,6 +82,135 @@ def test_modelstore_dump(glob, copy, makedirs, path_exists, modelstore_config):
         mock.call("{}.json".format(base_name), "w"),
     ]
     mo.assert_has_calls(calls, any_order=True)
+
+
+@mock.patch("{}.os.path.exists".format(r.__name__), return_value=True)
+@mock.patch("{}.pickle.dump".format(r.__name__))
+@mock.patch("{}.json.dump".format(r.__name__))
+def test_modelstore_dump_extra_model_keys(
+    jsond, pickled, path_exists, modelstore_config
+):
+    modelstore_config["model"]["extraparam"] = 42
+    modelstore_config["model"]["anotherparam"] = 23
+    modelstore_config["model"]["created"] = "colliding keys should not occur"
+    with mock.patch(
+        "{}.open".format(r.__name__), mock.mock_open(), create=True
+    ) as _:
+        ms = r.ModelStore(modelstore_config)
+        ms.dump_trained_model(
+            modelstore_config, {"pseudo_model": 1}, {"pseudo_metrics": 2}
+        )
+
+    dumped = jsond.call_args[0][0]
+    print(modelstore_config)
+    print(dumped)
+    assert "extraparam" in dumped
+    assert dumped["extraparam"] == 42
+    assert "anotherparam" in dumped
+    assert dumped["anotherparam"] == 23
+    assert dumped["created"] != "colliding keys should not occur"
+
+
+@mock.patch("{}.os.path.exists".format(r.__name__), return_value=True)
+@mock.patch("{}.pickle.dump".format(r.__name__))
+@mock.patch("{}.json.dump".format(r.__name__))
+def test_modelstore_train_report(
+    jsond, pickled, path_exists, modelstore_config
+):
+    with mock.patch(
+        "{}.open".format(r.__name__), mock.mock_open(), create=True
+    ) as _:
+        ms = r.ModelStore(modelstore_config)
+        ms.add_to_train_report("report_key", "report_val")
+        ms.dump_trained_model(
+            modelstore_config, {"pseudo_model": 1}, {"pseudo_metrics": 2}
+        )
+
+    dumped = jsond.call_args[0][0]
+    print(modelstore_config)
+    print(dumped)
+    assert "train_report" in dumped
+    assert "report_key" in dumped["train_report"]
+    assert dumped["train_report"]["report_key"] == "report_val"
+
+    assert "system" in dumped
+    assert "mllaunchpad_version" in dumped["system"]
+    assert "platform" in dumped["system"]
+    assert "packages" in dumped["system"]
+
+
+@mock.patch("{}.os.path.exists".format(r.__name__), return_value=True)
+@mock.patch(
+    "{}.ModelStore._load_metadata".format(r.__name__),
+    side_effect=lambda _: {"the_json": round(random() * 1000)},
+)
+def test_list_models(_load_metadata, path_exists, modelstore_config, caplog):
+    model_jsons = [
+        "mymodel_1.0.0.json",
+        "mymodel_1.1.0.json",
+        "anothermodel_0.0.1.json",
+    ]
+    backup_jsons = [
+        "mymodel_1.0.0_2021-08-01_18-00-00.json",
+        "mymodel_1.0.0_2021-07-31_12-00-00",
+    ]
+
+    def my_glob(pattern):
+        if "previous" in pattern.lower():
+            return backup_jsons
+        else:
+            return model_jsons
+
+    with mock.patch(
+        "{}.glob.glob".format(r.__name__), side_effect=my_glob,
+    ):
+        with caplog.at_level(logging.DEBUG):
+            ms = r.ModelStore(modelstore_config)
+            models = ms.list_models()
+
+    print(models)
+    assert (
+        len(models) == 2
+    )  # one model ID named "mymodel" and one named "anothermodel"
+    assert models["mymodel"]["latest"] == models["mymodel"]["1.1.0"]
+    assert len(models["mymodel"]["backups"]) == 2
+    assert models["anothermodel"]["backups"] == []
+    assert "ignoring" not in caplog.text.lower()
+
+
+@mock.patch("{}.os.path.exists".format(r.__name__), return_value=True)
+@mock.patch(
+    "{}.ModelStore._load_metadata".format(r.__name__),
+    side_effect=lambda _: {"the_json": round(random() * 1000)},
+)
+def test_list_models_ignore_obsolete_backups(
+    _load_metadata, path_exists, modelstore_config, caplog
+):
+    model_jsons = [
+        "mymodel_1.0.0.json",
+        "mymodel_1.1.0.json",
+        "anothermodel_0.0.1.json",
+    ]
+    backup_jsons = [
+        "mymodel_1.0.0_2021-08-01_18-00-00.json",
+        "OBSOLETE-IGNORED_1.0.0_2021-07-31_12-00-00",
+    ]
+
+    def my_glob(pattern):
+        if "previous" in pattern.lower():
+            return backup_jsons
+        else:
+            return model_jsons
+
+    with mock.patch(
+        "{}.glob.glob".format(r.__name__), side_effect=my_glob,
+    ):
+        with caplog.at_level(logging.DEBUG):
+            ms = r.ModelStore(modelstore_config)
+            models = ms.list_models()
+
+    print(models)
+    assert "ignoring" in caplog.text.lower()
 
 
 @mock.patch("{}.pickle.load".format(r.__name__), return_value="pickle")

@@ -13,7 +13,7 @@ implementation, to the things on the "outside", such as the data connection
 algorithm by using different configuration files for different purposes of your
 development life cycle. That way, you can cleanly separate different environments
 like development/testing/production, without having to touch your code (using the
-same build) when between these environments.
+same build) when switching between these environments.
 
 For ML Launchpad to know how to do its job, it *always* needs a configuration.
 To accommodate different ways of using ML Launchpad, you have different options of

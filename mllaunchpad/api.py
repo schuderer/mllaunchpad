@@ -23,6 +23,12 @@ logger = logging.getLogger(__name__)
 # TODO: factor out datasource/model preparation code -- use model_actions instead of low-level functionality
 
 
+def get_api_base_url(config):
+    api_name = config["api"]["name"]
+    api_version = _get_major_api_version(config)
+    return "/{}/{}".format(api_name, api_version)
+
+
 def _get_major_api_version(config):
     match = re.match(r"\d+", config["model"]["version"])
     if match is None:
@@ -267,9 +273,7 @@ class ModelApi:
         logger.debug("Initializing RESTful API")
         api = Api(application)
 
-        api_name = config["api"]["name"]
-        api_version = _get_major_api_version(config)
-        api_url = "/{}/{}".format(api_name, api_version)
+        api_url = get_api_base_url(config)
 
         raml = _load_raml(config)
         res_normal, res_with_id, res_file = _get_resources(raml)

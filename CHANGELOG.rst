@@ -28,7 +28,7 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ------------------------------------------------------------------------------
 
-* |Fixed| require ``flask<2.0.0`` as temporary workaround for `flask-restful issue #915 <https://github.com/flask-restful/flask-restful/pull/915>`_,
+* |Feature| Add training metadata reporting and querying `issue #142 <https://github.com/schuderer/mllaunchpad/issues/142>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Feature| Add support for typed CSVs (option ``dtypes_path`` of
   :class:`FileDataSource <mllaunchpad.datasources.FileDataSource>` and
