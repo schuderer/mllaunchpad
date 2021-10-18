@@ -30,6 +30,9 @@ class SparkDataSource(DataSource):
 
     Configuration example::
 
+        plugins:
+          - examples.spark_datasource  # or wherever you put this module
+
         dbms:
           # ... (other connections)
           # Example:

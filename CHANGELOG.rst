@@ -28,13 +28,17 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ------------------------------------------------------------------------------
 
-* |Feature| Add training metadata reporting and querying `issue #142 <https://github.com/schuderer/mllaunchpad/issues/142>`_,
+* |Feature| Add training metadata reporting and querying,
+  `issue #142 <https://github.com/schuderer/mllaunchpad/issues/142>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Feature| Add support for typed CSVs (option ``dtypes_path`` of
   :class:`FileDataSource <mllaunchpad.datasources.FileDataSource>` and
   :class:`FileDataSink <mllaunchpad.datasources.FileDataSink>`),
   `issue #127 <https://github.com/schuderer/mllaunchpad/issues/127>`_,
   by `Elisa Partodikromo <https://github.com/planeetjupyter>`_.
+* |Feature| Add Spark support (experimental), see ``examples/spark_datasource.py``
+  and `issue #145 <https://github.com/schuderer/mllaunchpad/issues/145>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Fixed| Keep generated RAML files free of command line messages,
   `issue #126 <https://github.com/schuderer/mllaunchpad/issues/126>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.

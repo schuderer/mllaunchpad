@@ -47,8 +47,8 @@ databases and CSV files are already included.
 
 The model "payload" itself is the only time where code needs
 to be produced by the model developer. Here, the developer is
-basically filling in three functions in an R or Python template
-(Spark support is planned):
+basically filling in three functions in an :ref:`R <other_technologies>` or Python template
+(:ref:`Spark <other_technologies>` is supported, too):
 
 * ``train`` - uses data provided by Data Sources and returns
   a trained model object

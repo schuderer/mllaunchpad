@@ -41,6 +41,85 @@ Configuration
 See separate page :doc:`config`.
 
 
+.. _other_technologies:
+
+What about support for R, Spark, <other technology>?
+------------------------------------------------------------------------------
+
+ML Launchpad is designed to be as technology-agnostic and flexible as possible.
+For machine learning technologies, this means that it does not care whether you use it
+with SciKit-Learn, PyTorch, spaCy, etc. Just import the Python packages you need and enjoy.
+See the tutorial in the next section for an example using SciKit-Learn.
+
+For interfacing with the outside world (getting data, etc.), we created interfaces
+for extending this functionality. The most common kinds are already supported out of
+the box. For getting and persisting data, look into inheriting
+:doc:`DataSources and DataSinks <datasources>`. For providing your model results in
+other ways as the provided WSGI API (events, Azure functions, etc),
+look into the :doc:`mllaunchpad API <mllaunchpad>` (particularly ``get_validated_config()``
+and ``predict()``).
+
+That said, we already accumulated some partial or complete solutions, and the one you need
+might already be there:
+
+ - **Oracle, Impala, Hive, etc. support** is covered by :class:`~mllaunchpad.datasources.SqlDataSource`).
+   It uses `SQLAlchemy <https://docs.sqlalchemy.org/>`_, which adds a lot
+   of flexibility to the datasource configuration. Please see the :class:`SqlDataSource docs <mllaunchpad.datasources.SqlDataSource>`
+   for more information. There also are some special classes like OracleDataSource and, in the examples,
+   ImpalaDataSource, but those were made before SqlDataSource, and we suggest trying SqlDataSource first.
+ - **R support** works by using and adapting the ``r_example*`` files in the examples directory (experimental).
+   You leave ``r_model.py`` as is, configure it as the ``model:module:``, where you also configure ``model:r_file`` and
+   ``model:r_dependencies`` with your script and R requirements. You will have to have R installed, as
+   well as the Python package ``rpy2[pandas]``.
+ - **Spark support** is available through the ``spark_datasource.py`` module in the examples (experimental).
+   Copy it into your project and include it in your config using the ``plugins:`` directive. Its detailed use
+   is documented in the module itself.
+ - **Containerization** is straightforward to do -- build an image that exposes the
+   ML Launchpad REST API::
+
+    # Example Dockerfile
+    ARG PYTHON=3.7
+    FROM python:${PYTHON}-slim-buster as mllp
+    RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        vim \
+        unixodbc-dev \
+        unixodbc \
+        libpq-dev \
+     && apt-get clean \
+     && apt-get autoremove -y \
+     && rm -rf /var/lib/apt/lists/*
+    WORKDIR /var/www/mllp/app
+    COPY . .  # In your project, be selective in what you put into the image.
+    RUN pip install -r requirements.txt
+    RUN pip install gunicorn
+    RUN python -m mllaunchpad -c my_config.yml train  # If not pre-trained earlier.
+    EXPOSE 5000
+    CMD gunicorn --workers 4 --bind 0.0.0.0:5000 mllaunchpad.wsgi
+
+
+ - **Azure/Firebase/AWS lambda functions** for prediction can be easily created using the
+   :doc:`mllaunchpad API <mllaunchpad>`:
+
+    .. code-block:: python
+
+        import json
+        import azure.functions as func
+        import mllaunchpad  # see https://mllaunchpad.readthedocs.io/en/stable/mllaunchpad.html
+
+        conf = mllaunchpad.get_validated_config("my_cfg_file_or_stream_or_url.yml")  # None=use LAUNCHPAD_CFG env var
+
+        def main(req: func.HttpRequest) -> func.HttpResponse:
+            # (you need to validate params yourself here, skipped in this example)
+            result = mllaunchpad.predict(conf, arg_dict=req.params)
+            return func.HttpResponse(json.dumps(result), mimetype="application/json")
+
+ - For any other technology, there's a good chance that you can tackle it with one of these
+   mechanisms (extending DataSources/DataSinks or through the API). If you are unsure,
+   `please create an issue <https://github.com/schuderer/mllaunchpad/issues>`_.
+
+
+
 .. _tutorial:
 
 Tutorial
