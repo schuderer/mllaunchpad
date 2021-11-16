@@ -475,7 +475,7 @@ documentation:
         raml_type = _pd_type_lookup[type_str]
         example = repr(series[0])
         url_params += [quote_plus(col_name) + "=" + quote_plus(example)]
-        illegal_chars = ":.,[]'\"\\ \n\t"
+        illegal_chars = ":.,[]\"\\ \n\t"
         quoted_col_name = (
             f"'{col_name}'"
             if any(c in illegal_chars for c in col_name)
@@ -494,7 +494,7 @@ documentation:
             example
         )
         if type_str == "category":
-            output += "\n" + str(list(series.cat.categories))
+            output += "\n        enum: " + str(list(series.cat.categories))
         param_hints = ""
 
     output += f"""

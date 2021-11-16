@@ -146,7 +146,7 @@ class ModelStore:
                 "mllaunchpad_version": mllp.__version__,
                 "platform": platform.platform(),
                 "host": socket.getfqdn(),
-                "host_ip": socket.gethostbyname(socket.getfqdn()),
+                # "host_ip": socket.gethostbyname(socket.getfqdn()),
                 "python": sys.version,
                 "packages": subprocess.getoutput(
                     "{} -m pip freeze".format(sys.executable)
