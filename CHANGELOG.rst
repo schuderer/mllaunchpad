@@ -47,6 +47,7 @@ Unreleased
   `issue #128 <https://github.com/schuderer/mllaunchpad/issues/128>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Fixed| Remove IP from training metadata due to problem on macOS Big Sur. Fix doc build by pinning `Sphinx dependency docutils <https://github.com/sphinx-doc/sphinx/issues/9841>`_ to version 0.17.1.
+  `issue #147 <https://github.com/schuderer/mllaunchpad/issues/147>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
 
 1.0.0 (2020-06-08)
