@@ -61,7 +61,8 @@ _type_lookup = {
     "number": float,
     "integer": int,
     "string": str,
-    "boolean": bool
+    "boolean": bool,
+    "array": list,  # https://medium.com/raml-api/array-enumeration-in-raml-b69950c75bb3
     # RAML Types: any, object, array, union via type expression,
     #             one of the following scalar types: number, boolean, string,
     #             date-only, time-only, datetime-only, datetime, file, integer, or nil
@@ -86,12 +87,21 @@ def _create_request_parser(resource_obj):
                 )
             )
 
+        # https://help.mulesoft.com/s/article/Repeat-query-parameters-using-RAML-1-0
+        try:
+            param_type, arr = p.type.split("[]")
+            is_array = True
+        except ValueError:
+            param_type = p.type
+            is_array = False
+        is_array = is_array or p.repeat
+
         parser.add_argument(
             p.name,
-            type=_type_lookup[p.type],
+            type=_type_lookup[param_type],
             required=p.required,
             default=p.default,
-            action="append" if p.repeat else "store",
+            action="append" if is_array else "store",
             choices=p.enum,
             help=str(p.description) + " - Error: {error_msg}",
         )

@@ -84,11 +84,36 @@ raml_query_resource_str = """
 
 /something:
   get:
-    description: Get a prediction something
+    description: Get a prediction of something
     queryParameters:
       aparam:
         displayName: a param
         type: string
+        description: the param's description
+        required: true
+"""
+raml_query_resource_repeat_str = """
+
+/something:
+  get:
+    description: Get a prediction of something
+    queryParameters:
+      aparam:
+        displayName: a repeatable param
+        type: string
+        description: the param's description
+        required: true
+        repeat: true
+"""
+raml_query_resource_array_str = """
+
+/something:
+  get:
+    description: Get a prediction of something
+    queryParameters:
+      aparam:
+        displayName: a repeatable param
+        type: string[]
         description: the param's description
         required: true
 """
@@ -132,6 +157,8 @@ minimal_raml_str = raml_head_str + raml_query_resource_str
     "raml",
     [
         raml_head_str + raml_query_resource_str,
+        raml_head_str + raml_query_resource_repeat_str,
+        raml_head_str + raml_query_resource_array_str,
         raml_head_str + raml_file_resource_str,
         raml_head_str + raml_query_resource_str + raml_file_resource_str,
         raml_head_str
