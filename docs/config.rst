@@ -97,7 +97,7 @@ Here's an example configuration with comments:
       # You would eschew mllaunchpad's WSGI API if you want to make it available as
       # part of another service framework, e.g. AWS Lambda or Azure Functions.
       name: iris  # Name of the service API
-      raml: tree.raml  # Path to the API's RAML definition (see next section)
+      raml: tree.raml  # Path to the API's RAML definition (see two sections below)
       preload_datasources: False  # Load datasources into memory before any predictions. Only makes sense with caching (expires != 0).
 
 
@@ -164,6 +164,7 @@ with one value:
             example: 3.14
             required: false  # test, should be true
             minimum: 0
+            repeat: false  # set to true to get param's list of values in your args_dict
           sepal.width:
             displayName: Sepal Width
             type: number
@@ -174,7 +175,11 @@ with one value:
           # ...
 
 The ``displayName``, ``type``, ``required``, ``example``, and ``minimum``/``maximum`` properties are
-used by ML Launchpad for validation and logging. Others are ignored.
+used by ML Launchpad for validation and logging. The optional ``repeat`` property turns the parameter
+into an array if you need it to support multiple values (RAML 0.8 standard). As a half-baked implementation
+of RAML 1.0 arrays, you can alternatively specify the type with brackets (``number[]``, `string[]`` etc).
+Use ``enum`` to specify a list of allowed values (for categorical data).
+Other RAML properties are ignored.
 
 Your model's :meth:`~mllaunchpad.ModelInterface.predict` method will get passed an ``args_dict``
 with a key for each query parameter, by which you can access the values.
