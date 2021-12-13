@@ -23,12 +23,12 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 .. |Removed| replace:: :raw-html:`<span style="font-family: Sans-Serif; font-size: 0.6em; color: white; font-weight: bold; padding: 0.05em; border-radius: 0.2em; display: inline-block; background-color: black">&nbsp;REMOVED&nbsp;</span>`
 
 .. Placeholder for empty Unreleased section:
-   * No contributions yet. :doc:`Be the first to add one! <contributing>`_ :)
+   * No contributions yet. :doc:`Be the first to add one! <contributing>` :)
 
 Unreleased
 ------------------------------------------------------------------------------
 
-   * No contributions yet. :doc:`Be the first to add one! <contributing>`_ :)
+   * No contributions yet. :doc:`Be the first to add one! <contributing>` :)
 
 1.0.0 (2021-12-13)
 ------------------------------------------------------------------------------
