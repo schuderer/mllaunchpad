@@ -89,7 +89,7 @@ def _create_request_parser(resource_obj):
 
         # https://help.mulesoft.com/s/article/Repeat-query-parameters-using-RAML-1-0
         try:
-            param_type, arr = p.type.split("[]")
+            param_type, _ = p.type.split("[]")
             is_array = True
         except ValueError:
             param_type = p.type
