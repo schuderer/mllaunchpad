@@ -28,6 +28,11 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ------------------------------------------------------------------------------
 
+   * No contributions yet. :doc:`Be the first to add one! <contributing>`_ :)
+
+1.0.0 (2021-12-13)
+------------------------------------------------------------------------------
+
 * |Feature| Add training metadata reporting and querying,
   `issue #142 <https://github.com/schuderer/mllaunchpad/issues/142>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
