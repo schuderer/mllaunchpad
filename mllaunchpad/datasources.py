@@ -104,6 +104,13 @@ def fill_nas(
         return df
 
 
+def ensure_dir_to(file_path):
+    path = os.path.dirname(file_path)
+    if path != "" and not os.path.exists(path):
+        logger.info("Creating missing path to file `{}`.".format(file_path))
+        os.makedirs(path)
+
+
 class SqlDataSource(DataSource):
     """DataSource for RedShift, Postgres, MySQL, SQLite, Oracle, Microsoft SQL (ODBC), and their dialects.
 
@@ -806,6 +813,7 @@ class FileDataSink(DataSink):
         """Write a pandas dataframe to file and optionally the dtypes if included in the configuration.
         The default is not to save the dataframe's row index.
         Configure the DataSink's `options` dict to pass keyword arguments to `my_df.to_csv`.
+        If the directory path leading to the file does not exist, it will be created.
 
         Example::
 
@@ -842,11 +850,14 @@ class FileDataSink(DataSink):
             dtypes_file.loc[
                 dtypes_file["dtypes"] == "datetime64[ns]", "dtypes"
             ] = "datetime"
+            ensure_dir_to(self.dtypes_path)
             dtypes_file.to_csv(self.dtypes_path)
 
         if self.type == "csv":
+            ensure_dir_to(self.path)
             dataframe.to_csv(self.path, **kw_options)
         elif self.type == "euro_csv":
+            ensure_dir_to(self.path)
             dataframe.to_csv(self.path, sep=";", decimal=",", **kw_options)
         else:
             raise TypeError(
@@ -860,6 +871,7 @@ class FileDataSink(DataSink):
         chunksize: Optional[int] = None,
     ) -> None:
         """Write raw (unstructured) data to file.
+        If the directory path leading to the file does not exist, it will be created.
 
         Example::
 
@@ -887,10 +899,12 @@ class FileDataSink(DataSink):
         if self.type == "text_file":
             if "encoding" not in kw_options:
                 kw_options["encoding"] = "utf-8"
+            ensure_dir_to(self.path)
             with open(self.path, "w", **kw_options) as txt_file:
                 raw_str: str = cast(str, raw_data)
                 txt_file.write(raw_str)
         elif self.type == "binary_file":
+            ensure_dir_to(self.path)
             with open(self.path, "wb", **kw_options) as bin_file:
                 raw_bytes: bytes = cast(bytes, raw_data)
                 bin_file.write(raw_bytes)
