@@ -40,7 +40,7 @@ Unreleased
   and `issue #145 <https://github.com/schuderer/mllaunchpad/issues/145>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Enhancement| FileDataSink (`csv`, `euro_csv`, `raw` DataSink types) now attempts to create missing paths if required,
-  `issue #000 <https://github.com/schuderer/mllaunchpad/issues/000>`_,
+  `issue #148 <https://github.com/schuderer/mllaunchpad/issues/148>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Fixed| Keep generated RAML files free of command line messages,
   `issue #126 <https://github.com/schuderer/mllaunchpad/issues/126>`_,
