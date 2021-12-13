@@ -39,6 +39,9 @@ Unreleased
 * |Feature| Add Spark support (experimental), see ``examples/spark_datasource.py``
   and `issue #145 <https://github.com/schuderer/mllaunchpad/issues/145>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
+* |Enhancement| FileDataSink (`csv`, `euro_csv`, `raw` DataSink types) now attempts to create missing paths if required,
+  `issue #148 <https://github.com/schuderer/mllaunchpad/issues/148>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
 * |Fixed| Keep generated RAML files free of command line messages,
   `issue #126 <https://github.com/schuderer/mllaunchpad/issues/126>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.

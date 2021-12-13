@@ -1,4 +1,5 @@
 # Stdlib imports
+import os
 import sys
 from io import BytesIO
 from unittest import mock
@@ -247,6 +248,34 @@ def test_filedatasink_notimplemented(filedatasink_cfg_and_data):
     cfg["type"] = "sausage"
     with pytest.raises(TypeError, match="file type"):
         mllp_ds.FileDataSink("bla", cfg)
+
+
+@mock.patch("os.makedirs")
+@mock.patch("os.path.exists", return_value=False)
+@mock.patch("pandas.DataFrame.to_csv")
+def test_filedatasink_df_ensure_path(
+    to_csv_mock, exists_mock, makedirs_mock, filedatasink_cfg_and_data
+):
+    cfg, data = filedatasink_cfg_and_data("csv")
+    cfg["path"] = os.path.join("bla/foo", cfg["path"])
+    ds = mllp_ds.FileDataSink("bla", cfg)
+    ds.put_dataframe(data)
+    exists_mock.assert_called_once()
+    makedirs_mock.assert_called_once_with("bla/foo")
+
+
+@mock.patch("os.makedirs")
+@mock.patch("os.path.exists", return_value=True)
+@mock.patch("pandas.DataFrame.to_csv")
+def test_filedatasink_df_ensure_path_noexist(
+    to_csv_mock, exists_mock, makedirs_mock, filedatasink_cfg_and_data
+):
+    cfg, data = filedatasink_cfg_and_data("csv")
+    cfg["path"] = os.path.join("bla/foo", cfg["path"])
+    ds = mllp_ds.FileDataSink("bla", cfg)
+    ds.put_dataframe(data)
+    exists_mock.assert_called_once()
+    makedirs_mock.assert_not_called()
 
 
 # OracleDataSource
