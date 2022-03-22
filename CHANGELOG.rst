@@ -30,7 +30,7 @@ Unreleased
 
    * No contributions yet. :doc:`Be the first to add one! <contributing>` :)
 
-1.0.0 (2021-12-13)
+1.1.0 (2021-12-13)
 ------------------------------------------------------------------------------
 
 * |Feature| Add training metadata reporting and querying,
