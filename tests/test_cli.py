@@ -114,7 +114,8 @@ def test_api(ma, flask, config, runner_cfg_logcfg, caplog):
     )  # Non-production Flask server warning
     flask.assert_called()
     ma.assert_called_with(config, app, debug=True)
-    app.run.assert_called()
+    app.run.assert_called_once()
+    assert list(app.run.call_args[1].keys()) == ["host", "port", "debug"]
 
 
 @mock.patch(
