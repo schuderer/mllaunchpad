@@ -72,7 +72,7 @@ def get_validated_config(filename: str = CONFIG_ENV) -> dict:
 
     :return: dict with configuration
     :rtype: dict
-   """
+    """
     if filename == CONFIG_DEFAULT:
         logger.warning(
             "Config filename environment variable LAUNCHPAD_CFG not set, "

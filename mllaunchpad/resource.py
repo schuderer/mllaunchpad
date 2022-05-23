@@ -8,7 +8,7 @@ import os
 import platform
 import shutil
 import socket
-import subprocess  # nosec We are running a known process using its full path (python -m pip).
+import subprocess  # nosec # We are running a known process using its full path (python -m pip)
 import sys
 from collections import OrderedDict
 from datetime import datetime
@@ -193,8 +193,7 @@ class ModelStore:
         return model, meta
 
     def update_model_metrics(self, model_conf, metrics):
-        """Update the test metrics for a previously stored model
-        """
+        """Update the test metrics for a previously stored model"""
         base_name = self._get_model_base_name(model_conf)
         meta = self._load_metadata(base_name)
         meta["metrics"] = metrics
@@ -491,8 +490,7 @@ class DataSource(metaclass=CachedDataSource):
         datasource_config: Dict,
         sub_config: Optional[Dict] = None,  # used in DBMS subclasses
     ):
-        """Please call super().__init(...) when overwriting this method
-        """
+        """Please call super().__init(...) when overwriting this method"""
         self.id = identifier
         self.config = datasource_config
         self.options = self.config.get("options", {})
@@ -531,8 +529,7 @@ class DataSource(metaclass=CachedDataSource):
             self._cache[key] = (item, time())
 
     def __del__(self):
-        """Overwrite to clean up any resources (connections, temp files, etc.).
-        """
+        """Overwrite to clean up any resources (connections, temp files, etc.)."""
         ...
 
 
@@ -549,8 +546,7 @@ class DataSink:
         datasink_config: Dict,
         sub_config: Optional[Dict] = None,
     ):
-        """Please call super().__init(...) when overwriting this method
-        """
+        """Please call super().__init(...) when overwriting this method"""
         self.id = identifier
         self.config = datasink_config
         self.options = self.config.get("options", {})
@@ -574,8 +570,7 @@ class DataSink:
         ...
 
     def __del__(self):
-        """Overwrite to clean up any resources (connections, temp files, etc.).
-        """
+        """Overwrite to clean up any resources (connections, temp files, etc.)."""
         ...
 
 

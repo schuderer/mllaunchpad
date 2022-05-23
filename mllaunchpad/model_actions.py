@@ -487,6 +487,7 @@ def _add_to_train_report(name: str, value) -> None:
             )
         )
     else:
+        # Third-party imports
         import pandas as pd
 
         if isinstance(value, pd.DataFrame):
