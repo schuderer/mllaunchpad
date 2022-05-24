@@ -29,7 +29,7 @@ Unreleased
 ------------------------------------------------------------------------------
 
 * |Enhancement| Update CI Pipeline and dev dependencies, target Python 3.8
-  `issue #??? <https://github.com/schuderer/mllaunchpad/issues/???>`_,
+  `issue #154 <https://github.com/schuderer/mllaunchpad/issues/154>`_,
   by `Andreas Schuderer <https://github.com/schuderer>`_.
 
 1.1.0 (2021-12-13)

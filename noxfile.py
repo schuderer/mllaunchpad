@@ -23,6 +23,7 @@ min_coverage = "90"
 nox.options.sessions = [
     "format",
     "lint",
+    "tests-3.6",
     "tests-3.7",
     "tests-3.9",
     "coverage",

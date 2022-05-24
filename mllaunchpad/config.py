@@ -6,13 +6,11 @@
 import logging
 import os
 from typing import AnyStr, Dict, TextIO, Union
-from warnings import warn
 
 # Third-party imports
 import yaml  # https://camel.readthedocs.io/en/latest/yamlref.html
 
 # Project imports
-import mllaunchpad
 from mllaunchpad.yaml_loader import SafeIncludeLoader
 
 
@@ -48,20 +46,10 @@ def validate_config(config_dict, required, path=""):
 
 def check_semantics(config_dict):
     if "api" in config_dict and "version" in config_dict["api"]:
-        if mllaunchpad.__version__ < "1.0.0":
-            warn(
-                "Specifying 'version' in the config's 'api' section is "
-                "deprecated and will lead to an error in mllaunchpad>=1.0.0. "
-                "Specify 'version' in the 'model' section instead. "
-                "Your 'api:version' value will be ignored.",
-                DeprecationWarning,
-            )
-            del config_dict["api"]["version"]
-        else:
-            raise ValueError(
-                "'api:version:' is not allowed in the config, "
-                "only 'model:version:'."
-            )
+        raise ValueError(
+            "'api:version:' is not allowed in the config, "
+            "only 'model:version:'."
+        )
 
 
 def get_validated_config(filename: str = CONFIG_ENV) -> dict:
