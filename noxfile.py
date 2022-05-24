@@ -14,7 +14,7 @@ import nox
 ON_TRAVIS_CI = os.environ.get("TRAVIS")
 
 package_name = "mllaunchpad"
-my_py_ver = "3.7"
+my_py_ver = "3.8"
 files_to_format = [package_name, "tests", "noxfile.py", "setup.py"]
 max_line_length = "79"  # I don't want a pyproject.toml just for 'black'...
 min_coverage = "90"
@@ -23,8 +23,8 @@ min_coverage = "90"
 nox.options.sessions = [
     "format",
     "lint",
-    "tests-3.6",
-    "tests-3.8",
+    "tests-3.7",
+    "tests-3.9",
     "coverage",
     "docs",
 ]
@@ -35,7 +35,7 @@ nox.options.sessions = [
 # pip install pandas==givemeallversions
 # Could not find a version that satisfies the requirement pandas==givemeallversions (from versions: 0.1, 0.2b0, 0.2b1, 0.2, 0.3.0b0, 0.3.0b2, 0.3.0, 0.4.0, 0.4.1, 0.4.2, 0.4.3, 0.5.0, 0.6.0, 0.6.1, 0.7.0rc1, 0.7.0, 0.7.1, 0.7.2, 0.7.3, 0.8.0rc1, 0.8.0rc2, 0.8.0, 0.8.1, 0.9.0, 0.9.1, 0.10.0, 0.10.1, 0.11.0, 0.12.0, 0.13.0, 0.13.1, 0.14.0, 0.14.1, 0.15.0, 0.15.1, 0.15.2, 0.16.0, 0.16.1, 0.16.2, 0.17.0, 0.17.1, 0.18.0, 0.18.1, 0.19.0rc1, 0.19.0, 0.19.1, 0.19.2, 0.20.0rc1, 0.20.0, 0.20.1, 0.20.2, 0.20.3, 0.21.0rc1, 0.21.0, 0.21.1, 0.22.0, 0.23.0rc2, 0.23.0, 0.23.1, 0.23.2, 0.23.3, 0.23.4, 0.24.0rc1, 0.24.0, 0.24.1, 0.24.2, 0.25.0rc0, 0.25.0, 0.25.1, 0.25.2, 0.25.3, 1.0.0rc0, 1.0.0, 1.0.1)
 # 1b. get two newest major versions, or if only one, two newest minor versions
-# 2. @nox.session(python=["3.6", my_py_ver])
+# 2. @nox.session(python=["3.7", my_py_ver])
 #    @nox.parametrize('pandas', ['1.0.1', '0.25.3'])  # somehow do this in loop
 #    ...
 #    @nox.parametrize('flask', ['1.1.1', '0.12.5'])
@@ -51,10 +51,10 @@ def format_code(session):
     """Run code reformatter"""
     # session.install("-e", ".[lint]")
     session.install(
-        "isort==4.3.21", "seed-isort-config==2.1.0", "black==19.10b0"
+        "isort==5.10.1", "seed-isort-config==2.2.0", "black==22.3.0"
     )
     session.run("seed-isort-config", success_codes=[0, 1])
-    session.run("isort", "-rc", *files_to_format)
+    session.run("isort", *files_to_format)
     session.run("black", "-l", max_line_length, *files_to_format)
 
 
@@ -63,14 +63,15 @@ def lint(session):
     """Run code style and vulnerability checkers"""
     # session.install("-e", ".[lint]")  # so isort can detect everything automatically, but heavy install
     session.install(
-        "mypy==0.761",
-        "isort==4.3.21",
-        "seed-isort-config==2.1.0",
-        "black==19.10b0",
-        "flake8==3.7.9",
-        "flake8-isort==2.9.1",
-        "bandit==1.6.2",
+        "mypy==0.950",
+        "isort==5.10.1",
+        "seed-isort-config==2.2.0",
+        "black==22.3.0",
+        "flake8==4.0.1",
+        "flake8-isort==4.1.1",
+        "bandit==1.7.4",
     )
+    session.run("mypy", "--install-types", "--non-interactive", package_name)
     session.run("mypy", package_name)
     session.run("seed-isort-config", success_codes=[0, 1])
     session.run("black", "-l", max_line_length, "--check", *files_to_format)
@@ -78,10 +79,14 @@ def lint(session):
         "flake8", "--max-line-length=" + max_line_length, *files_to_format
     )
     session.run("bandit", "-qr", *[f for f in files_to_format if f != "tests"])
+    print(
+        "If bandit shows warnings about being unable to find qualified names, they can be ignored. "
+        "https://github.com/PyCQA/bandit/discussions/725"
+    )
 
 
 # In Travis-CI: session selected via env vars
-@nox.session(python=["3.6", my_py_ver, "3.8"])
+@nox.session(python=["3.7", my_py_ver, "3.9"])
 def tests(session):
     """Run the unit test suite"""
     session.install("-e", ".[test]")

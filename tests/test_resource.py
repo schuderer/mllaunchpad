@@ -162,7 +162,8 @@ def test_list_models(_load_metadata, path_exists, modelstore_config, caplog):
             return model_jsons
 
     with mock.patch(
-        "{}.glob.glob".format(r.__name__), side_effect=my_glob,
+        "{}.glob.glob".format(r.__name__),
+        side_effect=my_glob,
     ):
         with caplog.at_level(logging.DEBUG):
             ms = r.ModelStore(modelstore_config)
@@ -203,7 +204,8 @@ def test_list_models_ignore_obsolete_backups(
             return model_jsons
 
     with mock.patch(
-        "{}.glob.glob".format(r.__name__), side_effect=my_glob,
+        "{}.glob.glob".format(r.__name__),
+        side_effect=my_glob,
     ):
         with caplog.at_level(logging.DEBUG):
             ms = r.ModelStore(modelstore_config)

@@ -21,14 +21,15 @@ language: python
 
 matrix:
   include:
-    - python: '3.6'
-      env: NOXSESSIONS="tests-3.6"
-    - python: '3.8'  # Also test docs with latest supported python version
-      dist: xenial
-      env: NOXSESSIONS="tests-3.8"
     - python: '3.7'
       dist: xenial  # required for Python >= 3.7
-      env: NOXSESSIONS="coverage-3.7 lint docs"
+      env: NOXSESSIONS="tests-3.7"
+    - python: '3.9'  # Also test docs with latest supported python version
+      dist: xenial
+      env: NOXSESSIONS="tests-3.9"
+    - python: '3.8'  # Our current target python version
+      dist: xenial
+      env: NOXSESSIONS="coverage-3.8 lint docs"
 
 
 cache: pip
@@ -48,8 +49,8 @@ deploy:
   on:
     tags: true
     repo: schuderer/mllaunchpad
-    python: 3.7
-    condition: "NOXSESSIONS=\"coverage-3.7 lint docs\""
+    python: 3.8
+    condition: "NOXSESSIONS=\"coverage-3.8 lint docs\""
 
 
 # Assuming you have installed the travis-ci CLI tool, after you

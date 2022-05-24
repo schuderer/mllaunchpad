@@ -54,6 +54,7 @@ def _get_dict_without_keys(a_dict: Dict, without: Iterable) -> Dict:
 
 def _create_sqlalchemy_engine(dbms_config: Dict):
     try:
+        # Third-party imports
         import sqlalchemy
     except ModuleNotFoundError as e:
         logger.error(
@@ -196,6 +197,7 @@ class SqlDataSource(DataSource):
         :return: DataFrame object, possibly cached according to config value of `expires:`
         """
         # https://stackoverflow.com/questions/53793877/usage-error-in-pandas-read-sql-with-sqlalchemy#comment94441435_53793978
+        # Third-party imports
         from sqlalchemy import text
 
         query = self.config["query"]
@@ -347,6 +349,7 @@ class SqlDataSink(DataSink):
 
 
 def _get_oracle_connection(dbms_config: Dict):
+    # Third-party imports
     import cx_Oracle  # Importing here avoids environment-specific dependencies
 
     user, pw = get_user_pw(

@@ -11,7 +11,7 @@ from click.testing import CliRunner
 import mllaunchpad.cli as cli
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def runner_cfg_logcfg():
     """Click runner with config and log config file"""
     cfg_file = "test_cfg.yml"
@@ -26,6 +26,7 @@ def runner_cfg_logcfg():
 
 
 def test_dunder_main():
+    # Project imports
     import mllaunchpad.__main__  # noqa: F401
 
 

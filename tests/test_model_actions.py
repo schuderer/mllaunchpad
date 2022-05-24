@@ -356,6 +356,7 @@ def test__get_model_caching(ms_class, config):
 
 
 def test__check_ordered_columns(caplog):
+    # Project imports
     from mllaunchpad.resource import order_columns
 
     with caplog.at_level(logging.INFO):

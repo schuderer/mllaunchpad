@@ -28,7 +28,12 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ------------------------------------------------------------------------------
 
-   * No contributions yet. :doc:`Be the first to add one! <contributing>` :)
+* |Enhancement| Update CI Pipeline and dev dependencies, target Python 3.8
+  `issue #154 <https://github.com/schuderer/mllaunchpad/issues/154>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
+* |Removed| Drop support for Python 3.6,
+  `issue #154 <https://github.com/schuderer/mllaunchpad/issues/154>`_,
+  by `Andreas Schuderer <https://github.com/schuderer>`_.
 
 1.1.0 (2021-12-13)
 ------------------------------------------------------------------------------

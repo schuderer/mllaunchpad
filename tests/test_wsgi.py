@@ -18,6 +18,7 @@ def test_log_error_on_config_filenotfound(mock_get_cfg, caplog):
     # This import is just to make sure the 'wsgi' symbol is known.
     # We will ignore what happens and afterwards reload (re-import).
     try:
+        # Project imports
         import mllaunchpad.wsgi as wsgi  # pylint: disable=unused-import
     except FileNotFoundError:
         pass
@@ -39,6 +40,7 @@ def test_regression_61_misleading(mock_get_cfg, mock_get_api, caplog):
     # This import is just to make sure the 'wsgi' symbol is known.
     # We will ignore what happens and afterwards reload (re-import).
     try:
+        # Project imports
         import mllaunchpad.wsgi as wsgi  # pylint: disable=unused-import
     except FileNotFoundError:
         pass

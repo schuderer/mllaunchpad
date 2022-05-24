@@ -128,8 +128,7 @@ def _create_request_parser(resource_obj):
 
 
 def _get_resources(raml):
-    """Gets relevant resources from RAML
-    """
+    """Gets relevant resources from RAML"""
     # only dealing with "get" method resources for now
     usable_methods = ["get", "post"]
     usable_rs = [
@@ -264,6 +263,7 @@ class ModelApi:
         # Workaround (tensorflow has problem with spontaneously created threads such as with Flask):
         # https://kobkrit.com/tensor-something-is-not-an-element-of-this-graph-error-in-keras-on-flask-web-server-4173a8fe15e1
         try:
+            # Third-party imports
             import tensorflow as tf
 
             graph = tf.get_default_graph()
@@ -444,8 +444,10 @@ def generate_raml(
     data_frame=None,
     resource_name="mythings",
 ):
-    from .model_actions import _get_data_sources_and_sinks
+    # Stdlib imports
     from urllib.parse import quote_plus
+
+    from .model_actions import _get_data_sources_and_sinks
 
     if data_source_name is not None:
         dso, _ = _get_data_sources_and_sinks(

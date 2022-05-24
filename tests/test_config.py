@@ -130,28 +130,6 @@ api:
 
 @pytest.mark.parametrize(
     "version, api_ver, deprecation_expected",
-    [("0.99.99", "", False), ("0.99.99", "    version: 0.1.1", True)],
-)
-def test_config_api_version_deprecation_warning(
-    version, api_ver, deprecation_expected
-):
-    """api:version should raise deprecation warning for mllaunchpad < 1.0"""
-    test_file = api_version_deprecation_file.format(api_ver).encode("utf-8")
-    mo = mock.mock_open(read_data=test_file)
-    mo.return_value.name = "./foobar.yml"
-    with mock.patch("builtins.open", mo, create=True):
-        with mock.patch.object(mllaunchpad, "__version__", new=version):
-            if deprecation_expected:
-                with pytest.warns(DeprecationWarning):
-                    _ = config.get_validated_config("lalala")
-            else:
-                with pytest.warns(None) as warnings:
-                    _ = config.get_validated_config("lalala")
-                assert not warnings
-
-
-@pytest.mark.parametrize(
-    "version, api_ver, deprecation_expected",
     [
         ("1.11.11", "", False),
         ("1.11.11", "    version: 0.1.1", True),
