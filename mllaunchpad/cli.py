@@ -126,7 +126,11 @@ def api(settings):
     ModelApi(settings.config, app, debug=True)
     # Flask apps must not be run in debug mode in production, because this allows for arbitrary code execution.
     # We know that and advise the user that this is only for debugging, so this is not a security issue (marked nosec):
-    app.run(debug=True)  # nosec
+    app.run(
+        host=settings.config["api"].get("host"),
+        port=settings.config["api"].get("port"),
+        debug=True
+    )  # nosec
 
 
 @main.command()

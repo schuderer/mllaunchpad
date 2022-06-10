@@ -104,6 +104,7 @@ def _create_request_parser(resource_obj):
             action="append" if is_array else "store",
             choices=p.enum,
             help=str(p.description) + " - Error: {error_msg}",
+            location="args" if resource_obj.method.lower() == "get" else ("json", "values", )
         )
         added_arguments.add(p.name)
 
@@ -175,7 +176,7 @@ class QueryResource(Resource):
 
     def get(self):
         args = self.parser.parse_args(
-            strict=True
+            strict=False
         )  # treats query_params and form_params as interchangeable
         logger.debug("Received GET request with arguments: %s", args)
         return self.model_api.predict_using_model(args)
@@ -189,7 +190,7 @@ class GetByIdResource(Resource):
 
     def get(self, some_resource_id):
         args = self.parser.parse_args(
-            strict=True
+            strict=False
         )  # treats query_params and form_params as interchangeable
         args[self.id_name] = some_resource_id
         logger.debug(
@@ -209,7 +210,7 @@ class QueryOrFileUploadResource(Resource):
 
     def get(self):
         args = self.query_parser.parse_args(
-            strict=True
+            strict=False
         )  # treat query_params and form_params as interchangeable
         logger.debug("Received GET request with arguments: %s", args)
         return self.model_api.predict_using_model(args)
